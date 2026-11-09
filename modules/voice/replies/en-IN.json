@@ -38,7 +38,7 @@
   "low.one": "One item is running low: {names}.",
   "low.many": "{count} items are running low: {names}.",
   "stock_level": "{name} stock is {qty} {unit}.",
-  "staff.head": "{name} came in {days} days this month.",
+  "staff.head": "{name} came in {days} days {when}.",
   "staff.earned": "{amount} earned",
   "staff.advances": "{amount} taken as advance",
   "staff.paid": "{amount} paid as salary",
@@ -55,5 +55,18 @@
   "negative_stock": "{name} stock is only {level} {unit}. Can't take out that much.",
   "not_found.create": "I couldn't find the name {name}. Shall I add a new customer?",
   "not_found": "I couldn't find the name {name}. Please say it again.",
-  "confirm_amount": "{amount} is very large. Should I write it?"
+  "confirm_amount": "{amount} is very large. Should I write it?",
+  "staff_list.none": "No staff have been added yet.",
+  "staff_list.one": "Only {names} works in the shop.",
+  "staff_list.many": "{count} people work in the shop: {names}.",
+  "attendance.none": "No one has come in yet today.",
+  "attendance.all": "Everyone is in today: {names}.",
+  "attendance.some": "{present} came in today. {absent} hasn't come yet.",
+  "customers.none": "There are no customers yet.",
+  "customers.owing": "You have {count} customers, and {owing} owe money.",
+  "customers.clear": "You have {count} customers, and no one owes anything.",
+  "when.this_month": "this month",
+  "when.last_month": "last month",
+  "when.months_ago": "{months} months ago",
+  "staff.none_paid": "nothing paid"
 }

@@ -38,7 +38,7 @@
   "low.one": "ఒక సరుకు తక్కువ ఉంది: {names}.",
   "low.many": "{count} సరుకులు తక్కువ ఉన్నాయి: {names}.",
   "stock_level": "{name} స్టాక్ {qty} {unit} ఉంది.",
-  "staff.head": "{name} ఈ నెల {days} రోజులు వచ్చారు.",
+  "staff.head": "{name} {when} {days} రోజులు వచ్చారు.",
   "staff.earned": "{amount} సంపాదించారు",
   "staff.advances": "{amount} అడ్వాన్స్ తీసుకున్నారు",
   "staff.paid": "{amount} జీతం ఇచ్చారు",
@@ -55,5 +55,18 @@
   "negative_stock": "{name} స్టాక్ {level} {unit} మాత్రమే ఉంది. అంత తీయలేను.",
   "not_found.create": "ఈ పేరు దొరకలేదు: {name}. కొత్త కస్టమర్‌గా చేర్చనా?",
   "not_found": "ఈ పేరు దొరకలేదు: {name}. మళ్ళీ చెప్పండి.",
-  "confirm_amount": "{amount} చాలా ఎక్కువ. ఖచ్చితంగా రాయనా?"
+  "confirm_amount": "{amount} చాలా ఎక్కువ. ఖచ్చితంగా రాయనా?",
+  "staff_list.none": "ఇంకా ఏ సిబ్బందినీ చేర్చలేదు.",
+  "staff_list.one": "షాపులో {names} మాత్రమే పని చేస్తారు.",
+  "staff_list.many": "షాపులో {count} మంది పని చేస్తారు: {names}.",
+  "attendance.none": "ఈరోజు ఇంకా ఎవరూ రాలేదు.",
+  "attendance.all": "ఈరోజు అందరూ వచ్చారు: {names}.",
+  "attendance.some": "ఈరోజు {present} వచ్చారు. {absent} ఇంకా రాలేదు.",
+  "customers.none": "ఇంకా ఏ కస్టమర్లూ లేరు.",
+  "customers.owing": "మీకు {count} మంది కస్టమర్లు ఉన్నారు, {owing} మంది దగ్గర అప్పు బాకీ ఉంది.",
+  "customers.clear": "మీకు {count} మంది కస్టమర్లు ఉన్నారు, ఎవరికీ అప్పు బాకీ లేదు.",
+  "when.this_month": "ఈ నెల",
+  "when.last_month": "పోయిన నెల",
+  "when.months_ago": "{months} నెలల క్రితం",
+  "staff.none_paid": "ఏమీ ఇవ్వలేదు"
 }

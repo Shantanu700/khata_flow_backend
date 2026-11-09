@@ -38,7 +38,7 @@
   "low.one": "ಒಂದು ಸಾಮಾನು ಕಡಿಮೆ ಇದೆ: {names}.",
   "low.many": "{count} ಸಾಮಾನು ಕಡಿಮೆ ಇವೆ: {names}.",
   "stock_level": "{name} ಸ್ಟಾಕ್ {qty} {unit} ಇದೆ.",
-  "staff.head": "{name} ಈ ತಿಂಗಳು {days} ದಿನ ಬಂದಿದ್ದಾರೆ.",
+  "staff.head": "{name} {when} {days} ದಿನ ಬಂದಿದ್ದಾರೆ.",
   "staff.earned": "{amount} ಗಳಿಸಿದ್ದಾರೆ",
   "staff.advances": "{amount} ಅಡ್ವಾನ್ಸ್ ತಗೊಂಡಿದ್ದಾರೆ",
   "staff.paid": "{amount} ಸಂಬಳ ಕೊಟ್ಟಿದೆ",
@@ -55,5 +55,18 @@
   "negative_stock": "{name} ಸ್ಟಾಕ್ {level} {unit} ಮಾತ್ರ ಇದೆ. ಅಷ್ಟು ತೆಗೆಯಲು ಆಗಲ್ಲ.",
   "not_found.create": "ಈ ಹೆಸರು ಸಿಗಲಿಲ್ಲ: {name}. ಹೊಸ ಗಿರಾಕಿ ಸೇರಿಸಲಾ?",
   "not_found": "ಈ ಹೆಸರು ಸಿಗಲಿಲ್ಲ: {name}. ಮತ್ತೆ ಹೇಳಿ.",
-  "confirm_amount": "{amount} ತುಂಬಾ ಜಾಸ್ತಿ. ಖಂಡಿತ ಬರೆಯಲಾ?"
+  "confirm_amount": "{amount} ತುಂಬಾ ಜಾಸ್ತಿ. ಖಂಡಿತ ಬರೆಯಲಾ?",
+  "staff_list.none": "ಇನ್ನೂ ಯಾವ ಸಿಬ್ಬಂದಿಯನ್ನೂ ಸೇರಿಸಿಲ್ಲ.",
+  "staff_list.one": "ಅಂಗಡಿಯಲ್ಲಿ {names} ಮಾತ್ರ ಕೆಲಸ ಮಾಡುತ್ತಾರೆ.",
+  "staff_list.many": "ಅಂಗಡಿಯಲ್ಲಿ {count} ಜನ ಕೆಲಸ ಮಾಡುತ್ತಾರೆ: {names}.",
+  "attendance.none": "ಇವತ್ತು ಇನ್ನೂ ಯಾರೂ ಬಂದಿಲ್ಲ.",
+  "attendance.all": "ಇವತ್ತು ಎಲ್ಲರೂ ಬಂದಿದ್ದಾರೆ: {names}.",
+  "attendance.some": "ಇವತ್ತು {present} ಬಂದಿದ್ದಾರೆ. {absent} ಇನ್ನೂ ಬಂದಿಲ್ಲ.",
+  "customers.none": "ಇನ್ನೂ ಯಾವ ಗ್ರಾಹಕರೂ ಇಲ್ಲ.",
+  "customers.owing": "ನಿಮಗೆ {count} ಗ್ರಾಹಕರಿದ್ದಾರೆ, {owing} ಜನರ ಸಾಲ ಬಾಕಿ ಇದೆ.",
+  "customers.clear": "ನಿಮಗೆ {count} ಗ್ರಾಹಕರಿದ್ದಾರೆ, ಯಾರದ್ದೂ ಸಾಲ ಬಾಕಿ ಇಲ್ಲ.",
+  "when.this_month": "ಈ ತಿಂಗಳು",
+  "when.last_month": "ಹೋದ ತಿಂಗಳು",
+  "when.months_ago": "{months} ತಿಂಗಳ ಹಿಂದೆ",
+  "staff.none_paid": "ಏನೂ ಕೊಟ್ಟಿಲ್ಲ"
 }

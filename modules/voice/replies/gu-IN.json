@@ -38,7 +38,7 @@
   "low.one": "એક વસ્તુ ઓછી છે: {names}.",
   "low.many": "{count} વસ્તુ ઓછી છે: {names}.",
   "stock_level": "{name} નો સ્ટોક {qty} {unit} છે.",
-  "staff.head": "{name} આ મહિને {days} દિવસ આવ્યા.",
+  "staff.head": "{name} {when} {days} દિવસ આવ્યા.",
   "staff.earned": "{amount} કમાયા",
   "staff.advances": "{amount} એડવાન્સ ગયા",
   "staff.paid": "{amount} પગાર આપ્યો",
@@ -55,5 +55,18 @@
   "negative_stock": "{name} નો સ્ટોક ફક્ત {level} {unit} છે. આટલો ન કાઢી શકાય.",
   "not_found.create": "આ નામ ન મળ્યું: {name}. નવો ગ્રાહક બનાવું?",
   "not_found": "આ નામ ન મળ્યું: {name}. ફરી બોલો.",
-  "confirm_amount": "{amount} બહુ વધારે છે. પાકું લખી દઉં?"
+  "confirm_amount": "{amount} બહુ વધારે છે. પાકું લખી દઉં?",
+  "staff_list.none": "હજી કોઈ સ્ટાફ ઉમેરાયો નથી.",
+  "staff_list.one": "દુકાનમાં ફક્ત {names} કામ કરે છે.",
+  "staff_list.many": "દુકાનમાં {count} લોકો કામ કરે છે: {names}.",
+  "attendance.none": "આજે હજી કોઈ આવ્યું નથી.",
+  "attendance.all": "આજે બધા આવ્યા છે: {names}.",
+  "attendance.some": "આજે {present} આવ્યા છે. {absent} હજી નથી આવ્યા.",
+  "customers.none": "હજી કોઈ ગ્રાહક નથી.",
+  "customers.owing": "તમારા {count} ગ્રાહક છે, {owing} પાસે ઉધાર બાકી છે.",
+  "customers.clear": "તમારા {count} ગ્રાહક છે, કોઈનું ઉધાર બાકી નથી.",
+  "when.this_month": "આ મહિને",
+  "when.last_month": "ગયા મહિને",
+  "when.months_ago": "{months} મહિના પહેલાં",
+  "staff.none_paid": "કંઈ આપ્યું નથી"
 }

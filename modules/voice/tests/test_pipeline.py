@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 from modules.ledger.choices import EntryKind
 from modules.ledger.models import Entry
 from modules.ledger.services import customer_balance, record_entry, stock_level
+from modules.shops.choices import PartyKind
 from modules.shops.models import Party, Shop
 from modules.voice.choices import CommandStatus, Intent
 from modules.voice.intent import FakeIntentParser, ParsedCommand
@@ -224,3 +225,31 @@ def test_commands_are_scoped_to_the_owners_shop(api, llm, sharma, django_user_mo
     response = stranger.get(f"/api/v1/voice/commands/{body['id']}/")
     assert (response.status_code, response.json()["error"]["code"]) == (404, "NOT_FOUND")
     assert stranger.get("/api/v1/parties/").json()["count"] == 0
+
+
+def test_shop_overview_questions(api, llm, shop, sharma, verma, ramu):
+    shyam = Party.objects.create(shop=shop, name="Shyam", kind=PartyKind.STAFF)
+    Party.objects.create(shop=shop, name="Gone", kind=PartyKind.STAFF, is_active=False)
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("500"))
+    record_entry(shop, EntryKind.ATTENDANCE, party=ramu)
+    cases = [
+        (Intent.QUERY_STAFF_LIST, "Dukaan mein 2 log kaam karte hain: Ramu aur Shyam."),
+        (Intent.QUERY_ATTENDANCE_TODAY, "Aaj Ramu aaye hain. Shyam abhi nahi aaye."),
+        (Intent.QUERY_CUSTOMER_COUNT, "Aapke 2 customer hain, 1 par udhaar baaki hai."),
+    ]
+    for intent, expected in cases:
+        llm(intent)
+        body = text(api)
+        assert (body["stage"], body["response_text"]) == (CommandStatus.ANSWERED, expected)
+    record_entry(shop, EntryKind.ATTENDANCE, party=shyam)
+    llm(Intent.QUERY_ATTENDANCE_TODAY)
+    assert text(api)["response_text"] == "Aaj sab aaye hain: Ramu aur Shyam."
+    shop.parties.filter(kind=PartyKind.STAFF).update(is_active=False)
+    llm(Intent.QUERY_STAFF_LIST)
+    assert text(api)["response_text"] == "Abhi koi staff nahi joda gaya hai."
+
+
+def test_staff_due_names_the_month_asked_about(api, llm, ramu):
+    last_month = (timezone.localdate().replace(day=1) - timedelta(days=1)).replace(day=1)
+    llm(Intent.QUERY_STAFF_DUE, party_name="Ramu", date_hint=last_month.isoformat())
+    assert text(api)["response_text"] == "Ramu pichhle mahine 0 din aaye. ₹0 bane, kuch nahi diya, ₹0 dena baaki hai."

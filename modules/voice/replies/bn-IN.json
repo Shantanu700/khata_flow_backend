@@ -38,7 +38,7 @@
   "low.one": "একটা জিনিস কম আছে: {names}।",
   "low.many": "{count}টা জিনিস কম আছে: {names}।",
   "stock_level": "{name}-এর স্টক {qty} {unit}।",
-  "staff.head": "{name} এই মাসে {days} দিন এসেছে।",
+  "staff.head": "{name} {when} {days} দিন এসেছে।",
   "staff.earned": "{amount} রোজগার হয়েছে",
   "staff.advances": "{amount} অ্যাডভান্স নিয়েছে",
   "staff.paid": "{amount} বেতন দেওয়া হয়েছে",
@@ -55,5 +55,18 @@
   "negative_stock": "{name}-এর স্টক মাত্র {level} {unit}। এতটা বের করা যাবে না।",
   "not_found.create": "এই নামটা পেলাম না: {name}। নতুন খদ্দের বানাব?",
   "not_found": "এই নামটা পেলাম না: {name}। আবার বলুন।",
-  "confirm_amount": "{amount} অনেক বেশি। সত্যিই লিখে দেব?"
+  "confirm_amount": "{amount} অনেক বেশি। সত্যিই লিখে দেব?",
+  "staff_list.none": "এখনও কোনো কর্মচারী যোগ করা হয়নি।",
+  "staff_list.one": "দোকানে শুধু {names} কাজ করেন।",
+  "staff_list.many": "দোকানে {count} জন কাজ করেন: {names}।",
+  "attendance.none": "আজ এখনও কেউ আসেননি।",
+  "attendance.all": "আজ সবাই এসেছেন: {names}।",
+  "attendance.some": "আজ {present} এসেছেন। {absent} এখনও আসেননি।",
+  "customers.none": "এখনও কোনো খদ্দের নেই।",
+  "customers.owing": "আপনার {count} জন খদ্দের, {owing} জনের কাছে বাকি আছে।",
+  "customers.clear": "আপনার {count} জন খদ্দের, কারও কোনো বাকি নেই।",
+  "when.this_month": "এই মাসে",
+  "when.last_month": "গত মাসে",
+  "when.months_ago": "{months} মাস আগে",
+  "staff.none_paid": "কিছু দেওয়া হয়নি"
 }

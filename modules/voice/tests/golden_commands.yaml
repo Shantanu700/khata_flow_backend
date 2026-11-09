@@ -69,6 +69,22 @@ cases:
     expect: {intent: QUERY_STOCK_LEVEL, product_name: Maggi}
   - text: "Ramu ka is mahine kitna banta hai?"
     expect: {intent: QUERY_STAFF_DUE, party_name: Ramu}
+  - text: "shyam ko pichle mahine kitne paise diye"
+    expect: {intent: QUERY_STAFF_DUE, party_name: Shyam, date_hint: "2026-10-01"}
+  - text: "meri dukaan me kitne staff hai"
+    expect: {intent: QUERY_STAFF_LIST}
+  - text: "meri dukaan me kitne log kaam karte hai"
+    expect: {intent: QUERY_STAFF_LIST}
+  - text: "मेरे यहाँ कौन कौन काम करता है"
+    expect: {intent: QUERY_STAFF_LIST}
+  - text: "aaj kaun kaun aaya hai kaam pe"
+    expect: {intent: QUERY_ATTENDANCE_TODAY}
+  - text: "आज कौन नहीं आया"
+    expect: {intent: QUERY_ATTENDANCE_TODAY}
+  - text: "mere kitne grahak hain"
+    expect: {intent: QUERY_CUSTOMER_COUNT}
+  - text: "कितने लोगों का खाता चलता है"
+    expect: {intent: QUERY_CUSTOMER_COUNT}
   - text: "श्याम की इस महीने की पगार कितनी बनी"
     expect: {intent: QUERY_STAFF_DUE, party_name: Shyam}
   - text: "abhi wala galat ho gaya, hata do"

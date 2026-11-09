@@ -38,7 +38,7 @@
   "low.one": "Ek cheez kam hai: {names}.",
   "low.many": "{count} cheezein kam hain: {names}.",
   "stock_level": "{name} ka stock {qty} {unit} hai.",
-  "staff.head": "{name} is mahine {days} din aaye.",
+  "staff.head": "{name} {when} {days} din aaye.",
   "staff.earned": "{amount} bane",
   "staff.advances": "{amount} advance gaya",
   "staff.paid": "{amount} tankhwah di",
@@ -55,5 +55,18 @@
   "negative_stock": "{name} ka stock sirf {level} {unit} hai. Itna nahi nikal sakta.",
   "not_found.create": "Ye naam nahi mila: {name}. Naya customer banaun?",
   "not_found": "Ye naam nahi mila: {name}. Dobara boliye.",
-  "confirm_amount": "{amount} bahut zyada hai. Pakka likh doon?"
+  "confirm_amount": "{amount} bahut zyada hai. Pakka likh doon?",
+  "staff_list.none": "Abhi koi staff nahi joda gaya hai.",
+  "staff_list.one": "Dukaan mein sirf {names} kaam karte hain.",
+  "staff_list.many": "Dukaan mein {count} log kaam karte hain: {names}.",
+  "attendance.none": "Aaj abhi tak koi nahi aaya.",
+  "attendance.all": "Aaj sab aaye hain: {names}.",
+  "attendance.some": "Aaj {present} aaye hain. {absent} abhi nahi aaye.",
+  "customers.none": "Abhi koi customer nahi hai.",
+  "customers.owing": "Aapke {count} customer hain, {owing} par udhaar baaki hai.",
+  "customers.clear": "Aapke {count} customer hain, kisi par udhaar baaki nahi hai.",
+  "when.this_month": "is mahine",
+  "when.last_month": "pichhle mahine",
+  "when.months_ago": "{months} mahine pehle",
+  "staff.none_paid": "kuch nahi diya"
 }

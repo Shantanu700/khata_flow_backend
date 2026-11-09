@@ -38,7 +38,7 @@
   "low.one": "ஒரு பொருள் குறைவா இருக்கு: {names}.",
   "low.many": "{count} பொருள் குறைவா இருக்கு: {names}.",
   "stock_level": "{name} ஸ்டாக் {qty} {unit} இருக்கு.",
-  "staff.head": "{name} இந்த மாசம் {days} நாள் வந்தாங்க.",
+  "staff.head": "{name} {when} {days} நாள் வந்தாங்க.",
   "staff.earned": "{amount} சம்பாதிச்சது",
   "staff.advances": "{amount} அட்வான்ஸ் போனது",
   "staff.paid": "{amount} சம்பளம் கொடுத்தது",
@@ -55,5 +55,18 @@
   "negative_stock": "{name} ஸ்டாக் {level} {unit} தான் இருக்கு. அவ்வளவு எடுக்க முடியாது.",
   "not_found.create": "{name} என்ற பெயர் கிடைக்கல. புது கஸ்டமரா சேர்க்கவா?",
   "not_found": "{name} என்ற பெயர் கிடைக்கல. மீண்டும் சொல்லுங்க.",
-  "confirm_amount": "{amount} ரொம்ப அதிகம். நிச்சயமா எழுதவா?"
+  "confirm_amount": "{amount} ரொம்ப அதிகம். நிச்சயமா எழுதவா?",
+  "staff_list.none": "இன்னும் எந்த ஊழியரும் சேர்க்கப்படவில்லை.",
+  "staff_list.one": "கடையில் {names} மட்டும் வேலை செய்கிறார்.",
+  "staff_list.many": "கடையில் {count} பேர் வேலை செய்கிறார்கள்: {names}.",
+  "attendance.none": "இன்று இன்னும் யாரும் வரவில்லை.",
+  "attendance.all": "இன்று எல்லோரும் வந்துவிட்டார்கள்: {names}.",
+  "attendance.some": "இன்று {present} வந்தார்கள். {absent} இன்னும் வரவில்லை.",
+  "customers.none": "இன்னும் வாடிக்கையாளர் யாரும் இல்லை.",
+  "customers.owing": "உங்களுக்கு {count} வாடிக்கையாளர்கள், {owing} பேரிடம் கடன் பாக்கி.",
+  "customers.clear": "உங்களுக்கு {count} வாடிக்கையாளர்கள், யாரிடமும் கடன் பாக்கி இல்லை.",
+  "when.this_month": "இந்த மாசம்",
+  "when.last_month": "போன மாசம்",
+  "when.months_ago": "{months} மாசம் முன்னாடி",
+  "staff.none_paid": "எதுவும் கொடுக்கல"
 }

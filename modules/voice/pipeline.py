@@ -185,6 +185,10 @@ def _write(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, pr
     return responses.staff_paid(entry, ledger.staff_due(party, entry.occurred_on))
 
 
+def _staff(shop) -> list[Party]:
+    return list(shop.parties.filter(kind=PartyKind.STAFF, is_active=True).order_by("name"))
+
+
 def _answer(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, product: Product | None) -> str:
     shop, intent = command.shop, parsed.intent
     command.stage = CommandStatus.ANSWERED
@@ -197,7 +201,18 @@ def _answer(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, p
     if intent == Intent.QUERY_STOCK_LEVEL:
         return responses.stock_level(product, ledger.stock_level(product))
     if intent == Intent.QUERY_STAFF_DUE:
-        return responses.staff_due(party, ledger.staff_due(party, _occurred_on(parsed)))
+        month = _occurred_on(parsed)
+        return responses.staff_due(party, ledger.staff_due(party, month), month)
+    if intent == Intent.QUERY_STAFF_LIST:
+        return responses.staff_list(_staff(shop))
+    if intent == Intent.QUERY_ATTENDANCE_TODAY:
+        today = timezone.localdate()
+        staff = _staff(shop)
+        present = [p for p in staff if ledger.attendance_entry_id(p, today)]
+        return responses.attendance_today(staff, present)
+    if intent == Intent.QUERY_CUSTOMER_COUNT:
+        customers = shop.parties.filter(kind=PartyKind.CUSTOMER, is_active=True).count()
+        return responses.customer_count(customers, len(ledger.top_debtors(shop, limit=None)))
     if intent == Intent.UNDO_LAST:
         command.stage = CommandStatus.COMMITTED
         return responses.undone(ledger.undo_last(shop, voice_command=command))

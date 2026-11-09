@@ -1,9 +1,12 @@
 import json
 import re
 from contextvars import ContextVar
+from datetime import date
 from decimal import Decimal
 from functools import cache
 from pathlib import Path
+
+from django.utils import timezone
 
 from modules.ledger.choices import EntryKind
 from modules.ledger.models import Entry
@@ -119,14 +122,48 @@ def stock_level(product: Product, level: Decimal) -> str:
     return say("stock_level", name=product.name, qty=qty(level), unit=unit(product))
 
 
-def staff_due(party: Party, due: StaffDue) -> str:
+def month_label(month: date) -> str:
+    today = timezone.localdate()
+    back = (today.year - month.year) * 12 + today.month - month.month
+    if back <= 0:
+        return say("when.this_month")
+    return say("when.last_month") if back == 1 else say("when.months_ago", months=back)
+
+
+def staff_due(party: Party, due: StaffDue, month: date) -> str:
     parts = [say("staff.earned", amount=format_inr(due.earned))]
     if due.advances:
         parts.append(say("staff.advances", amount=format_inr(due.advances)))
     if due.salary_paid:
         parts.append(say("staff.paid", amount=format_inr(due.salary_paid)))
+    if not due.advances and not due.salary_paid:
+        parts.append(say("staff.none_paid"))
     owed = say("staff.left", amount=format_inr(due.due)) if due.due >= 0 else say("staff.over", amount=format_inr(-due.due))
-    return f"{say('staff.head', name=party.name, days=due.days_present)} {', '.join(parts)}, {owed}."
+    return f"{say('staff.head', name=party.name, days=due.days_present, when=month_label(month))} {', '.join(parts)}, {owed}."
+
+
+def staff_list(staff: list[Party]) -> str:
+    if not staff:
+        return say("staff_list.none")
+    names = join_names([p.name for p in staff])
+    return say("staff_list.one", names=names) if len(staff) == 1 else say("staff_list.many", count=len(staff), names=names)
+
+
+def attendance_today(staff: list[Party], present: list[Party]) -> str:
+    if not staff:
+        return say("staff_list.none")
+    if not present:
+        return say("attendance.none")
+    if len(present) == len(staff):
+        return say("attendance.all", names=join_names([p.name for p in staff]))
+    absent = [p for p in staff if p not in present]
+    return say("attendance.some", present=join_names([p.name for p in present]), absent=join_names([p.name for p in absent]))
+
+
+def customer_count(customers: int, owing: int) -> str:
+    if not customers:
+        return say("customers.none")
+    return say("customers.owing" if owing else "customers.clear", count=customers, owing=owing)
 
 
 def describe(entry: Entry) -> str:

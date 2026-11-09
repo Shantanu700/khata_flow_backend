@@ -38,7 +38,7 @@
   "low.one": "ഒരു സാധനം കുറവാണ്: {names}.",
   "low.many": "{count} സാധനങ്ങൾ കുറവാണ്: {names}.",
   "stock_level": "{name} സ്റ്റോക്ക് {qty} {unit} ഉണ്ട്.",
-  "staff.head": "{name} ഈ മാസം {days} ദിവസം വന്നു.",
+  "staff.head": "{name} {when} {days} ദിവസം വന്നു.",
   "staff.earned": "{amount} സമ്പാദിച്ചു",
   "staff.advances": "{amount} അഡ്വാൻസ് എടുത്തു",
   "staff.paid": "{amount} ശമ്പളം കൊടുത്തു",
@@ -55,5 +55,18 @@
   "negative_stock": "{name} സ്റ്റോക്ക് {level} {unit} മാത്രമേ ഉള്ളൂ. അത്രയും എടുക്കാൻ പറ്റില്ല.",
   "not_found.create": "{name} എന്ന പേര് കിട്ടിയില്ല. പുതിയ കസ്റ്റമറായി ചേർക്കട്ടെ?",
   "not_found": "{name} എന്ന പേര് കിട്ടിയില്ല. ഒന്നുകൂടി പറയൂ.",
-  "confirm_amount": "{amount} വളരെ കൂടുതലാണ്. ഉറപ്പായും എഴുതട്ടെ?"
+  "confirm_amount": "{amount} വളരെ കൂടുതലാണ്. ഉറപ്പായും എഴുതട്ടെ?",
+  "staff_list.none": "ഇതുവരെ ജീവനക്കാരെ ആരെയും ചേർത്തിട്ടില്ല.",
+  "staff_list.one": "കടയിൽ {names} മാത്രമാണ് ജോലി ചെയ്യുന്നത്.",
+  "staff_list.many": "കടയിൽ {count} പേർ ജോലി ചെയ്യുന്നു: {names}.",
+  "attendance.none": "ഇന്ന് ഇതുവരെ ആരും വന്നിട്ടില്ല.",
+  "attendance.all": "ഇന്ന് എല്ലാവരും വന്നു: {names}.",
+  "attendance.some": "ഇന്ന് {present} വന്നു. {absent} ഇതുവരെ വന്നിട്ടില്ല.",
+  "customers.none": "ഇതുവരെ കസ്റ്റമർമാരില്ല.",
+  "customers.owing": "നിങ്ങൾക്ക് {count} കസ്റ്റമർമാരുണ്ട്, {owing} പേർക്ക് കടം ബാക്കിയുണ്ട്.",
+  "customers.clear": "നിങ്ങൾക്ക് {count} കസ്റ്റമർമാരുണ്ട്, ആർക്കും കടം ബാക്കിയില്ല.",
+  "when.this_month": "ഈ മാസം",
+  "when.last_month": "കഴിഞ്ഞ മാസം",
+  "when.months_ago": "{months} മാസം മുമ്പ്",
+  "staff.none_paid": "ഒന്നും കൊടുത്തിട്ടില്ല"
 }

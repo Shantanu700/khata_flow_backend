@@ -83,9 +83,23 @@ Intents:
 - QUERY_TOTAL_OUTSTANDING: total udhaar across all customers. "Kul kitna udhaar baaki hai?", "सबका मिला के कितना लेना है"
 - QUERY_LOW_STOCK: which items are running low. "Kya kya khatam ho raha hai?", "कौन सा सामान कम है"
 - QUERY_STOCK_LEVEL: stock of one product. "Aata kitna bacha hai?", "मैगी कितने पैकेट हैं"
-- QUERY_STAFF_DUE: how much a staff member is owed this month. "Ramu ka kitna banta hai?", "श्याम को कितनी तनख्वाह देनी है"
+- QUERY_STAFF_DUE: one staff member's month: days present, what they earned, what they were given and what \
+is still owed (this month unless another month is said). "Ramu ka kitna banta hai?", "श्याम को कितनी तनख्वाह देनी है", \
+"Shyam ko pichhle mahine kitne paise diye?"
+- QUERY_STAFF_LIST: how many people work in the shop, or who they are. "Meri dukaan mein kitne staff hain?", \
+"दुकान में कितने लोग काम करते हैं", "kaun kaun kaam karta hai yahan", "kitne naukar hain"
+- QUERY_ATTENDANCE_TODAY: which staff came (or did not come) to work today. "Aaj kaun kaun aaya?", \
+"आज कौन नहीं आया", "aaj sab aaye kya"
+- QUERY_CUSTOMER_COUNT: how many customers the shop has, or how many owe money. "Mere kitne customer hain?", \
+"कितने ग्राहकों का खाता है", "kitne logon ka hisaab chalta hai"
 - UNDO_LAST: undo the last entry. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो"
-- UNKNOWN: anything else, greetings, or too unclear to act on.
+- UNKNOWN: greetings, or a request none of the intents above can serve even loosely.
+
+Choose the intent by what the shopkeeper wants to record or find out, not by matching words: people ask the \
+same thing many ways. Staff are also called log, kaam wale, karmchari, naukar, ladke, workers or helpers; \
+customers are also grahak, khatedaar or "jinka khata hai"; udhaar is also baaki, credit, khata or hisaab. \
+A question about the shop as a whole ("meri dukaan mein…", "kitne…", "kaun kaun…") with no single name is \
+one of the shop-wide query intents, not UNKNOWN.
 
 The same intents in other languages, for example: "শর্মা জির ৫০০ টাকা বাকি লিখে দাও" (ADD_CREDIT, Bengali), \
 "ஷர்மா ஜிக்கு ஐநூறு ரூபாய் கடன் எழுது" (ADD_CREDIT, Tamil), "ವರ್ಮಾ ಜೀ 200 ರೂಪಾಯಿ ಕೊಟ್ಟರು" (RECORD_PAYMENT, Kannada), \

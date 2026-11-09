@@ -38,7 +38,7 @@
   "low.one": "ਇੱਕ ਚੀਜ਼ ਘੱਟ ਹੈ: {names}।",
   "low.many": "{count} ਚੀਜ਼ਾਂ ਘੱਟ ਹਨ: {names}।",
   "stock_level": "{name} ਦਾ ਸਟਾਕ {qty} {unit} ਹੈ।",
-  "staff.head": "{name} ਇਸ ਮਹੀਨੇ {days} ਦਿਨ ਆਏ।",
+  "staff.head": "{name} {when} {days} ਦਿਨ ਆਏ।",
   "staff.earned": "{amount} ਬਣੇ",
   "staff.advances": "{amount} ਐਡਵਾਂਸ ਗਿਆ",
   "staff.paid": "{amount} ਤਨਖਾਹ ਦਿੱਤੀ",
@@ -55,5 +55,18 @@
   "negative_stock": "{name} ਦਾ ਸਟਾਕ ਸਿਰਫ਼ {level} {unit} ਹੈ। ਇੰਨਾ ਨਹੀਂ ਕੱਢ ਸਕਦਾ।",
   "not_found.create": "ਇਹ ਨਾਂ ਨਹੀਂ ਮਿਲਿਆ: {name}। ਨਵਾਂ ਗਾਹਕ ਬਣਾਵਾਂ?",
   "not_found": "ਇਹ ਨਾਂ ਨਹੀਂ ਮਿਲਿਆ: {name}। ਫਿਰ ਬੋਲੋ।",
-  "confirm_amount": "{amount} ਬਹੁਤ ਜ਼ਿਆਦਾ ਹੈ। ਪੱਕਾ ਲਿਖ ਦਿਆਂ?"
+  "confirm_amount": "{amount} ਬਹੁਤ ਜ਼ਿਆਦਾ ਹੈ। ਪੱਕਾ ਲਿਖ ਦਿਆਂ?",
+  "staff_list.none": "ਹਾਲੇ ਕੋਈ ਸਟਾਫ਼ ਨਹੀਂ ਜੋੜਿਆ ਗਿਆ।",
+  "staff_list.one": "ਦੁਕਾਨ ਵਿੱਚ ਸਿਰਫ਼ {names} ਕੰਮ ਕਰਦੇ ਹਨ।",
+  "staff_list.many": "ਦੁਕਾਨ ਵਿੱਚ {count} ਲੋਕ ਕੰਮ ਕਰਦੇ ਹਨ: {names}।",
+  "attendance.none": "ਅੱਜ ਹਾਲੇ ਤੱਕ ਕੋਈ ਨਹੀਂ ਆਇਆ।",
+  "attendance.all": "ਅੱਜ ਸਾਰੇ ਆਏ ਹਨ: {names}।",
+  "attendance.some": "ਅੱਜ {present} ਆਏ ਹਨ। {absent} ਹਾਲੇ ਨਹੀਂ ਆਏ।",
+  "customers.none": "ਹਾਲੇ ਕੋਈ ਗਾਹਕ ਨਹੀਂ ਹੈ।",
+  "customers.owing": "ਤੁਹਾਡੇ {count} ਗਾਹਕ ਹਨ, {owing} ਵੱਲ ਉਧਾਰ ਬਾਕੀ ਹੈ।",
+  "customers.clear": "ਤੁਹਾਡੇ {count} ਗਾਹਕ ਹਨ, ਕਿਸੇ ਵੱਲ ਉਧਾਰ ਬਾਕੀ ਨਹੀਂ ਹੈ।",
+  "when.this_month": "ਇਸ ਮਹੀਨੇ",
+  "when.last_month": "ਪਿਛਲੇ ਮਹੀਨੇ",
+  "when.months_ago": "{months} ਮਹੀਨੇ ਪਹਿਲਾਂ",
+  "staff.none_paid": "ਕੁਝ ਨਹੀਂ ਦਿੱਤਾ"
 }

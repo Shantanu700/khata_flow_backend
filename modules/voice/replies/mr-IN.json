@@ -38,7 +38,7 @@
   "low.one": "एक वस्तू कमी आहे: {names}.",
   "low.many": "{count} वस्तू कमी आहेत: {names}.",
   "stock_level": "{name}चा स्टॉक {qty} {unit} आहे.",
-  "staff.head": "{name} या महिन्यात {days} दिवस आले.",
+  "staff.head": "{name} {when} {days} दिवस आले.",
   "staff.earned": "{amount} झाले",
   "staff.advances": "{amount} ॲडव्हान्स गेला",
   "staff.paid": "{amount} पगार दिला",
@@ -55,5 +55,18 @@
   "negative_stock": "{name}चा स्टॉक फक्त {level} {unit} आहे. एवढा काढता येणार नाही.",
   "not_found.create": "हे नाव सापडलं नाही: {name}. नवा ग्राहक जोडू का?",
   "not_found": "हे नाव सापडलं नाही: {name}. पुन्हा सांगा.",
-  "confirm_amount": "{amount} खूप जास्त आहे. नक्की लिहू का?"
+  "confirm_amount": "{amount} खूप जास्त आहे. नक्की लिहू का?",
+  "staff_list.none": "अजून कोणताही कर्मचारी जोडलेला नाही.",
+  "staff_list.one": "दुकानात फक्त {names} काम करतात.",
+  "staff_list.many": "दुकानात {count} जण काम करतात: {names}.",
+  "attendance.none": "आज अजून कोणीही आलेले नाही.",
+  "attendance.all": "आज सगळे आले आहेत: {names}.",
+  "attendance.some": "आज {present} आले आहेत. {absent} अजून आलेले नाहीत.",
+  "customers.none": "अजून कोणताही ग्राहक नाही.",
+  "customers.owing": "तुमचे {count} ग्राहक आहेत, {owing} जणांकडे उधारी बाकी आहे.",
+  "customers.clear": "तुमचे {count} ग्राहक आहेत, कुणाकडेही उधारी बाकी नाही.",
+  "when.this_month": "या महिन्यात",
+  "when.last_month": "मागच्या महिन्यात",
+  "when.months_ago": "{months} महिन्यांपूर्वी",
+  "staff.none_paid": "काहीही दिले नाही"
 }
