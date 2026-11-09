@@ -20,7 +20,7 @@ def api(shop) -> APIClient:
 def test_update_marks_updated_and_delete_is_soft(api, shop, sharma):
     record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=Decimal("500"))
 
-    body = api.patch(f"/api/v1/parties/{sharma.pk}/", {"aliases": ["Sharma Uncle"]}, format="json").json()
+    body = api.put(f"/api/v1/parties/{sharma.pk}/", {"name": "Sharma ji", "aliases": ["Sharma Uncle"]}, format="json").json()
     assert (body["status"], body["aliases"]) == (Status.UPDATED, ["sharma uncle"])
 
     assert api.delete(f"/api/v1/parties/{sharma.pk}/").status_code == 204

@@ -16,3 +16,6 @@ staticfiles/
 .idea/
 .vscode/
 .claude/settings.local.json
+
+# Local mkcert certificate for the HTTPS dev server.
+docker/nonprod/certs/

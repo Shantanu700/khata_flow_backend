@@ -1,6 +1,7 @@
 # Development stack. Run from the repo root:
 #   docker compose -f docker/nonprod/docker-compose.yml up -d
-# The API is then on http://localhost:8000 (API_PORT to change it).
+# The API is then on https://localhost:8000 (API_PORT to change it), using the mkcert certificate in
+# docker/nonprod/certs/ (see README: Setup).
 name: khaataflow
 
 # No env_file: Django reads the mounted .env itself, so editing it never needs a container restart.
@@ -47,7 +48,9 @@ services:
 
   web:
     <<: *app
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      python manage.py runsslserver 0.0.0.0:8000
+      --certificate /app/docker/nonprod/certs/localhost.pem --key /app/docker/nonprod/certs/localhost-key.pem
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:

@@ -1,3 +1,5 @@
+import os
+import secrets
 from datetime import timedelta
 from decimal import Decimal
 
@@ -91,9 +93,12 @@ class Command(BaseCommand):
             self._merchant(merchant)
 
     def _merchant(self, merchant: dict) -> None:
-        user, created = get_user_model().objects.get_or_create(username=merchant["username"])
-        if created:
-            user.set_unusable_password()
+        user, _ = get_user_model().objects.get_or_create(username=merchant["username"])
+        password = None
+        if not user.has_usable_password():
+            # DEMO_PASSWORD for a known password on every demo account; otherwise a random one, shown once.
+            password = os.environ.get("DEMO_PASSWORD") or secrets.token_urlsafe(9)
+            user.set_password(password)
             user.save()
         token, token_created = Token.objects.get_or_create(user=user)
         shop, _ = Shop.objects.get_or_create(owner=user, defaults={"name": merchant["shop"], "preferred_language": "hi-IN"})
@@ -119,6 +124,8 @@ class Command(BaseCommand):
         else:
             self._history(shop, merchant)
             self.stdout.write(f"{label}: created {shop.entries.count()} entries.")
+        if password and not os.environ.get("DEMO_PASSWORD"):
+            self.stdout.write(self.style.WARNING(f"{label} password (shown once): {password}"))
         if token_created:
             self.stdout.write(self.style.WARNING(f"{label} API token (shown once): {token.key}"))
         else:

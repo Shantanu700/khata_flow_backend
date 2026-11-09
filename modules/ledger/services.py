@@ -106,6 +106,35 @@ def staff_due(party: Party, month: date) -> StaffDue:
     )
 
 
+def month_bounds(month: date) -> tuple[date, date]:
+    return month.replace(day=1), month.replace(day=calendar.monthrange(month.year, month.month)[1])
+
+
+def attendance_entry_id(party: Party, on: date) -> int | None:
+    return live_entries().filter(kind=EntryKind.ATTENDANCE, party=party, occurred_on=on).values_list("id", flat=True).first()
+
+
+def present_days(party: Party, start: date, end: date) -> list[date]:
+    days = live_entries().filter(kind=EntryKind.ATTENDANCE, party=party, occurred_on__range=(start, end))
+    return sorted(set(days.values_list("occurred_on", flat=True)))
+
+
+def with_month_advances(parties: QuerySet[Party], month: date) -> QuerySet[Party]:
+    start, end = month_bounds(month)
+    live = Q(
+        entries__reversal__isnull=True,
+        entries__kind=EntryKind.STAFF_ADVANCE,
+        entries__occurred_on__range=(start, end),
+    )
+    return parties.annotate(month_advances=Coalesce(Sum("entries__amount", filter=live), Value(ZERO), output_field=MONEY))
+
+
+def salary_left(party: Party, month: date) -> Decimal:
+    "What can still be handed over this month as advance or salary: the monthly salary less both."
+    due = staff_due(party, month)
+    return (party.monthly_salary or ZERO) - due.advances - due.salary_paid
+
+
 def _validate(
     shop: Shop,
     kind: EntryKind,

@@ -30,7 +30,9 @@ ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1" if DEBUG else ""
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
 
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "https://localhost:8000,https://127.0.0.1:8000" if DEBUG else "")
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 DJANGO_APPS = [
     "django.contrib.admin",
@@ -55,7 +57,10 @@ LOCAL_APPS = [
     "modules.voice",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+# runsslserver: the dev server over HTTPS (docker/nonprod).
+DEV_APPS = ["sslserver"] if DEBUG else []
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + DEV_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -119,6 +124,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["base.permissions.APIAuthenticationPermission"],
     "DEFAULT_PAGINATION_CLASS": "base.pagination.DefaultPagination",
     "COERCE_DECIMAL_TO_STRING": False,
+    "DEFAULT_THROTTLE_RATES": {"login": "10/min"},
 }
 
 SPECTACULAR_SETTINGS = {

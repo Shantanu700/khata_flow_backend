@@ -176,6 +176,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-sslserver-v2"
+version = "1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/14/44/c0485b9b9ea3621f19920a57fcaf9bd0cad6cb287c56c75ed4fb3c991dfe/django_sslserver_v2-1.1.tar.gz", hash = "sha256:4bf25aee6284874b01e191bb57d07fbc38264207e8fe63451e7307531a647828", size = 11488, upload-time = "2026-09-09T10:13:50.435Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/09/51/311be81ca8db256ccce9397c7ec261a6dc42a913490d10bb2cb8bfce48cd/django_sslserver_v2-1.1-py3-none-any.whl", hash = "sha256:12c0eb6091f40ef119c40cc7adf3715463509496edc09da3bc7aafb825021f1f", size = 12127, upload-time = "2026-09-09T10:13:48.362Z" },
+]
+
+[[package]]
 name = "djangorestframework"
 version = "3.18.3"
 source = { registry = "https://pypi.org/simple" }
@@ -317,6 +329,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "django-sslserver-v2" },
     { name = "pytest" },
     { name = "pytest-django" },
     { name = "ruff" },
@@ -342,6 +355,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "django-sslserver-v2", specifier = ">=1.1" },
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "pytest-django", specifier = ">=4.14.0" },
     { name = "ruff", specifier = ">=0.17.4" },
