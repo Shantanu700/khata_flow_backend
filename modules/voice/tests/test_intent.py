@@ -42,3 +42,20 @@ def test_invalid_json_is_retried_then_unknown(llm):
     remaining = llm(reply(200, '{"intent": "NOPE"}'), reply(200, "not json"))
     assert GroqIntentParser().parse("hmm", ShopContext()).intent == Intent.UNKNOWN
     assert remaining == []
+
+
+def test_strict_json_failure_falls_back_to_plain_json(llm, monkeypatch):
+    sent = []
+    queue = [
+        httpx.Response(400, json={"error": {"code": "json_validate_failed"}}, request=REQUEST),
+        reply(200, '{"intent": "QUERY_CUSTOMER_BALANCE", "party_name": "Rathore ji"}'),
+    ]
+
+    def post(*args, json, **kwargs):
+        sent.append(json)
+        return queue.pop(0)
+
+    monkeypatch.setattr(intent.httpx, "post", post)
+    parsed = GroqIntentParser().parse("Rathore ji ka kitna baaki hai", ShopContext())
+    assert (parsed.intent, parsed.party_name) == (Intent.QUERY_CUSTOMER_BALANCE, "Rathore ji")
+    assert "response_format" in sent[0] and "response_format" not in sent[1]

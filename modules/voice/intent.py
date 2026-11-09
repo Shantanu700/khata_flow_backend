@@ -13,6 +13,10 @@ from modules.voice.choices import Intent
 from modules.voice.providers.base import ProviderError
 
 MAX_RATE_LIMIT_WAIT = 10.0
+PLAIN_JSON_HINT = (
+    "\nReply with only one JSON object with exactly these keys: intent, party_name, product_name, amount, "
+    "quantity, unit, date_hint. Use null for unused keys. No other text."
+)
 
 
 class ParsedCommand(BaseModel):
@@ -88,8 +92,8 @@ by alias, honorific or Devanagari spelling), copy the known name exactly. Otherw
 paanch sau = 500, dhai sau = 250, dedh sau = 150, dedh = 1.5, dhai = 2.5, sava = 1.25, saade teen = 3.5, \
 ek hazaar = 1000, dedh hazaar = 1500, do hazaar = 2000.
 - unit: packet, kg, litre or piece when said, else null.
-- date_hint: ISO date (YYYY-MM-DD) only when a day is said ("kal" means yesterday, "parson" the day before \
-yesterday, "pichhle mahine" the first day of last month); else null.
+- date_hint: ISO date (YYYY-MM-DD) only when a past day is said ("kal" means yesterday, "parson" the day \
+before yesterday, "pichhle mahine" the first day of last month); null for today ("aaj") or no day.
 - Every field not used by the intent is null.
 """
 
@@ -112,8 +116,18 @@ class GroqIntentParser:
             {"role": "system", "content": build_prompt(context)},
             {"role": "user", "content": transcript},
         ]
+        strict = True
         for attempt in (1, 2):
-            raw = self._complete(messages)
+            try:
+                raw = self._complete(messages, strict=strict)
+            except ProviderError as exc:
+                # Groq's constrained decoder sometimes gives up mid-word on a name; the same request without
+                # it, still validated by Pydantic below, goes through.
+                if exc.code != "LLM_JSON_FAILED" or attempt == 2:
+                    raise
+                strict = False
+                messages[0] = {"role": "system", "content": messages[0]["content"] + PLAIN_JSON_HINT}
+                continue
             try:
                 return ParsedCommand.model_validate_json(raw)
             except ValidationError as exc:
@@ -125,20 +139,21 @@ class GroqIntentParser:
                 ]
         return ParsedCommand(intent=Intent.UNKNOWN)
 
-    def _complete(self, messages: list[dict]) -> str:
+    def _complete(self, messages: list[dict], strict: bool = True) -> str:
         if not settings.LLM_API_KEY:
             raise ProviderError("LLM_NOT_CONFIGURED", "LLM_API_KEY is empty")
         payload = {
             "model": settings.LLM_MODEL,
             "messages": messages,
             "temperature": 0,
-            "reasoning_effort": "low",
+            "reasoning_effort": settings.LLM_REASONING_EFFORT,
             "include_reasoning": False,
-            "response_format": {
+        }
+        if strict:
+            payload["response_format"] = {
                 "type": "json_schema",
                 "json_schema": {"name": "parsed_command", "strict": True, "schema": RESPONSE_SCHEMA},
-            },
-        }
+            }
         for attempt in (1, 2):
             try:
                 response = httpx.post(
@@ -153,6 +168,8 @@ class GroqIntentParser:
             if response.status_code != 429 or attempt == 2:
                 break
             time.sleep(min(float(response.headers.get("retry-after") or 5), MAX_RATE_LIMIT_WAIT))
+        if response.status_code == 400 and "json_validate_failed" in response.text:
+            raise ProviderError("LLM_JSON_FAILED", response.text[:200])
         if response.status_code != 200:
             raise ProviderError(f"LLM_HTTP_{response.status_code}", response.text[:200])
         try:

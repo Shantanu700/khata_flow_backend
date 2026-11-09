@@ -50,23 +50,24 @@ Same `base/` layer as the owner's certifier project:
 
 ## Measured numbers
 
-Only numbers from real runs, measured on 9 November 2026 on a laptop running the Docker stack.
+Only numbers from real runs, measured on 9 November 2026 on a laptop running the Docker stack, with Groq `openai/gpt-oss-120b` at `reasoning_effort=medium`.
 
-- **Intent accuracy: 36/36 (100%)** on the golden set (`modules/voice/tests/golden_commands.yaml`, run with `scripts/eval_intents.py`). These are 36 synthetic transcripts covering every intent, in Devanagari and romanised Hinglish, with Hindi number words and messy phrasing. The set is small and written by us, so treat it as a regression check, not a benchmark.
-- **Median latency per stage**, from 5 spoken commands (synthetic Timbre audio sent through `POST /voice/commands/`):
+- **Intent accuracy: 35/36 (97.2%)** on the golden set (`modules/voice/tests/golden_commands.yaml`, run with `scripts/eval_intents.py`), in each of the last two runs. These are 36 synthetic transcripts covering every intent, in Devanagari and romanised Hinglish, with Hindi number words and messy phrasing. The one miss differed between runs and was harmless both times: an extra `date_hint` of today, then an extra `product_name` on an udhaar command (neither changes what gets written). The set is small and written by us, so treat it as a regression check, not a benchmark.
+- With `reasoning_effort=low` the golden set scored 36/36 and was about 250 ms faster, but in real spoken commands the model garbled some names ("Rathore ji" became "Rathoth ji"), so `medium` is the default (`LLM_REASONING_EFFORT`).
+- **Median latency per stage**, from 7 spoken commands across both demo shops (synthetic Timbre audio sent through `POST /voice/commands/`; all 7 answered correctly):
 
   | Stage | Median |
   | - | - |
-  | Normalise audio (ffmpeg) | 65 ms |
-  | Gnani Prisma speech-to-text | 424 ms |
-  | Intent extraction (Groq `gpt-oss-120b`) | 1,016 ms |
-  | Resolve + ledger write or query | ~12 ms |
-  | Gnani Timbre text-to-speech | 971 ms |
-  | **Whole request** | **2,639 ms** |
+  | Normalise audio (ffmpeg) | 83 ms |
+  | Gnani Prisma speech-to-text | 457 ms |
+  | Intent extraction (Groq) | 950 ms |
+  | Resolve + ledger write or query | ~10 ms |
+  | Gnani Timbre text-to-speech | 986 ms |
+  | **Whole request** | **2,841 ms** |
 
-  Across the 36 golden-set calls, the median intent latency was 806 ms.
+  Across the 36 golden-set calls, the median intent latency was 1,140 ms.
 
-- Groq's free tier allows 8,000 tokens a minute and each command uses about 1,230, so roughly 6 commands a minute. On a rate limit the parser waits up to 10 seconds and retries once.
+- Groq's free tier allows 8,000 tokens a minute and each command uses about 1,450, so roughly 5 commands a minute. On a rate limit the parser waits up to 10 seconds and retries once. If Groq's strict JSON mode fails on a reply, the parser retries once without it and validates the result itself.
 
 ## Setup
 

@@ -176,6 +176,8 @@ GNANI_TTS_LANGUAGE = os.environ.get("GNANI_TTS_LANGUAGE", "hi-IN")
 LLM_PROVIDER = os.environ.get("LLM_PROVIDER") or "groq"
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_MODEL = os.environ.get("LLM_MODEL") or "openai/gpt-oss-120b"
+# medium, not low: at low, gpt-oss-120b on Groq garbled some names ("Rathore ji" -> "Rathoth ji").
+LLM_REASONING_EFFORT = os.environ.get("LLM_REASONING_EFFORT") or "medium"
 # Any OpenAI-compatible chat completions base URL.
 LLM_BASE_URL = (os.environ.get("LLM_BASE_URL") or "https://api.groq.com/openai/v1").rstrip("/")
 
