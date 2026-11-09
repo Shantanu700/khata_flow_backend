@@ -1,6 +1,8 @@
 import logging
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import date, datetime, timedelta
 
 from django.conf import settings
@@ -32,6 +34,9 @@ from modules.voice.providers import ProviderError, get_stt, get_tts
 from modules.voice.resolver import Outcome, resolve_party, resolve_product
 
 log = logging.getLogger(__name__)
+
+# Set while a request streams its progress: told each stage's name and milliseconds as soon as it finishes.
+progress: ContextVar[Callable[[str, int], None] | None] = ContextVar("voice_progress", default=None)
 
 WRITE_KINDS = {
     Intent.ADD_CREDIT: EntryKind.CREDIT_GIVEN,
@@ -66,7 +71,9 @@ class Timings:
         try:
             yield
         finally:
-            self.command.timings_ms[stage] = round((time.perf_counter() - start) * 1000)
+            ms = self.command.timings_ms[stage] = round((time.perf_counter() - start) * 1000)
+            if report := progress.get():
+                report(stage, ms)
 
 
 def _set_stage(command: VoiceCommand, stage: CommandStatus) -> None:

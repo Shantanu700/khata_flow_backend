@@ -1,16 +1,25 @@
+import json
+import logging
+import queue
+import threading
+from collections.abc import Callable
+
 from django.conf import settings
-from django.http import FileResponse, Http404
+from django.db import connection
+from django.http import FileResponse, Http404, StreamingHttpResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
+from rest_framework.utils.encoders import JSONEncoder
 
 from base.decorators import extend_response
+from base.exceptions import DomainError
 from base.pagination import DefaultPagination
 from base.views import BaseAV
 from modules.shops.services import shop_for
-from modules.voice import stream
+from modules.voice import pipeline, stream
 from modules.voice.api.v1.serializers import (
     AudioCommandSerializer,
     ClarifySerializer,
@@ -22,9 +31,38 @@ from modules.voice.choices import InputMode
 from modules.voice.models import VoiceCommand
 from modules.voice.pipeline import clarify, handle_command
 
+log = logging.getLogger(__name__)
+
 
 def _body(request, command: VoiceCommand) -> dict:
     return VoiceCommandSerializer(command, context={"request": request}).data
+
+
+def _respond(request, run: Callable[[], VoiceCommand]):
+    """The command as JSON; with ?progress=1, NDJSON instead: {"stage", "ms"} as each pipeline stage finishes,
+    then {"command": …} (or {"error": {"code", "message"}}), so the screen can tick steps off as they happen."""
+    if not request.query_params.get("progress"):
+        return _body(request, run())
+    events: queue.Queue = queue.Queue()
+
+    def work() -> None:
+        reset = pipeline.progress.set(lambda stage, ms: events.put({"stage": stage, "ms": ms}))
+        try:
+            events.put({"command": _body(request, run())})
+        except DomainError as exc:
+            events.put({"error": {"code": exc.code, "message": exc.message}})
+        except Exception:
+            log.exception("streamed voice command failed")
+            events.put({"error": {"code": "SERVER_ERROR", "message": "Something went wrong."}})
+        finally:
+            pipeline.progress.reset(reset)
+            connection.close()
+            events.put(None)
+
+    threading.Thread(target=work, daemon=True).start()
+    # DRF's encoder, as for every other response: entries carry Decimal amounts.
+    lines = (json.dumps(event, cls=JSONEncoder, ensure_ascii=False) + "\n" for event in iter(events.get, None))
+    return StreamingHttpResponse(lines, content_type="application/x-ndjson")
 
 
 class AudioCommandAV(BaseAV):
@@ -51,7 +89,7 @@ class AudioCommandAV(BaseAV):
             audio=data.validated_data["audio"],
             language=data.validated_data.get("language", shop.preferred_language),
         )
-        return _body(request, handle_command(command))
+        return _respond(request, lambda: handle_command(command))
 
 
 class TextCommandAV(BaseAV):
@@ -69,7 +107,7 @@ class TextCommandAV(BaseAV):
             transcript=data.validated_data["text"].strip(),
             language=data.validated_data.get("language", shop.preferred_language),
         )
-        return _body(request, handle_command(command))
+        return _respond(request, lambda: handle_command(command))
 
 
 class CommandDetailAV(BaseAV):
@@ -87,8 +125,8 @@ class ClarifyAV(BaseAV):
         command = get_object_or_404(VoiceCommand, pk=pk, shop=shop_for(request.user))
         data = ClarifySerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        clarify(command, option_id=data.validated_data.get("option_id"), confirm=data.validated_data.get("confirm"))
-        return _body(request, command)
+        answer = {"option_id": data.validated_data.get("option_id"), "confirm": data.validated_data.get("confirm")}
+        return _respond(request, lambda: clarify(command, **answer))
 
 
 class StreamTicketAV(BaseAV):

@@ -56,8 +56,11 @@ async def stream(scope, receive, send) -> None:
         "model": settings.GNANI_STT_MODEL,
         "format": settings.GNANI_STT_FORMAT,
         "x-sample-rate": "16000",
-        # Shorter than Gnani's 500 ms default, so phrases appear while the shopkeeper is still speaking.
-        "x-min-silence-ms": "300",
+        # A phrase closes at a 200 ms pause, or after 2 s of unbroken speech, so text keeps appearing while the
+        # shopkeeper talks (Prisma sends no partial results). A forced break can split a word in the live text;
+        # the command itself is transcribed again in full.
+        "x-min-silence-ms": "200",
+        "x-max-speech-s": "2",
         "x-idle-timeout-sec": "30",
     }
     if terms:

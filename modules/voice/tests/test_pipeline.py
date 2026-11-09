@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 from decimal import Decimal
 
@@ -294,3 +295,32 @@ def test_query_for_unknown_customer_does_not_offer_to_create(api, llm, sharma):
     llm(Intent.QUERY_CREDIT_GIVEN, party_name="Pandey ji")
     body = text(api)
     assert body["stage"] == CommandStatus.FAILED and body["clarification"] is None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_progress_streams_each_stage_then_the_command(api, llm, sharma):
+    llm(Intent.QUERY_CUSTOMER_BALANCE, party_name="Sharma ji")
+    response = api.post("/api/v1/voice/text-commands/?progress=1", {"text": "Sharma ji ka kitna"}, format="json")
+    assert response["Content-Type"] == "application/x-ndjson"
+    events = [json.loads(line) for line in b"".join(response.streaming_content).decode().splitlines()]
+    assert [e["stage"] for e in events[:-1]] == ["intent", "resolve", "commit", "tts"]
+    assert all(isinstance(e["ms"], int) for e in events[:-1])
+    assert events[-1]["command"]["stage"] == CommandStatus.ANSWERED
+    assert events[-1]["command"]["response_text"] == "Sharma ji ka koi baaki nahi hai."
+
+
+@pytest.mark.django_db(transaction=True)
+def test_progress_reports_a_refused_answer_as_an_error_line(api, llm, sharma):
+    llm(Intent.QUERY_CUSTOMER_BALANCE, party_name="Sharma ji")
+    command = text(api)
+    response = api.post(f"/api/v1/voice/commands/{command['id']}/clarify/?progress=1", {"confirm": True}, format="json")
+    events = [json.loads(line) for line in b"".join(response.streaming_content).decode().splitlines()]
+    assert events == [{"error": {"code": "NOT_WAITING", "message": "This command is not waiting for an answer."}}]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_progress_carries_a_written_entry(api, llm, sharma):
+    llm(Intent.ADD_CREDIT, party_name="Sharma ji", amount=D("500"))
+    response = api.post("/api/v1/voice/text-commands/?progress=1", {"text": "Sharma ji ka 500 udhaar"}, format="json")
+    last = json.loads(b"".join(response.streaming_content).decode().splitlines()[-1])
+    assert last["command"]["stage"] == CommandStatus.COMMITTED and last["command"]["entry"]["amount"] == 500
