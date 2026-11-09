@@ -1,0 +1,39 @@
+[project]
+name = "khaataflow"
+version = "0.1.0"
+description = "Voice-first shop book for kirana merchants"
+requires-python = ">=3.13"
+dependencies = [
+    "celery>=5.7.0",
+    "django>=6.1.3",
+    "django-cors-headers>=4.9.0",
+    "djangorestframework>=3.18.3",
+    "drf-spectacular>=0.30.0",
+    "httpx>=0.28.1",
+    "psycopg[binary]>=3.3.8",
+    "pydantic>=2.14.3",
+    "python-dotenv>=1.2.4",
+    "pyyaml>=6.0.3",
+    "rapidfuzz>=3.14.6",
+    "redis>=8.1.0",
+    "uuid6>=2025.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.17.4",
+    "watchfiles>=1.3.0",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.test_settings"
+python_files = ["test_*.py"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

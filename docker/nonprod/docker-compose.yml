@@ -1,0 +1,77 @@
+# Development stack. Run from the repo root:
+#   docker compose -f docker/nonprod/docker-compose.yml up -d
+# The API is then on http://localhost:8000 (API_PORT to change it).
+name: khaataflow
+
+# No env_file: Django reads the mounted .env itself, so editing it never needs a container restart.
+x-app: &app
+  build:
+    context: ../..
+    dockerfile: docker/nonprod/Dockerfile
+  image: khaataflow:dev
+  volumes:
+    - ../..:/app
+    - media:/app/media
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: khaataflow
+      POSTGRES_USER: khaataflow
+      POSTGRES_PASSWORD: khaataflow
+    volumes:
+      # Postgres 18+ keeps data in a versioned subdirectory of this path.
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "${DB_PORT:-5435}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U khaataflow -d khaataflow"]
+      interval: 2s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 30
+
+  # Migrations are generated, not committed (same convention as the owner's other repos).
+  init:
+    <<: *app
+    command: sh -c "python manage.py makemigrations shops ledger voice && python manage.py migrate"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    <<: *app
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker:
+    <<: *app
+    # Restarts the worker when code or .env changes. Watch only these paths: /app also holds the host's .venv,
+    # whose symlinks are broken inside the container and look "deleted" on every poll.
+    command: >
+      watchfiles "celery -A config worker -l info --concurrency 2"
+      /app/.env /app/config /app/base /app/modules
+    environment:
+      # Host edits reach the bind mount without inotify events on Docker Desktop, so poll.
+      WATCHFILES_FORCE_POLLING: "true"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  media:
