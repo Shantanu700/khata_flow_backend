@@ -1,0 +1,191 @@
+import json
+import time
+from dataclasses import dataclass, field
+from datetime import date
+from decimal import Decimal
+from typing import Protocol
+
+import httpx
+from django.conf import settings
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+from modules.voice.choices import Intent
+from modules.voice.providers.base import ProviderError
+
+MAX_RATE_LIMIT_WAIT = 10.0
+PLAIN_JSON_HINT = (
+    "\nReply with only one JSON object with exactly these keys: intent, party_name, product_name, amount, "
+    "quantity, unit, date_hint. Use null for unused keys. No other text."
+)
+
+
+class ParsedCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    intent: Intent
+    party_name: str | None = None
+    product_name: str | None = None
+    amount: Decimal | None = None
+    quantity: Decimal | None = None
+    unit: str | None = None
+    date_hint: str | None = None
+
+
+@dataclass
+class ShopContext:
+    customers: list[str] = field(default_factory=list)
+    staff: list[str] = field(default_factory=list)
+    products: list[str] = field(default_factory=list)
+    today: date = field(default_factory=date.today)
+
+
+class IntentParser(Protocol):
+    def parse(self, transcript: str, context: ShopContext) -> ParsedCommand: ...
+
+
+def _nullable(kind: str) -> dict:
+    return {"type": [kind, "null"]}
+
+
+# Groq strict mode: every property required, nulls spelled out, no extra keys.
+RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "intent": {"type": "string", "enum": [intent.value for intent in Intent]},
+        "party_name": _nullable("string"),
+        "product_name": _nullable("string"),
+        "amount": _nullable("number"),
+        "quantity": _nullable("number"),
+        "unit": _nullable("string"),
+        "date_hint": _nullable("string"),
+    },
+    "required": list(ParsedCommand.model_fields),
+    "additionalProperties": False,
+}
+
+INSTRUCTIONS = """\
+You turn one spoken command from an Indian kirana shopkeeper into JSON. The command is Hindi, \
+Hinglish or English; speech-to-text may write Hindi words in Devanagari and numbers as digits or ₹.
+Speech-to-text also mishears sound-alike words; read the command as a shopkeeper meant it \
+(e.g. "आता कितना बच्चा है" is "आटा कितना बचा है", a stock question about aata).
+
+Intents:
+- ADD_CREDIT: customer took goods on udhaar (credit). "Sharma ji ka 500 udhaar likh do", "वर्मा जी के खाते में 250 चढ़ा दो", "Gupta aunty ne 300 ka saman udhaar liya"
+- RECORD_PAYMENT: customer paid back. "Sharma ji ne 200 de diye", "मिश्रा जी से 500 मिल गए", "arre wo Verma ji ne kal ke 200 jama kiye"
+- STOCK_IN: stock arrived. "Aata ke 20 packet aaye", "मैगी के 5 डिब्बे स्टॉक में जोड़ो", "Tata namak 10 packet add karo"
+- STOCK_OUT: stock went out or was sold. "Maggi ke 3 packet nikle", "दो फॉर्च्यून तेल बिक गए", "Parle-G 12 bech diye"
+- MARK_ATTENDANCE: staff came to work. "Ramu aaj aaya hai", "श्याम की हाज़िरी लगा दो", "Ramu present"
+- STAFF_ADVANCE: advance money given to staff. "Ramu ko 500 advance diya", "श्याम को एक हज़ार एडवांस दे दिया"
+- SALARY_PAID: salary paid to staff. "Shyam ko 4000 salary de di", "रामू की तनख्वाह 5000 दे दी"
+- QUERY_CUSTOMER_BALANCE: how much one customer owes. "Sharma ji ka kitna baaki hai?", "वर्मा जी का हिसाब बताओ"
+- QUERY_TOTAL_OUTSTANDING: total udhaar across all customers. "Kul kitna udhaar baaki hai?", "सबका मिला के कितना लेना है"
+- QUERY_LOW_STOCK: which items are running low. "Kya kya khatam ho raha hai?", "कौन सा सामान कम है"
+- QUERY_STOCK_LEVEL: stock of one product. "Aata kitna bacha hai?", "मैगी कितने पैकेट हैं"
+- QUERY_STAFF_DUE: how much a staff member is owed this month. "Ramu ka kitna banta hai?", "श्याम को कितनी तनख्वाह देनी है"
+- UNDO_LAST: undo the last entry. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो"
+- UNKNOWN: anything else, greetings, or too unclear to act on.
+
+Rules:
+- party_name / product_name: always Latin script. If it matches a known name below (even loosely, \
+by alias, honorific or Devanagari spelling), copy the known name exactly. Otherwise transliterate what was said.
+- amount: rupees as a number. quantity: count as a number. Convert Hindi number words to digits: \
+paanch sau = 500, dhai sau = 250, dedh sau = 150, dedh = 1.5, dhai = 2.5, sava = 1.25, saade teen = 3.5, \
+ek hazaar = 1000, dedh hazaar = 1500, do hazaar = 2000.
+- unit: packet, kg, litre or piece when said, else null.
+- date_hint: ISO date (YYYY-MM-DD) only when a past day is said ("kal" means yesterday, "parson" the day \
+before yesterday, "pichhle mahine" the first day of last month); null for today ("aaj") or no day.
+- Every field not used by the intent is null.
+"""
+
+
+def build_prompt(context: ShopContext) -> str:
+    known = {
+        "today": context.today.isoformat(),
+        "customers": context.customers,
+        "staff": context.staff,
+        "products": context.products,
+    }
+    return f"{INSTRUCTIONS}\nKnown names:\n{json.dumps(known, ensure_ascii=False)}"
+
+
+class GroqIntentParser:
+    "Any OpenAI-compatible chat endpoint; Groq by default."
+
+    def parse(self, transcript: str, context: ShopContext) -> ParsedCommand:
+        messages = [
+            {"role": "system", "content": build_prompt(context)},
+            {"role": "user", "content": transcript},
+        ]
+        strict = True
+        for attempt in (1, 2):
+            try:
+                raw = self._complete(messages, strict=strict)
+            except ProviderError as exc:
+                # Groq's constrained decoder sometimes gives up mid-word on a name; the same request without
+                # it, still validated by Pydantic below, goes through.
+                if exc.code != "LLM_JSON_FAILED" or attempt == 2:
+                    raise
+                strict = False
+                messages[0] = {"role": "system", "content": messages[0]["content"] + PLAIN_JSON_HINT}
+                continue
+            try:
+                return ParsedCommand.model_validate_json(raw)
+            except ValidationError as exc:
+                if attempt == 2:
+                    break
+                messages += [
+                    {"role": "assistant", "content": raw},
+                    {"role": "user", "content": f"That JSON is invalid: {exc}. Reply with corrected JSON only."},
+                ]
+        return ParsedCommand(intent=Intent.UNKNOWN)
+
+    def _complete(self, messages: list[dict], strict: bool = True) -> str:
+        if not settings.LLM_API_KEY:
+            raise ProviderError("LLM_NOT_CONFIGURED", "LLM_API_KEY is empty")
+        payload = {
+            "model": settings.LLM_MODEL,
+            "messages": messages,
+            "temperature": 0,
+            "reasoning_effort": settings.LLM_REASONING_EFFORT,
+            "include_reasoning": False,
+        }
+        if strict:
+            payload["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {"name": "parsed_command", "strict": True, "schema": RESPONSE_SCHEMA},
+            }
+        for attempt in (1, 2):
+            try:
+                response = httpx.post(
+                    f"{settings.LLM_BASE_URL}/chat/completions",
+                    headers={"Authorization": f"Bearer {settings.LLM_API_KEY}"},
+                    json=payload,
+                    timeout=httpx.Timeout(connect=5.0, read=20.0, write=10.0, pool=5.0),
+                )
+            except httpx.HTTPError as exc:
+                raise ProviderError("LLM_NETWORK", type(exc).__name__) from exc
+            # Groq's free tier allows 8,000 tokens a minute (~6 commands); one short wait rides out a burst.
+            if response.status_code != 429 or attempt == 2:
+                break
+            time.sleep(min(float(response.headers.get("retry-after") or 5), MAX_RATE_LIMIT_WAIT))
+        if response.status_code == 400 and "json_validate_failed" in response.text:
+            raise ProviderError("LLM_JSON_FAILED", response.text[:200])
+        if response.status_code != 200:
+            raise ProviderError(f"LLM_HTTP_{response.status_code}", response.text[:200])
+        try:
+            return response.json()["choices"][0]["message"]["content"] or ""
+        except (ValueError, KeyError, IndexError) as exc:
+            raise ProviderError("LLM_BAD_RESPONSE") from exc
+
+
+class FakeIntentParser:
+    "Returns `result` (set by tests) for any transcript."
+
+    result = ParsedCommand(intent=Intent.UNKNOWN)
+
+    def parse(self, transcript: str, context: ShopContext) -> ParsedCommand:
+        return self.result
+
+
+def get_intent_parser() -> IntentParser:
+    return {"groq": GroqIntentParser, "fake": FakeIntentParser}[settings.LLM_PROVIDER]()

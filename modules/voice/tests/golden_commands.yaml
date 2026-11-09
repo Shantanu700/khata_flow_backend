@@ -1,0 +1,81 @@
+# Synthetic transcripts in the shapes Prisma returns (format=transcribe: Hindi in Devanagari, digits for
+# numbers) plus romanised Hinglish. Phrasings deliberately differ from the prompt's examples.
+# Run with scripts/eval_intents.py; not part of CI.
+today: "2026-11-09"
+context:
+  customers: ["Sharma ji", "Verma ji", "Gupta aunty", "Mishra ji"]
+  staff: ["Ramu", "Shyam"]
+  products: ["Aashirvaad Aata 5kg", "Amul Butter 100g", "Maggi", "Tata Salt", "Fortune Oil 1L", "Parle-G"]
+cases:
+  - text: "Sharma ji ka paanch sau udhaar likh do"
+    expect: {intent: ADD_CREDIT, party_name: Sharma ji, amount: 500}
+  - text: "शर्मा जी का 500 उधार लिख दो"
+    expect: {intent: ADD_CREDIT, party_name: Sharma ji, amount: 500}
+  - text: "Gupta aunty ne dhai sau ka saman udhaar liya"
+    expect: {intent: ADD_CREDIT, party_name: Gupta aunty, amount: 250}
+  - text: "वर्मा जी के नाम 1200 लिख दो"
+    expect: {intent: ADD_CREDIT, party_name: Verma ji, amount: 1200}
+  - text: "Varma ji ka sava sau udhaar"
+    expect: {intent: ADD_CREDIT, party_name: Verma ji, amount: 125}
+  - text: "Pandey ji ka 300 udhaar likho"
+    expect: {intent: ADD_CREDIT, party_name: Pandey ji, amount: 300}
+  - text: "arre wo Sharma ji ne kal ke 200 de diye"
+    expect: {intent: RECORD_PAYMENT, party_name: Sharma ji, amount: 200, date_hint: "2026-11-08"}
+  - text: "मिश्रा जी से डेढ़ हज़ार मिल गए"
+    expect: {intent: RECORD_PAYMENT, party_name: Mishra ji, amount: 1500}
+  - text: "Verma ji ne 700 jama kar diye"
+    expect: {intent: RECORD_PAYMENT, party_name: Verma ji, amount: 700}
+  - text: "Aashirvaad aata ke 20 packet aaye hain"
+    expect: {intent: STOCK_IN, product_name: Aashirvaad Aata 5kg, quantity: 20}
+  - text: "मैगी के पाँच पैकेट आए"
+    expect: {intent: STOCK_IN, product_name: Maggi, quantity: 5}
+  - text: "Tata namak das packet add karo"
+    expect: {intent: STOCK_IN, product_name: Tata Salt, quantity: 10}
+  - text: "Parle-G ke 12 packet bik gaye"
+    expect: {intent: STOCK_OUT, product_name: Parle-G, quantity: 12}
+  - text: "फॉर्च्यून तेल के दो पैकेट बेचे"
+    expect: {intent: STOCK_OUT, product_name: Fortune Oil 1L, quantity: 2}
+  - text: "Amul butter teen nikle"
+    expect: {intent: STOCK_OUT, product_name: Amul Butter 100g, quantity: 3}
+  - text: "Ramu aa gaya aaj"
+    expect: {intent: MARK_ATTENDANCE, party_name: Ramu}
+  - text: "आज श्याम आया है"
+    expect: {intent: MARK_ATTENDANCE, party_name: Shyam}
+  - text: "Ramu kal aaya tha, haaziri laga do"
+    expect: {intent: MARK_ATTENDANCE, party_name: Ramu, date_hint: "2026-11-08"}
+  - text: "Ramu ko paanch sau advance diya"
+    expect: {intent: STAFF_ADVANCE, party_name: Ramu, amount: 500}
+  - text: "श्याम ने हज़ार रुपये एडवांस लिए"
+    expect: {intent: STAFF_ADVANCE, party_name: Shyam, amount: 1000}
+  - text: "Shyam ki 4000 tankhwah de di"
+    expect: {intent: SALARY_PAID, party_name: Shyam, amount: 4000}
+  - text: "रामू को 5000 सैलरी दी"
+    expect: {intent: SALARY_PAID, party_name: Ramu, amount: 5000}
+  - text: "Sharma ji ka hisaab kitna hua?"
+    expect: {intent: QUERY_CUSTOMER_BALANCE, party_name: Sharma ji}
+  - text: "गुप्ता आंटी का कितना बकाया है"
+    expect: {intent: QUERY_CUSTOMER_BALANCE, party_name: Gupta aunty}
+  - text: "total kitna paisa udhaar mein phansa hai"
+    expect: {intent: QUERY_TOTAL_OUTSTANDING}
+  - text: "सबका मिला के कितना पैसा लेना है"
+    expect: {intent: QUERY_TOTAL_OUTSTANDING}
+  - text: "kaun kaun si cheez mangwani padegi"
+    expect: {intent: QUERY_LOW_STOCK}
+  - text: "कौन सा सामान कम है दुकान में"
+    expect: {intent: QUERY_LOW_STOCK}
+  - text: "aate ke kitne packet hain"
+    expect: {intent: QUERY_STOCK_LEVEL, product_name: Aashirvaad Aata 5kg}
+  - text: "मैगी का स्टॉक कितना है"
+    expect: {intent: QUERY_STOCK_LEVEL, product_name: Maggi}
+  - text: "Ramu ka is mahine kitna banta hai?"
+    expect: {intent: QUERY_STAFF_DUE, party_name: Ramu}
+  - text: "श्याम की इस महीने की पगार कितनी बनी"
+    expect: {intent: QUERY_STAFF_DUE, party_name: Shyam}
+  - text: "abhi wala galat ho gaya, hata do"
+    expect: {intent: UNDO_LAST}
+  - text: "पिछली एंट्री गलत है, उसे मिटा दो"
+    expect: {intent: UNDO_LAST}
+  - text: "Namaste, kaise ho?"
+    expect: {intent: UNKNOWN}
+  - text: "kal baarish hogi kya"
+    expect: {intent: UNKNOWN}
