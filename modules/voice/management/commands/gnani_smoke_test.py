@@ -4,6 +4,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from modules.shops.choices import voice_language
 from modules.voice.audio import normalise
 from modules.voice.providers import ProviderError
 from modules.voice.providers.gnani import GnaniPrismaSTT, GnaniTimbreTTS
@@ -31,7 +32,7 @@ class Command(BaseCommand):
         try:
             for name, text in {"sentence": SENTENCE, **RUPEE_VARIANTS}.items():
                 start = time.perf_counter()
-                wav = tts.synthesize(text, settings.GNANI_TTS_LANGUAGE)
+                wav = tts.synthesize(text, voice_language(language))
                 path = out / f"tts_{name}.wav"
                 path.write_bytes(wav)
                 self.stdout.write(f"Timbre {self._ms(start)} ms -> {path} ({len(wav)} bytes)")
@@ -41,7 +42,7 @@ class Command(BaseCommand):
             clip, seconds = normalise(source)
             self.stdout.write(f"normalise {self._ms(start)} ms ({seconds:.1f}s of audio)")
             start = time.perf_counter()
-            transcript = stt.transcribe(clip, "audio/wav", language, keyterms=KEYTERMS)
+            transcript = stt.transcribe(clip, "audio/wav", voice_language(language), keyterms=KEYTERMS)
             self.stdout.write(f"Prisma {self._ms(start)} ms -> {transcript.text!r} ({transcript.language})")
         except (ProviderError, OSError) as exc:
             raise CommandError(f"Smoke test failed: {exc}") from exc

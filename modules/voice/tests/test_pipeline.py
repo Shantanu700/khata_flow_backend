@@ -53,7 +53,7 @@ def test_add_credit_writes_entry_and_speaks(api, llm, sharma):
     assert body["stage"] == CommandStatus.COMMITTED
     assert body["response_text"] == "Theek hai. Sharma ji ka ₹500 udhaar likh diya. Ab kul baaki ₹500 hai."
     assert body["entry"]["kind"] == EntryKind.CREDIT_GIVEN and body["entry"]["amount"] == 500
-    assert body["response_audio_url"].endswith(".wav")
+    assert body["response_audio_url"].endswith(f"/api/v1/voice/commands/{body['id']}/audio/")
     assert set(body["timings_ms"]) == {"intent", "resolve", "commit", "tts"}
 
 

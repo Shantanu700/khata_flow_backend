@@ -148,7 +148,7 @@ class SummaryAV(BaseAV):
         customers = ledger.with_balance(shop.parties.filter(kind=PartyKind.CUSTOMER))
         recent = (
             Entry.objects.filter(shop=shop)
-            .exclude(kind__in=STOCK_KINDS)
+            .exclude(kind__in=(*STOCK_KINDS, EntryKind.ATTENDANCE))
             .select_related("party", "product", "reversal", "voice_command")
             .order_by("-id")[:6]
         )

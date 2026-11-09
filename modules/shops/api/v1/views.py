@@ -1,6 +1,7 @@
 from datetime import date
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
+from django.db import transaction
 from django.db.models import F, Max, Q, TextField
 from django.db.models.functions import Cast
 from django.utils import timezone
@@ -25,10 +26,12 @@ from modules.shops.api.v1.serializers import (
     PartySerializer,
     ProductFilterSerializer,
     ProductSerializer,
+    RegisterSerializer,
     SessionSerializer,
     ShopSerializer,
     StaffMonthSerializer,
 )
+from modules.shops.models import Shop
 from modules.shops.services import shop_for
 
 # Updates are PUT with the full object; PATCH is not offered anywhere.
@@ -182,6 +185,26 @@ class LoginAV(BaseAV):
         if user is None:
             raise AuthenticationFailed("Wrong username or password.", code="invalid_credentials")
         token, _ = Token.objects.get_or_create(user=user)
+        return _session(user, token.key)
+
+
+class RegisterAV(BaseAV):
+    "Open a new shop: creates the owner, the shop and the API token in one go."
+
+    authentication = False
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "login"
+
+    @extend_schema(request=RegisterSerializer)
+    @extend_response(SessionSerializer())
+    def post(self, request):
+        body = RegisterSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        data = body.validated_data
+        with transaction.atomic():
+            user = get_user_model().objects.create_user(username=data["username"], password=data["password"])
+            Shop.objects.create(owner=user, name=data["shop_name"], preferred_language=data["preferred_language"])
+            token = Token.objects.create(user=user)
         return _session(user, token.key)
 
 

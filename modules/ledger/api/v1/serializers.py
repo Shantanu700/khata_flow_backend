@@ -99,4 +99,4 @@ class SummarySerializer(serializers.Serializer):
     week_credit = serializers.DecimalField(max_digits=14, decimal_places=2)
     week_payment = serializers.DecimalField(max_digits=14, decimal_places=2)
     entry_count_14d = serializers.IntegerField()
-    recent = EntrySerializer(many=True, help_text="The 6 latest entries that aren't stock movements.")
+    recent = EntrySerializer(many=True, help_text="The 6 latest money entries (no stock movements or attendance).")

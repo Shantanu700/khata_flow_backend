@@ -5,10 +5,11 @@ from rest_framework import serializers
 from base.model import ModelBase
 from base.serializers import BaseSerializer
 from modules.ledger.api.v1.serializers import EntrySerializer
+from modules.shops.choices import SHOP_LANGUAGES
 from modules.voice.models import VoiceCommand
 
-# Prisma's supported language codes (docs.gnani.ai/api/STT/languages).
-LANGUAGES = ["bn-IN", "en-IN", "gu-IN", "hi-IN", "kn-IN", "ml-IN", "mr-IN", "pa-IN", "ta-IN", "te-IN"]
+# Prisma and Timbre's language codes (docs.gnani.ai/api/STT/languages), plus hi-Latn: Hindi voice, Hinglish replies.
+LANGUAGES = SHOP_LANGUAGES
 
 
 class AudioCommandSerializer(serializers.Serializer):
@@ -49,10 +50,11 @@ class VoiceCommandSerializer(BaseSerializer):
         read_only_fields = fields
 
     def get_response_audio_url(self, command: VoiceCommand) -> str | None:
+        "The authenticated reply-audio endpoint (never a public media URL)."
         if not command.response_audio:
             return None
         request = self.context.get("request")
-        url = command.response_audio.url
+        url = f"/api/v1/voice/commands/{command.pk}/audio/"
         return request.build_absolute_uri(url) if request else url
 
     @extend_schema_field(EntrySerializer(allow_null=True))

@@ -101,7 +101,7 @@ class Command(BaseCommand):
             user.set_password(password)
             user.save()
         token, token_created = Token.objects.get_or_create(user=user)
-        shop, _ = Shop.objects.get_or_create(owner=user, defaults={"name": merchant["shop"], "preferred_language": "hi-IN"})
+        shop, _ = Shop.objects.get_or_create(owner=user, defaults={"name": merchant["shop"], "preferred_language": "en-IN"})
 
         for name, aliases in merchant["customers"].items():
             Party.objects.get_or_create(shop=shop, name=name, defaults={"aliases": aliases})

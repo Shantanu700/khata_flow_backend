@@ -10,7 +10,7 @@ from django.utils import timezone
 from base.exceptions import DomainError
 from modules.ledger import services as ledger
 from modules.ledger.choices import EntryKind
-from modules.shops.choices import PartyKind
+from modules.shops.choices import SHOP_LANGUAGES, PartyKind, voice_language
 from modules.shops.models import Party, Product
 from modules.voice import responses
 from modules.voice.audio import normalise
@@ -122,7 +122,7 @@ def _party(command: VoiceCommand, parsed: ParsedCommand, answers: dict) -> Party
         return None
     if kind == PartyKind.CUSTOMER and parsed.intent != Intent.QUERY_CUSTOMER_BALANCE:
         question = responses.not_found(parsed.party_name, offer_create=True)
-        _ask(command, "create_party", question, [(YES, "Haan"), (NO, "Nahi")], answers)
+        _ask(command, "create_party", question, list(zip((YES, NO), responses.yes_no())), answers)
         return None
     raise Stop(responses.not_found(parsed.party_name, offer_create=False), "NOT_FOUND")
 
@@ -148,7 +148,7 @@ def _check_numbers(command: VoiceCommand, parsed: ParsedCommand, answers: dict) 
         if parsed.amount is None or parsed.amount <= 0:
             raise Stop(responses.spoken_error("MISSING_AMOUNT"), "MISSING_AMOUNT")
         if parsed.amount > settings.LEDGER_AMOUNT_CAP and not answers.get("amount_confirmed"):
-            _ask(command, "confirm_amount", responses.confirm_amount(parsed.amount), [(YES, "Haan"), (NO, "Nahi")], answers)
+            _ask(command, "confirm_amount", responses.confirm_amount(parsed.amount), list(zip((YES, NO), responses.yes_no())), answers)
             return False
     if parsed.intent in QUANTITY_INTENTS and (parsed.quantity is None or parsed.quantity <= 0):
         raise Stop(responses.spoken_error("MISSING_QUANTITY"), "MISSING_QUANTITY")
@@ -201,7 +201,7 @@ def _answer(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, p
     if intent == Intent.UNDO_LAST:
         command.stage = CommandStatus.COMMITTED
         return responses.undone(ledger.undo_last(shop, voice_command=command))
-    raise Stop(responses.FALLBACK, "UNKNOWN_INTENT")
+    raise Stop(responses.fallback(), "UNKNOWN_INTENT")
 
 
 def _resolve_and_act(command: VoiceCommand, parsed: ParsedCommand, answers: dict, timings: Timings) -> None:
@@ -229,6 +229,15 @@ def _fail(command: VoiceCommand, code: str, text: str, detail: str = "") -> None
 
 
 def _run(command: VoiceCommand, timings: Timings, stages) -> None:
+    # Replies are written in the command's language (responses.language).
+    reset = responses.language.set(command.language if command.language in SHOP_LANGUAGES else responses.BASE)
+    try:
+        _stages(command, timings, stages)
+    finally:
+        responses.language.reset(reset)
+
+
+def _stages(command: VoiceCommand, timings: Timings, stages) -> None:
     try:
         stages()
     except Stop as stop:
@@ -243,7 +252,7 @@ def _run(command: VoiceCommand, timings: Timings, stages) -> None:
         _fail(command, exc.code, responses.spoken_error(exc.code), exc.message)
     except Exception as exc:
         log.exception("voice command %s crashed", command.pk)
-        _fail(command, "INTERNAL_ERROR", responses.FALLBACK, type(exc).__name__)
+        _fail(command, "INTERNAL_ERROR", responses.fallback(), type(exc).__name__)
     _speak(command, timings)
     command.save()
 
@@ -253,7 +262,7 @@ def _speak(command: VoiceCommand, timings: Timings) -> None:
         return
     try:
         with timings("tts"):
-            audio = get_tts().synthesize(responses.for_speech(command.response_text), settings.GNANI_TTS_LANGUAGE)
+            audio = get_tts().synthesize(responses.for_speech(command.response_text), voice_language(command.language))
     except ProviderError as exc:
         log.warning("tts for command %s failed: %s", command.pk, exc)
         command.error_detail = f"{command.error_detail} tts:{exc.code}".strip()
@@ -272,7 +281,7 @@ def handle_command(command: VoiceCommand) -> VoiceCommand:
                 wav, _ = normalise(command.audio.read())
                 command.audio.close()
             with timings("stt"):
-                transcript = get_stt().transcribe(wav, "audio/wav", command.language, keyterms=_keyterms(command))
+                transcript = get_stt().transcribe(wav, "audio/wav", voice_language(command.language), keyterms=_keyterms(command))
             command.transcript = transcript.text
             command.stt_confidence = transcript.confidence
             _set_stage(command, CommandStatus.TRANSCRIBED)
@@ -283,7 +292,7 @@ def handle_command(command: VoiceCommand) -> VoiceCommand:
         command.parsed = parsed.model_dump(mode="json")
         _set_stage(command, CommandStatus.PARSED)
         if parsed.intent == Intent.UNKNOWN:
-            raise Stop(responses.FALLBACK, "UNKNOWN_INTENT")
+            raise Stop(responses.fallback(), "UNKNOWN_INTENT")
         _resolve_and_act(command, parsed, {}, timings)
 
     _run(command, timings, stages)

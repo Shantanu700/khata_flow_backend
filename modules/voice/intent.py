@@ -64,8 +64,10 @@ RESPONSE_SCHEMA = {
 }
 
 INSTRUCTIONS = """\
-You turn one spoken command from an Indian kirana shopkeeper into JSON. The command is Hindi, \
-Hinglish or English; speech-to-text may write Hindi words in Devanagari and numbers as digits or ₹.
+You turn one spoken command from an Indian kirana shopkeeper into JSON. The command is in Hindi, \
+Hinglish, English, Bengali, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Tamil or Telugu, often mixed with \
+English words; speech-to-text writes each language in its own script and numbers as digits (sometimes native \
+digits such as ৫০০ or ௫௦௦) or ₹. The intents and rules below are the same whatever the language.
 Speech-to-text also mishears sound-alike words; read the command as a shopkeeper meant it \
 (e.g. "आता कितना बच्चा है" is "आटा कितना बचा है", a stock question about aata).
 
@@ -85,10 +87,17 @@ Intents:
 - UNDO_LAST: undo the last entry. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो"
 - UNKNOWN: anything else, greetings, or too unclear to act on.
 
+The same intents in other languages, for example: "শর্মা জির ৫০০ টাকা বাকি লিখে দাও" (ADD_CREDIT, Bengali), \
+"ஷர்மா ஜிக்கு ஐநூறு ரூபாய் கடன் எழுது" (ADD_CREDIT, Tamil), "ವರ್ಮಾ ಜೀ 200 ರೂಪಾಯಿ ಕೊಟ್ಟರು" (RECORD_PAYMENT, Kannada), \
+"రాము ఈరోజు వచ్చాడు" (MARK_ATTENDANCE, Telugu), "मॅगीचे ५ पाकीट आले" (STOCK_IN, Marathi), \
+"ਸ਼ਿਆਮ ਨੂੰ 500 ਐਡਵਾਂਸ ਦਿੱਤਾ" (STAFF_ADVANCE, Punjabi), "આટો કેટલો બચ્યો છે?" (QUERY_STOCK_LEVEL, Gujarati), \
+"ആരുടെയൊക്കെ കടം ബാക്കിയുണ്ട്?" (QUERY_TOTAL_OUTSTANDING, Malayalam).
+
 Rules:
 - party_name / product_name: always Latin script. If it matches a known name below (even loosely, \
 by alias, honorific or Devanagari spelling), copy the known name exactly. Otherwise transliterate what was said.
-- amount: rupees as a number. quantity: count as a number. Convert Hindi number words to digits: \
+- amount: rupees as a number. quantity: count as a number. Native digits become ASCII digits, and number \
+words in any of the languages become digits (ஐநூறு = 500, পাঁচশো = 500, ಸಾವಿರ = 1000). Hindi number words: \
 paanch sau = 500, dhai sau = 250, dedh sau = 150, dedh = 1.5, dhai = 2.5, sava = 1.25, saade teen = 3.5, \
 ek hazaar = 1000, dedh hazaar = 1500, do hazaar = 2000.
 - unit: packet, kg, litre or piece when said, else null.

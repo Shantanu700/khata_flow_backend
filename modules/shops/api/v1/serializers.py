@@ -3,6 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from base.model import ModelBase
@@ -31,7 +32,17 @@ def _aliases(value: list) -> list[str]:
     return [alias.strip().lower() for alias in value if alias.strip()]
 
 
+class StaffDueFieldsSerializer(serializers.Serializer):
+    days_present = serializers.IntegerField()
+    days_in_month = serializers.IntegerField()
+    earned = serializers.DecimalField(max_digits=14, decimal_places=2)
+    advances = serializers.DecimalField(max_digits=14, decimal_places=2)
+    salary_paid = serializers.DecimalField(max_digits=14, decimal_places=2)
+    due = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
 class PartySerializer(ShopScopedNameMixin, BaseSerializer):
+    aliases = serializers.ListField(child=serializers.CharField(max_length=100), required=False)
     balance = serializers.SerializerMethodField()
     staff_due = serializers.SerializerMethodField()
     present_today = serializers.SerializerMethodField()
@@ -55,6 +66,7 @@ class PartySerializer(ShopScopedNameMixin, BaseSerializer):
         balance = getattr(party, "balance", None)
         return ledger.customer_balance(party) if balance is None else balance
 
+    @extend_schema_field(StaffDueFieldsSerializer(allow_null=True))
     def get_staff_due(self, party: Party) -> dict | None:
         if party.kind != PartyKind.STAFF:
             return None
@@ -74,6 +86,7 @@ class PartySerializer(ShopScopedNameMixin, BaseSerializer):
 
 
 class ProductSerializer(ShopScopedNameMixin, BaseSerializer):
+    aliases = serializers.ListField(child=serializers.CharField(max_length=100), required=False)
     stock_level = serializers.SerializerMethodField()
     is_low = serializers.SerializerMethodField()
 
@@ -149,3 +162,36 @@ class MeSerializer(serializers.Serializer):
 
 class SessionSerializer(MeSerializer):
     token = serializers.CharField(read_only=True)
+
+
+class RegisterSerializer(serializers.Serializer):
+    "A new owner and their shop. The password follows Django's password rules."
+
+    shop_name = serializers.CharField(max_length=200)
+    username = serializers.RegexField(r"^[\w.@+-]+$", max_length=150)
+    password = serializers.CharField(max_length=128, style={"input_type": "password"})
+    preferred_language = serializers.ChoiceField(choices=SHOP_LANGUAGES, default="en-IN")
+
+    def validate_shop_name(self, value: str) -> str:
+        value = " ".join(value.split())
+        if not value:
+            raise serializers.ValidationError("Enter the shop's name.")
+        return value
+
+    def validate_username(self, value: str) -> str:
+        from django.contrib.auth import get_user_model
+
+        if get_user_model().objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("That username is taken.")
+        return value
+
+    def validate(self, data: dict) -> dict:
+        from django.contrib.auth import get_user_model
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError
+
+        try:
+            validate_password(data["password"], get_user_model()(username=data["username"]))
+        except ValidationError as exc:
+            raise serializers.ValidationError({"password": list(exc.messages)}) from exc
+        return data

@@ -13,7 +13,7 @@ class Shop(ModelBase):
     # One owner per shop, so request.user.shop scopes every query.
     owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="shop")
     name = models.CharField(max_length=200)
-    preferred_language = models.CharField(max_length=16, default="hi-IN")
+    preferred_language = models.CharField(max_length=16, default="en-IN")
 
     def __str__(self) -> str:
         return self.name

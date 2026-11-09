@@ -55,6 +55,7 @@ LOCAL_APPS = [
     "modules.shops",
     "modules.ledger",
     "modules.voice",
+    "modules.i18n",
 ]
 
 # runsslserver: the dev server over HTTPS (docker/nonprod).
@@ -163,7 +164,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-DEFAULT_LANGUAGE = os.environ.get("DEFAULT_LANGUAGE", "hi-IN")
+DEFAULT_LANGUAGE = os.environ.get("DEFAULT_LANGUAGE", "en-IN")
 
 STT_PROVIDER = os.environ.get("STT_PROVIDER", "gnani")
 TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "gnani")

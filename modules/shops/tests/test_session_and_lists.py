@@ -27,7 +27,7 @@ def test_login_returns_token_and_shop_and_logout_revokes_it(shop):
     client = APIClient()
     assert client.post("/api/v1/auth/login/", {"username": "owner", "password": "wrong"}).status_code == 401
     body = client.post("/api/v1/auth/login/", {"username": "owner", "password": "test-pass-123"}).json()
-    assert body["shop"] == {"name": "Test Kirana", "preferred_language": "hi-IN"}
+    assert body["shop"] == {"name": "Test Kirana", "preferred_language": "hi-Latn"}
     client.credentials(HTTP_AUTHORIZATION=f"Token {body['token']}")
     assert client.get("/api/v1/me/").json()["username"] == "owner"
     assert client.post("/api/v1/auth/logout/").status_code == 201
@@ -85,3 +85,16 @@ def test_products_search_low_and_order(api, shop, aata, maggi):
     assert names(api.get("/api/v1/products/?low=true")) == ["Maggi", "Tata Salt"]
     assert names(api.get("/api/v1/products/?low=false")) == ["Aashirvaad Aata 5kg"]
     assert names(api.get("/api/v1/products/?ordering=-stock_level")) == ["Aashirvaad Aata 5kg", "Maggi", "Tata Salt"]
+
+
+def test_register_opens_a_shop_and_signs_in(db):
+    client = APIClient()
+    body = {"shop_name": "  Naya   Kirana ", "username": "naya_kirana", "password": "kirana-pass-2026", "preferred_language": "ta-IN"}
+    session = client.post("/api/v1/auth/register/", body).json()
+    assert session["shop"] == {"name": "Naya Kirana", "preferred_language": "ta-IN"}
+    client.credentials(HTTP_AUTHORIZATION=f"Token {session['token']}")
+    assert client.get("/api/v1/parties/").json()["count"] == 0
+    again = APIClient().post("/api/v1/auth/register/", {**body, "username": "NAYA_kirana"})
+    assert again.status_code == 400 and "username" in again.json()["error"]["details"]
+    weak = APIClient().post("/api/v1/auth/register/", {**body, "username": "other", "password": "1234"})
+    assert weak.status_code == 400 and "password" in weak.json()["error"]["details"]
