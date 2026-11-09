@@ -106,6 +106,37 @@ def staff_due(party: Party, month: date) -> StaffDue:
     )
 
 
+def totals(
+    shop: Shop, kinds, start: date | None, end: date, *, party: Party | None = None, product: Product | None = None
+) -> dict[str, Decimal]:
+    "Sum of amount (money kinds) or quantity (stock kinds) per kind from start (None: the beginning) to end."
+    entries = live_entries().filter(shop=shop, kind__in=kinds, occurred_on__lte=end)
+    if start:
+        entries = entries.filter(occurred_on__gte=start)
+    if party:
+        entries = entries.filter(party=party)
+    if product:
+        entries = entries.filter(product=product)
+    sums = {
+        kind: Coalesce(Sum("quantity" if kind in STOCK_KINDS else "amount", filter=Q(kind=kind)), Value(ZERO), output_field=MONEY)
+        for kind in kinds
+    }
+    return entries.aggregate(**sums)
+
+
+def stock_moves(shop: Shop, start: date | None, end: date) -> list[Product]:
+    "Products that moved in the period, annotated with moved_in and moved_out."
+    live = Q(entries__reversal__isnull=True, entries__occurred_on__lte=end)
+    if start:
+        live &= Q(entries__occurred_on__gte=start)
+    moves = {
+        f"moved_{name}": Coalesce(Sum("entries__quantity", filter=live & Q(entries__kind=kind)), Value(ZERO), output_field=MONEY)
+        for name, kind in (("in", EntryKind.STOCK_IN), ("out", EntryKind.STOCK_OUT))
+    }
+    products = shop.products.annotate(**moves).filter(Q(moved_in__gt=0) | Q(moved_out__gt=0))
+    return list(products.order_by("name"))
+
+
 def month_bounds(month: date) -> tuple[date, date]:
     return month.replace(day=1), month.replace(day=calendar.monthrange(month.year, month.month)[1])
 

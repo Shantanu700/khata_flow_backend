@@ -9,13 +9,13 @@ import httpx
 from django.conf import settings
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from modules.voice.choices import Intent
+from modules.voice.choices import Intent, Period
 from modules.voice.providers.base import ProviderError
 
 MAX_RATE_LIMIT_WAIT = 10.0
 PLAIN_JSON_HINT = (
     "\nReply with only one JSON object with exactly these keys: intent, party_name, product_name, amount, "
-    "quantity, unit, date_hint. Use null for unused keys. No other text."
+    "quantity, unit, date_hint, period. Use null for unused keys. No other text."
 )
 
 
@@ -29,6 +29,7 @@ class ParsedCommand(BaseModel):
     quantity: Decimal | None = None
     unit: str | None = None
     date_hint: str | None = None
+    period: Period | None = None
 
 
 @dataclass
@@ -58,6 +59,7 @@ RESPONSE_SCHEMA = {
         "quantity": _nullable("number"),
         "unit": _nullable("string"),
         "date_hint": _nullable("string"),
+        "period": {"type": ["string", "null"], "enum": [*(p.value for p in Period), None]},
     },
     "required": list(ParsedCommand.model_fields),
     "additionalProperties": False,
@@ -85,13 +87,24 @@ Intents:
 - QUERY_STOCK_LEVEL: stock of one product. "Aata kitna bacha hai?", "मैगी कितने पैकेट हैं"
 - QUERY_STAFF_DUE: one staff member's month: days present, what they earned, what they were given and what \
 is still owed (this month unless another month is said). "Ramu ka kitna banta hai?", "श्याम को कितनी तनख्वाह देनी है", \
-"Shyam ko pichhle mahine kitne paise diye?"
+"Ramu ka pichhle mahine ka hisaab"
 - QUERY_STAFF_LIST: how many people work in the shop, or who they are. "Meri dukaan mein kitne staff hain?", \
 "दुकान में कितने लोग काम करते हैं", "kaun kaun kaam karta hai yahan", "kitne naukar hain"
 - QUERY_ATTENDANCE_TODAY: which staff came (or did not come) to work today. "Aaj kaun kaun aaya?", \
 "आज कौन नहीं आया", "aaj sab aaye kya"
 - QUERY_CUSTOMER_COUNT: how many customers the shop has, or how many owe money. "Mere kitne customer hain?", \
 "कितने ग्राहकों का खाता है", "kitne logon ka hisaab chalta hai"
+- QUERY_DEBTOR_LIST: who owes money, or who owes the most. "Kis kis ka udhaar baaki hai?", "सबसे ज़्यादा उधार किसका है"
+- QUERY_STOCK_LIST: what items the shop has in stock, or how many. "Stock mein kya kya saamaan hai?", \
+"स्टॉक में क्या क्या सामान है", "dukaan mein kitni cheezein hain"
+- QUERY_CREDIT_GIVEN: how much udhaar was given in a period, in all or to one customer. "Aaj kitna udhaar diya?", \
+"इस हफ्ते शर्मा जी को कितना उधार दिया"
+- QUERY_PAYMENTS_RECEIVED: how much money customers paid back in a period, in all or one customer. \
+"Aaj kitni vasooli hui?", "पिछले महीने वर्मा जी से कितने पैसे आए", "aaj kitna paisa aaya"
+- QUERY_STAFF_PAID: money given to staff (advance and salary) in a period, in all or to one person. \
+"Is mahine staff ko kitna diya?", "Shyam ko pichhle mahine kitne paise diye?"
+- QUERY_STOCK_MOVEMENT: how much stock came in or went out (was sold) in a period, of all items or one. \
+"Aaj kitni Maggi biki?", "इस हफ्ते क्या क्या माल आया", "kal kitna saamaan bika"
 - UNDO_LAST: undo the last entry. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो"
 - UNKNOWN: greetings, or a request none of the intents above can serve even loosely.
 
@@ -105,7 +118,8 @@ The same intents in other languages, for example: "শর্মা জির ৫
 "ஷர்மா ஜிக்கு ஐநூறு ரூபாய் கடன் எழுது" (ADD_CREDIT, Tamil), "ವರ್ಮಾ ಜೀ 200 ರೂಪಾಯಿ ಕೊಟ್ಟರು" (RECORD_PAYMENT, Kannada), \
 "రాము ఈరోజు వచ్చాడు" (MARK_ATTENDANCE, Telugu), "मॅगीचे ५ पाकीट आले" (STOCK_IN, Marathi), \
 "ਸ਼ਿਆਮ ਨੂੰ 500 ਐਡਵਾਂਸ ਦਿੱਤਾ" (STAFF_ADVANCE, Punjabi), "આટો કેટલો બચ્યો છે?" (QUERY_STOCK_LEVEL, Gujarati), \
-"ആരുടെയൊക്കെ കടം ബാക്കിയുണ്ട്?" (QUERY_TOTAL_OUTSTANDING, Malayalam).
+"ആരുടെയൊക്കെ കടം ബാക്കിയുണ്ട്?" (QUERY_DEBTOR_LIST, Malayalam).
+QUERY_TOTAL_OUTSTANDING is what is still owed now; QUERY_CREDIT_GIVEN is what was given in a period.
 
 Rules:
 - party_name / product_name: always Latin script. If it matches a known name below (even loosely, \
@@ -117,6 +131,9 @@ ek hazaar = 1000, dedh hazaar = 1500, do hazaar = 2000.
 - unit: packet, kg, litre or piece when said, else null.
 - date_hint: ISO date (YYYY-MM-DD) only when a past day is said ("kal" means yesterday, "parson" the day \
 before yesterday, "pichhle mahine" the first day of last month); null for today ("aaj") or no day.
+- period: only for QUERY_CREDIT_GIVEN, QUERY_PAYMENTS_RECEIVED, QUERY_STAFF_PAID, QUERY_STOCK_MOVEMENT and \
+QUERY_STAFF_DUE (its month), and only when said: TODAY (aaj), YESTERDAY (kal), THIS_WEEK, LAST_WEEK, THIS_MONTH, LAST_MONTH, or ALL (ab tak, \
+kul milake, total). Those intents use period, never date_hint.
 - Every field not used by the intent is null.
 """
 

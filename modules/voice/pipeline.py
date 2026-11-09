@@ -14,7 +14,18 @@ from modules.shops.choices import SHOP_LANGUAGES, PartyKind, voice_language
 from modules.shops.models import Party, Product
 from modules.voice import responses
 from modules.voice.audio import normalise
-from modules.voice.choices import CUSTOMER_INTENTS, PRODUCT_INTENTS, STAFF_INTENTS, CommandStatus, InputMode, Intent
+from modules.voice.choices import (
+    CUSTOMER_INTENTS,
+    OPTIONAL_CUSTOMER_INTENTS,
+    OPTIONAL_PRODUCT_INTENTS,
+    OPTIONAL_STAFF_INTENTS,
+    PRODUCT_INTENTS,
+    STAFF_INTENTS,
+    CommandStatus,
+    InputMode,
+    Intent,
+    Period,
+)
 from modules.voice.intent import ParsedCommand, ShopContext, get_intent_parser
 from modules.voice.models import VoiceCommand
 from modules.voice.providers import ProviderError, get_stt, get_tts
@@ -104,7 +115,7 @@ def _ask(command: VoiceCommand, kind: str, question: str, options: list[tuple[st
 
 def _party(command: VoiceCommand, parsed: ParsedCommand, answers: dict) -> Party | None:
     "The resolved party, or None after asking the shopkeeper to clarify."
-    kind = PartyKind.STAFF if parsed.intent in STAFF_INTENTS else PartyKind.CUSTOMER
+    kind = PartyKind.STAFF if parsed.intent in STAFF_INTENTS | OPTIONAL_STAFF_INTENTS else PartyKind.CUSTOMER
     parties = command.shop.parties.filter(kind=kind, is_active=True)
     if "party_id" in answers:
         return parties.get(pk=answers["party_id"])
@@ -120,7 +131,7 @@ def _party(command: VoiceCommand, parsed: ParsedCommand, answers: dict) -> Party
         options = [(f"party:{p.pk}", p.name) for p in result.options]
         _ask(command, "choose", responses.choose([p.name for p in result.options]), options, answers)
         return None
-    if kind == PartyKind.CUSTOMER and parsed.intent != Intent.QUERY_CUSTOMER_BALANCE:
+    if kind == PartyKind.CUSTOMER and parsed.intent in WRITE_KINDS:
         question = responses.not_found(parsed.party_name, offer_create=True)
         _ask(command, "create_party", question, list(zip((YES, NO), responses.yes_no())), answers)
         return None
@@ -185,6 +196,29 @@ def _write(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, pr
     return responses.staff_paid(entry, ledger.staff_due(party, entry.occurred_on))
 
 
+PERIOD_KINDS = {
+    Intent.QUERY_CREDIT_GIVEN: (EntryKind.CREDIT_GIVEN,),
+    Intent.QUERY_PAYMENTS_RECEIVED: (EntryKind.PAYMENT_RECEIVED,),
+    Intent.QUERY_STAFF_PAID: (EntryKind.STAFF_ADVANCE, EntryKind.SALARY_PAID),
+    Intent.QUERY_STOCK_MOVEMENT: (EntryKind.STOCK_IN, EntryKind.STOCK_OUT),
+}
+
+
+def period_bounds(period: Period) -> tuple[date | None, date]:
+    today = timezone.localdate()
+    monday = today - timedelta(days=today.weekday())
+    first = today.replace(day=1)
+    return {
+        Period.TODAY: (today, today),
+        Period.YESTERDAY: (today - timedelta(days=1), today - timedelta(days=1)),
+        Period.THIS_WEEK: (monday, today),
+        Period.LAST_WEEK: (monday - timedelta(days=7), monday - timedelta(days=1)),
+        Period.THIS_MONTH: (first, today),
+        Period.LAST_MONTH: ledger.month_bounds(first - timedelta(days=1)),
+        Period.ALL: (None, today),
+    }[period]
+
+
 def _staff(shop) -> list[Party]:
     return list(shop.parties.filter(kind=PartyKind.STAFF, is_active=True).order_by("name"))
 
@@ -201,7 +235,7 @@ def _answer(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, p
     if intent == Intent.QUERY_STOCK_LEVEL:
         return responses.stock_level(product, ledger.stock_level(product))
     if intent == Intent.QUERY_STAFF_DUE:
-        month = _occurred_on(parsed)
+        month = (period_bounds(parsed.period)[0] if parsed.period else None) or _occurred_on(parsed)
         return responses.staff_due(party, ledger.staff_due(party, month), month)
     if intent == Intent.QUERY_STAFF_LIST:
         return responses.staff_list(_staff(shop))
@@ -213,6 +247,17 @@ def _answer(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, p
     if intent == Intent.QUERY_CUSTOMER_COUNT:
         customers = shop.parties.filter(kind=PartyKind.CUSTOMER, is_active=True).count()
         return responses.customer_count(customers, len(ledger.top_debtors(shop, limit=None)))
+    if intent == Intent.QUERY_DEBTOR_LIST:
+        return responses.debtor_list(ledger.top_debtors(shop, limit=None))
+    if intent == Intent.QUERY_STOCK_LIST:
+        return responses.stock_list(list(ledger.with_stock_level(shop.products.filter(is_active=True)).order_by("name")))
+    if intent in PERIOD_KINDS:
+        period = parsed.period or (Period.ALL if party else Period.TODAY)
+        start, end = period_bounds(period)
+        if intent == Intent.QUERY_STOCK_MOVEMENT and not product:
+            return responses.stock_moves(period, ledger.stock_moves(shop, start, end))
+        sums = ledger.totals(shop, PERIOD_KINDS[intent], start, end, party=party, product=product)
+        return responses.period_total(intent, period, sums, party, product)
     if intent == Intent.UNDO_LAST:
         command.stage = CommandStatus.COMMITTED
         return responses.undone(ledger.undo_last(shop, voice_command=command))
@@ -221,10 +266,13 @@ def _answer(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, p
 
 def _resolve_and_act(command: VoiceCommand, parsed: ParsedCommand, answers: dict, timings: Timings) -> None:
     with timings("resolve"):
-        party = _party(command, parsed, answers) if parsed.intent in CUSTOMER_INTENTS | STAFF_INTENTS else None
+        named = parsed.intent in CUSTOMER_INTENTS | STAFF_INTENTS
+        optional = parsed.intent in OPTIONAL_CUSTOMER_INTENTS | OPTIONAL_STAFF_INTENTS and parsed.party_name
+        party = _party(command, parsed, answers) if named or optional else None
         if command.stage == CommandStatus.NEEDS_CLARIFICATION:
             return
-        product = _product(command, parsed, answers) if parsed.intent in PRODUCT_INTENTS else None
+        optional = parsed.intent in OPTIONAL_PRODUCT_INTENTS and parsed.product_name
+        product = _product(command, parsed, answers) if parsed.intent in PRODUCT_INTENTS or optional else None
         if command.stage == CommandStatus.NEEDS_CLARIFICATION:
             return
         if not _check_numbers(command, parsed, answers):

@@ -166,6 +166,57 @@ def customer_count(customers: int, owing: int) -> str:
     return say("customers.owing" if owing else "customers.clear", count=customers, owing=owing)
 
 
+def _list(key: str, items: list[str], cap: int) -> str:
+    "Speaks the first `cap` items and only counts the rest, so a long list stays short to listen to."
+    text = say(key, count=len(items), items=join_names(items[:cap]))
+    return f"{text} {say('more', count=len(items) - cap)}" if len(items) > cap else text
+
+
+def debtor_list(debtors: list[Party]) -> str:
+    if not debtors:
+        return say("total.none")
+    return _list("debtors.some", [f"{p.name} {format_inr(p.balance)}" for p in debtors], cap=5)
+
+
+def stock_list(products: list[Product]) -> str:
+    if not products:
+        return say("stock_list.none")
+    return _list("stock_list.some", [f"{p.name} {qty(p.stock_level)} {unit(p)}" for p in products], cap=8)
+
+
+def period_total(intent, period, sums: dict, party: Party | None, product: Product | None) -> str:
+    when = say(f"period.{period}")
+    if product:
+        return say(
+            "stock_move.product",
+            period=when,
+            name=product.name,
+            moved_in=qty(sums[EntryKind.STOCK_IN]),
+            moved_out=qty(sums[EntryKind.STOCK_OUT]),
+            unit=unit(product),
+        )
+    key = {"QUERY_CREDIT_GIVEN": "credit", "QUERY_PAYMENTS_RECEIVED": "payments", "QUERY_STAFF_PAID": "staff_paid"}[intent]
+    money = {
+        "amount": format_inr(sum(sums.values())),
+        "advance": format_inr(sums.get(EntryKind.STAFF_ADVANCE, 0)),
+        "salary": format_inr(sums.get(EntryKind.SALARY_PAID, 0)),
+    }
+    if party:
+        return say(f"{key}.party", period=when, name=party.name, **money)
+    return say(f"{key}.total", period=when, **money)
+
+
+def stock_moves(period, products: list[Product]) -> str:
+    when = say(f"period.{period}")
+    if not products:
+        return say("stock_move.none", period=when)
+    items = [
+        say("stock_move.item", name=p.name, moved_in=qty(p.moved_in), moved_out=qty(p.moved_out), unit=unit(p))
+        for p in products
+    ]
+    return say("stock_move.many", period=when, count=len(products), items="; ".join(items))
+
+
 def describe(entry: Entry) -> str:
     kind, party, product = entry.kind, entry.party, entry.product
     if kind in (EntryKind.STOCK_IN, EntryKind.STOCK_OUT):

@@ -253,3 +253,44 @@ def test_staff_due_names_the_month_asked_about(api, llm, ramu):
     last_month = (timezone.localdate().replace(day=1) - timedelta(days=1)).replace(day=1)
     llm(Intent.QUERY_STAFF_DUE, party_name="Ramu", date_hint=last_month.isoformat())
     assert text(api)["response_text"] == "Ramu pichhle mahine 0 din aaye. ₹0 bane, kuch nahi diya, ₹0 dena baaki hai."
+    llm(Intent.QUERY_STAFF_DUE, party_name="Ramu", period="LAST_MONTH")
+    assert text(api)["response_text"].startswith("Ramu pichhle mahine 0 din aaye.")
+
+
+def test_aggregate_questions(api, llm, shop, sharma, verma, ramu, aata, maggi):
+    today = timezone.localdate()
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=verma, amount=D("1000"), occurred_on=today - timedelta(days=40))
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("500"))
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=verma, amount=D("200"))
+    record_entry(shop, EntryKind.PAYMENT_RECEIVED, party=sharma, amount=D("100"))
+    record_entry(shop, EntryKind.STAFF_ADVANCE, party=ramu, amount=D("300"))
+    record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("1000"))
+    record_entry(shop, EntryKind.STOCK_IN, product=maggi, quantity=D("10"))
+    record_entry(shop, EntryKind.STOCK_OUT, product=maggi, quantity=D("4"))
+    record_entry(shop, EntryKind.STOCK_IN, product=aata, quantity=D("5"))
+    cases = [
+        (dict(intent=Intent.QUERY_STOCK_LIST), "Stock mein 2 cheezein hain: Aashirvaad Aata 5kg 5 packet aur Maggi 6 packet."),
+        (dict(intent=Intent.QUERY_DEBTOR_LIST), "2 logon par udhaar baaki hai: Verma ji ₹1,200 aur Sharma ji ₹400."),
+        (dict(intent=Intent.QUERY_CREDIT_GIVEN), "Aaj ₹700 ka udhaar diya gaya."),
+        (dict(intent=Intent.QUERY_CREDIT_GIVEN, party_name="Verma"), "Ab tak Verma ji ko ₹1,200 ka udhaar diya gaya."),
+        (dict(intent=Intent.QUERY_PAYMENTS_RECEIVED, period="THIS_WEEK"), "Is hafte ₹100 ki vasooli hui."),
+        (dict(intent=Intent.QUERY_PAYMENTS_RECEIVED, party_name="Sharma ji", period="LAST_MONTH"), "Pichhle mahine Sharma ji se ₹0 mile."),
+        (dict(intent=Intent.QUERY_STAFF_PAID), "Aaj staff ko ₹1,300 diye gaye: ₹300 advance, ₹1,000 tankhwah."),
+        (dict(intent=Intent.QUERY_STAFF_PAID, party_name="Ramu", period="THIS_MONTH"), "Is mahine Ramu ko ₹1,300 diye gaye: ₹300 advance, ₹1,000 tankhwah."),
+        (dict(intent=Intent.QUERY_STOCK_MOVEMENT, product_name="maggi"), "Aaj Maggi ke 10 packet aaye aur 4 packet nikle."),
+        (
+            dict(intent=Intent.QUERY_STOCK_MOVEMENT),
+            "Aaj 2 cheezon mein aana-jaana hua: Aashirvaad Aata 5kg: 5 packet aaye, 0 packet nikle; Maggi: 10 packet aaye, 4 packet nikle.",
+        ),
+        (dict(intent=Intent.QUERY_STOCK_MOVEMENT, period="YESTERDAY"), "Kal stock mein kuch aaya ya nikla nahi."),
+    ]
+    for fields, expected in cases:
+        llm(**fields)
+        body = text(api)
+        assert (body["stage"], body["response_text"]) == (CommandStatus.ANSWERED, expected), fields
+
+
+def test_query_for_unknown_customer_does_not_offer_to_create(api, llm, sharma):
+    llm(Intent.QUERY_CREDIT_GIVEN, party_name="Pandey ji")
+    body = text(api)
+    assert body["stage"] == CommandStatus.FAILED and body["clarification"] is None
