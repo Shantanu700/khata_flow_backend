@@ -59,6 +59,22 @@ services:
       redis:
         condition: service_healthy
 
+  # The live-transcript WebSocket (modules/voice/stream.py) on https://localhost:8001; the API stays on runsslserver.
+  # No access log: the short-lived ticket travels in the URL.
+  stream:
+    <<: *app
+    command: >
+      uvicorn config.asgi:application --host 0.0.0.0 --port 8001 --lifespan off --no-access-log
+      --ssl-certfile /app/docker/nonprod/certs/localhost.pem --ssl-keyfile /app/docker/nonprod/certs/localhost-key.pem
+      --reload --reload-dir /app/config --reload-dir /app/base --reload-dir /app/modules
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+    ports:
+      - "${STREAM_PORT:-8001}:8001"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
   worker:
     <<: *app
     # Restarts the worker when code or .env changes. Watch only these paths: /app also holds the host's .venv,

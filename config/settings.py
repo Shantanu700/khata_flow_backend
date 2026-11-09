@@ -172,6 +172,9 @@ TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "gnani")
 GNANI_API_KEY = os.environ.get("GNANI_API_KEY", "")
 GNANI_BASE_URL = os.environ.get("GNANI_BASE_URL", "https://api.vachana.ai").rstrip("/")
 GNANI_STT_MODEL = os.environ.get("GNANI_STT_MODEL", "prisma-v3.0")
+GNANI_STREAM_URL = os.environ.get("GNANI_STREAM_URL", "wss://api.vachana.ai/stt/v3/stream")
+# Where browsers reach the live-transcript WebSocket (the `stream` service, an ASGI server beside the API).
+VOICE_STREAM_URL = os.environ.get("VOICE_STREAM_URL", "wss://localhost:8001/api/v1/voice/stream/")
 # transcribe: digits and ₹ for numbers, English words in Latin, Hindi in Devanagari.
 GNANI_STT_FORMAT = os.environ.get("GNANI_STT_FORMAT", "transcribe")
 GNANI_TTS_MODEL = os.environ.get("GNANI_TTS_MODEL", "timbre-v2.5")

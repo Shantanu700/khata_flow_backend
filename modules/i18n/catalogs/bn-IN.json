@@ -327,5 +327,7 @@
   "auth.cardTitle": "আজকের হিসাব",
   "auth.example": "উদাহরণ",
   "auth.notchTitle": "আজকের আদায়",
-  "auth.notchSub": "3 জন খদ্দের · উদাহরণ"
+  "auth.notchSub": "3 জন খদ্দের · উদাহরণ",
+  "bolo.queue.todo": "{count}টা বাকি",
+  "bolo.queue.done": "{count}টা হয়ে গেছে"
 }

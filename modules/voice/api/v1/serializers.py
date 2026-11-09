@@ -22,6 +22,11 @@ class AudioCommandSerializer(serializers.Serializer):
         return audio
 
 
+class StreamTicketSerializer(serializers.Serializer):
+    ticket = serializers.CharField()
+    url = serializers.CharField(help_text="The live-transcript WebSocket; connect with ?ticket=…&language=…")
+
+
 class TextCommandSerializer(serializers.Serializer):
     text = serializers.CharField(max_length=500)
     language = serializers.ChoiceField(choices=LANGUAGES, required=False)

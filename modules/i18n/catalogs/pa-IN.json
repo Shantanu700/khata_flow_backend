@@ -327,5 +327,7 @@
   "auth.cardTitle": "ਅੱਜ ਦਾ ਹਿਸਾਬ",
   "auth.example": "ਉਦਾਹਰਨ",
   "auth.notchTitle": "ਅੱਜ ਦੀ ਵਸੂਲੀ",
-  "auth.notchSub": "3 ਗਾਹਕ · ਉਦਾਹਰਨ"
+  "auth.notchSub": "3 ਗਾਹਕ · ਉਦਾਹਰਨ",
+  "bolo.queue.todo": "{count} ਬਾਕੀ",
+  "bolo.queue.done": "{count} ਹੋ ਗਏ"
 }

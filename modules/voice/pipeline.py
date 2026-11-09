@@ -84,9 +84,9 @@ def _shop_context(command: VoiceCommand) -> ShopContext:
     )
 
 
-def _keyterms(command: VoiceCommand) -> list[str]:
+def shop_keyterms(shop) -> list[str]:
     "Names plus aliases: shopkeepers say 'aata', not 'Aashirvaad Aata 5kg'."
-    rows = [*command.shop.parties.filter(is_active=True), *command.shop.products.filter(is_active=True)]
+    rows = [*shop.parties.filter(is_active=True), *shop.products.filter(is_active=True)]
     return list(dict.fromkeys(term for row in rows for term in [row.name, *(row.aliases or [])]))
 
 
@@ -344,7 +344,7 @@ def handle_command(command: VoiceCommand) -> VoiceCommand:
                 wav, _ = normalise(command.audio.read())
                 command.audio.close()
             with timings("stt"):
-                transcript = get_stt().transcribe(wav, "audio/wav", voice_language(command.language), keyterms=_keyterms(command))
+                transcript = get_stt().transcribe(wav, "audio/wav", voice_language(command.language), keyterms=shop_keyterms(command.shop))
             command.transcript = transcript.text
             command.stt_confidence = transcript.confidence
             _set_stage(command, CommandStatus.TRANSCRIBED)

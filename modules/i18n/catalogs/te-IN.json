@@ -327,5 +327,7 @@
   "auth.cardTitle": "ఈరోజు లెక్క",
   "auth.example": "ఉదాహరణ",
   "auth.notchTitle": "ఈరోజు వసూలు",
-  "auth.notchSub": "3 కస్టమర్లు · ఉదాహరణ"
+  "auth.notchSub": "3 కస్టమర్లు · ఉదాహరణ",
+  "bolo.queue.todo": "{count} మిగిలాయి",
+  "bolo.queue.done": "{count} అయిపోయాయి"
 }

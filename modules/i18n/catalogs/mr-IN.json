@@ -327,5 +327,7 @@
   "auth.cardTitle": "आजचा हिशोब",
   "auth.example": "उदाहरण",
   "auth.notchTitle": "आजची वसुली",
-  "auth.notchSub": "3 ग्राहक · उदाहरण"
+  "auth.notchSub": "3 ग्राहक · उदाहरण",
+  "bolo.queue.todo": "{count} बाकी",
+  "bolo.queue.done": "{count} झाले"
 }

@@ -327,5 +327,7 @@
   "auth.cardTitle": "இன்றைய கணக்கு",
   "auth.example": "உதாரணம்",
   "auth.notchTitle": "இன்றைய வசூல்",
-  "auth.notchSub": "3 வாடிக்கையாளர் · உதாரணம்"
+  "auth.notchSub": "3 வாடிக்கையாளர் · உதாரணம்",
+  "bolo.queue.todo": "{count} மீதம்",
+  "bolo.queue.done": "{count} முடிந்தது"
 }

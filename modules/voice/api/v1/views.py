@@ -1,16 +1,20 @@
+from django.conf import settings
 from django.http import FileResponse, Http404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.response import Response
 
 from base.decorators import extend_response
 from base.pagination import DefaultPagination
 from base.views import BaseAV
 from modules.shops.services import shop_for
+from modules.voice import stream
 from modules.voice.api.v1.serializers import (
     AudioCommandSerializer,
     ClarifySerializer,
+    StreamTicketSerializer,
     TextCommandSerializer,
     VoiceCommandSerializer,
 )
@@ -85,6 +89,14 @@ class ClarifyAV(BaseAV):
         data.is_valid(raise_exception=True)
         clarify(command, option_id=data.validated_data.get("option_id"), confirm=data.validated_data.get("confirm"))
         return _body(request, command)
+
+
+class StreamTicketAV(BaseAV):
+    "A 30-second ticket for the live-transcript WebSocket, which cannot take the API token."
+
+    @extend_schema(request=None, responses=StreamTicketSerializer)
+    def post(self, request):
+        return Response({"ticket": stream.ticket(shop_for(request.user)), "url": settings.VOICE_STREAM_URL})
 
 
 class ReplyAudioAV(BaseAV):

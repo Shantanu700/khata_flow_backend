@@ -327,5 +327,7 @@
   "auth.cardTitle": "Today's account",
   "auth.example": "Example",
   "auth.notchTitle": "Today's payments",
-  "auth.notchSub": "3 customers · Example"
+  "auth.notchSub": "3 customers · Example",
+  "bolo.queue.todo": "{count} to do",
+  "bolo.queue.done": "{count} done"
 }

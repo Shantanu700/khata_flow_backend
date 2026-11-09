@@ -327,5 +327,7 @@
   "view.cards": "Cards",
   "view.label": "Kaise dikhaye",
   "view.table": "Table",
-  "weekday.short": "So,Ma,Bu,Gu,Shu,Sha,Ra"
+  "weekday.short": "So,Ma,Bu,Gu,Shu,Sha,Ra",
+  "bolo.queue.todo": "{count} baaki",
+  "bolo.queue.done": "{count} ho gaye"
 }

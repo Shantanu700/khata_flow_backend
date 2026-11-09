@@ -17,6 +17,8 @@ dependencies = [
     "rapidfuzz>=3.14.6",
     "redis>=8.1.0",
     "uuid6>=2025.0.1",
+    "uvicorn[standard]>=0.38",
+    "websockets>=15",
 ]
 
 [dependency-groups]
