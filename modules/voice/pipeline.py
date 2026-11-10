@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from collections.abc import Callable
 from contextlib import contextmanager
@@ -219,9 +220,9 @@ def _new_details(command: VoiceCommand, parsed: ParsedCommand, answers: dict) ->
         raise Stop(responses.say("exists", name=name), "ALREADY_EXISTS")
     new = {
         "name": name,
-        "amount": max(parsed.amount or 0, 0),
+        "amount": max(parsed.amount or Decimal(0), Decimal(0)),
         "unit": unit,
-        "quantity": max(parsed.quantity or 0, 0),
+        "quantity": max(parsed.quantity or Decimal(0), Decimal(0)),
         "alert": NEW_PRODUCT_ALERT,
     }
     if not answers.get("create_confirmed"):
@@ -434,23 +435,67 @@ def _speak(command: VoiceCommand, timings: Timings) -> None:
     command.response_audio.save(f"{command.pk}.wav", ContentFile(audio), save=False)
 
 
-def _earlier_words(command: VoiceCommand, reply_to: int | None) -> str:
-    "What was said before, when `reply_to` is still asking for a missing detail; that question is closed by this answer."
+# Beyond each language's own Yes/No labels: what shopkeepers also type or say.
+YES_WORDS = {"yes", "y", "ok", "okay", "sure", "haan", "han", "ha", "haa", "hanji", "ji", "theek", "thik", "jod", "kar", "add"}
+NO_WORDS = {"no", "n", "nahi", "nahin", "nai", "na", "mat", "cancel", "rehne", "ruko", "stop"}
+
+
+def _yes_no(text: str) -> str | None:
+    "YES or NO for a short reply that starts with one ('haan jod do', 'no thanks'); None for anything else."
+    words = re.sub(r"[^\w\s]", " ", text.lower()).split()
+    if not 0 < len(words) <= 4:
+        return None
+    labels = [(responses.catalog(code)["yes"].lower(), responses.catalog(code)["no"].lower()) for code in SHOP_LANGUAGES]
+    if words[0] in YES_WORDS or words[0] in {yes for yes, _ in labels}:
+        return YES
+    if words[0] in NO_WORDS or words[0] in {no for _, no in labels}:
+        return NO
+    return None
+
+
+def _take_question(command: VoiceCommand, reply_to: int | None) -> tuple[dict, dict, str | None] | None:
+    """The question `reply_to` still waits on, when this command answers it: (clarification, its parsed command,
+    YES/NO or None for a missing detail). That question is closed; this command carries on from it."""
     if not reply_to:
-        return ""
+        return None
     with transaction.atomic():
         pending = VoiceCommand.objects.select_for_update().filter(pk=reply_to, shop=command.shop).first()
         asked = pending and pending.stage == CommandStatus.NEEDS_CLARIFICATION and pending.clarification
-        if not asked or asked["kind"] != "fill" or timezone.now() > datetime.fromisoformat(asked["expires_at"]):
-            return ""
+        if not asked or timezone.now() > datetime.fromisoformat(asked["expires_at"]):
+            return None
+        answer = _yes_no(command.transcript)
+        if asked["kind"] == "fill":
+            answer = NO if answer == NO else None
+        elif answer is None or {option["id"] for option in asked["options"]} != {YES, NO}:
+            return None
         pending.stage = CommandStatus.ANSWERED
         pending.clarification = None
         pending.save(update_fields=["stage", "clarification", "updated_at"])
-    return asked["answers"]["said"]
+    return asked, pending.parsed, answer
+
+
+def _resume(command: VoiceCommand, pending: dict, choice: str, timings: Timings) -> None:
+    "Carry on from the question `pending` with the shopkeeper's answer."
+    if choice == NO:
+        command.stage = CommandStatus.ANSWERED
+        command.clarification = None
+        raise Stop(responses.spoken_error("CANCELLED"))
+    answers = dict(pending.get("answers", {}))
+    if pending["kind"] == "create_party":
+        answers["create_party"] = True
+    elif pending["kind"] == "confirm_amount":
+        answers["amount_confirmed"] = True
+    elif pending["kind"] == "confirm_create":
+        answers["create_confirmed"] = True
+    else:
+        field, pk = choice.split(":")
+        answers[f"{field}_id"] = int(pk)
+    command.stage = CommandStatus.PARSED
+    _resolve_and_act(command, ParsedCommand.model_validate(command.parsed), answers, timings)
 
 
 def handle_command(command: VoiceCommand, reply_to: int | None = None) -> VoiceCommand:
-    "`reply_to`: a command asking for a missing detail, which this one answers."
+    "`reply_to`: a command waiting on a question (a missing detail, or yes/no), which this one may answer."
     timings = Timings(command)
 
     def stages() -> None:
@@ -467,8 +512,14 @@ def handle_command(command: VoiceCommand, reply_to: int | None = None) -> VoiceC
             _set_stage(command, CommandStatus.TRANSCRIBED)
         if not command.transcript.strip():
             raise Stop(responses.spoken_error("EMPTY_TRANSCRIPT"), "EMPTY_TRANSCRIPT")
+        question = _take_question(command, reply_to)
+        if question and question[2]:
+            command.parsed = question[1]
+            _resume(command, question[0], question[2], timings)
+            return
         # The answer to "what is the salary?" is parsed together with what came before it, so it has a meaning.
-        said = ". ".join(filter(None, [_earlier_words(command, reply_to), command.transcript.strip()]))
+        earlier = question[0]["answers"]["said"] if question else ""
+        said = ". ".join(filter(None, [earlier, command.transcript.strip()]))
         with timings("intent"):
             parsed = get_intent_parser().parse(said, context)
         command.parsed = parsed.model_dump(mode="json")
@@ -487,7 +538,6 @@ def clarify(command: VoiceCommand, option_id: str | None = None, confirm: bool |
         raise DomainError("NOT_WAITING", "This command is not waiting for an answer.")
     timings = Timings(command)
     pending = command.clarification
-    answers = dict(pending.get("answers", {}))
     choice = option_id or (YES if confirm else NO if confirm is not None else None)
     valid = {option["id"] for option in pending["options"]}
     if choice not in valid:
@@ -496,21 +546,7 @@ def clarify(command: VoiceCommand, option_id: str | None = None, confirm: bool |
     def stages() -> None:
         if timezone.now() > datetime.fromisoformat(pending["expires_at"]):
             raise Stop(responses.spoken_error("CLARIFICATION_EXPIRED"), "CLARIFICATION_EXPIRED")
-        if choice == NO:
-            command.stage = CommandStatus.ANSWERED
-            command.clarification = None
-            raise Stop(responses.spoken_error("CANCELLED"))
-        if pending["kind"] == "create_party":
-            answers["create_party"] = True
-        elif pending["kind"] == "confirm_amount":
-            answers["amount_confirmed"] = True
-        elif pending["kind"] == "confirm_create":
-            answers["create_confirmed"] = True
-        else:
-            field, pk = choice.split(":")
-            answers[f"{field}_id"] = int(pk)
-        command.stage = CommandStatus.PARSED
-        _resolve_and_act(command, ParsedCommand.model_validate(command.parsed), answers, timings)
+        _resume(command, pending, choice, timings)
 
     _run(command, timings, stages)
     return command

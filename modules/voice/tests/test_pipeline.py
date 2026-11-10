@@ -418,3 +418,40 @@ def test_an_existing_name_is_not_added_twice(api, llm, sharma):
     llm(Intent.ADD_CUSTOMER, party_name="sharma ji")
     body = text(api)
     assert (body["error_code"], body["response_text"]) == ("ALREADY_EXISTS", "sharma ji pehle se hai. Doosra naam boliye.")
+
+
+def reply(api, body: dict, words: str) -> dict:
+    return api.post("/api/v1/voice/text-commands/", {"text": words, "reply_to": body["id"]}, format="json").json()
+
+
+def test_product_without_opening_stock_is_confirmed_with_zero(api, llm, shop):
+    llm(Intent.ADD_PRODUCT, product_name="Kinder Joy", unit="packet")
+    body = text(api, "Naya saamaan Kinder Joy, packet")
+    assert body["clarification"]["kind"] == "confirm_create"
+    assert body["response_text"].startswith("Naya saamaan Kinder Joy, packet mein, abhi 0 packet stock")
+
+
+def test_typed_yes_or_no_answers_the_question(api, llm, shop, monkeypatch):
+    llm(Intent.ADD_STAFF, party_name="Bebo", amount=D("2000"))
+    body = text(api, "Naya staff Bebo, salary 2000")
+    parse = lambda self, said, context: pytest.fail("a yes/no answer is not parsed")  # noqa: E731
+    monkeypatch.setattr(FakeIntentParser, "parse", parse)
+    done = reply(api, body, "Haan, jod do")
+    assert done["stage"] == CommandStatus.COMMITTED and Party.objects.get(name="Bebo").monthly_salary == D("2000")
+    assert VoiceCommand.objects.get(pk=body["id"]).stage == CommandStatus.ANSWERED
+    monkeypatch.undo()
+    llm(Intent.ADD_CUSTOMER, party_name="Mohan")
+    body = text(api)
+    done = reply(api, body, "no")
+    assert done["response_text"] == "Theek hai, kuch nahi likha." and not Party.objects.filter(name="Mohan").exists()
+
+
+def test_typed_no_cancels_a_missing_detail_question(api, llm, shop):
+    llm(Intent.ADD_PRODUCT, product_name="Kinder Joy")
+    body = text(api)
+    assert body["clarification"]["kind"] == "fill"
+    assert reply(api, body, "nahi rehne do")["response_text"] == "Theek hai, kuch nahi likha."
+
+
+def test_yes_without_a_question_is_a_fresh_command(api, llm, shop):
+    assert text(api, "yes")["error_code"] == "UNKNOWN_INTENT"
