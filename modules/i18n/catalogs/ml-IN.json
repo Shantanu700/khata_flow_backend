@@ -343,5 +343,14 @@
   "toast.entry.SALARY_PAID": "{name}: {amount} ശമ്പളം എഴുതി.",
   "stock.after": "ഇതിനു ശേഷം സ്റ്റോക്ക്",
   "toast.entry.STOCK_IN": "{name}: {qty} വന്നു.",
-  "toast.entry.STOCK_OUT": "{name}: {qty} പോയി."
+  "toast.entry.STOCK_OUT": "{name}: {qty} പോയി.",
+  "bolo.hello.morning": "സുപ്രഭാതം",
+  "bolo.hello.afternoon": "നമസ്കാരം",
+  "bolo.hello.evening": "ശുഭ സന്ധ്യ",
+  "bolo.ask": "ഇന്ന് എന്താണ് എഴുതേണ്ടത്?",
+  "bolo.try": "പറയൂ: “{text}”",
+  "bolo.example.1": "ശർമ്മയുടെ 500 കടം എഴുതൂ",
+  "bolo.example.2": "ശർമ്മ എത്ര തരാനുണ്ട്?",
+  "bolo.example.3": "രാമു ഇന്ന് വന്നു",
+  "bolo.example.4": "ഏത് സാധനമാണ് കുറവ്?"
 }

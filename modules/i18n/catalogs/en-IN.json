@@ -343,5 +343,14 @@
   "toast.entry.SALARY_PAID": "{amount} salary written for {name}.",
   "stock.after": "Stock after this",
   "toast.entry.STOCK_IN": "{qty} added to {name}.",
-  "toast.entry.STOCK_OUT": "{qty} taken out of {name}."
+  "toast.entry.STOCK_OUT": "{qty} taken out of {name}.",
+  "bolo.hello.morning": "Good morning",
+  "bolo.hello.afternoon": "Good afternoon",
+  "bolo.hello.evening": "Good evening",
+  "bolo.ask": "What shall I write today?",
+  "bolo.try": "Try: “{text}”",
+  "bolo.example.1": "Sharma ji 500 credit",
+  "bolo.example.2": "How much does Sharma ji owe?",
+  "bolo.example.3": "Ramu is here today",
+  "bolo.example.4": "What is running low?"
 }

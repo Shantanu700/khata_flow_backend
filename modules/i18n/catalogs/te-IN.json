@@ -343,5 +343,14 @@
   "toast.entry.SALARY_PAID": "{name}: {amount} జీతం రాశాం.",
   "stock.after": "దీని తర్వాత స్టాక్",
   "toast.entry.STOCK_IN": "{name}: {qty} వచ్చింది.",
-  "toast.entry.STOCK_OUT": "{name}: {qty} వెళ్ళింది."
+  "toast.entry.STOCK_OUT": "{name}: {qty} వెళ్ళింది.",
+  "bolo.hello.morning": "శుభోదయం",
+  "bolo.hello.afternoon": "నమస్కారం",
+  "bolo.hello.evening": "శుభ సాయంత్రం",
+  "bolo.ask": "ఈరోజు ఏమి రాయాలి?",
+  "bolo.try": "చెప్పండి: “{text}”",
+  "bolo.example.1": "శర్మ గారి 500 అప్పు రాయండి",
+  "bolo.example.2": "శర్మ గారు ఎంత ఇవ్వాలి?",
+  "bolo.example.3": "రాము ఈరోజు వచ్చాడు",
+  "bolo.example.4": "ఏ సామాను తక్కువగా ఉంది?"
 }

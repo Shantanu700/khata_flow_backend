@@ -343,5 +343,14 @@
   "toast.entry.SALARY_PAID": "{name}: {amount} पगार लिहिला.",
   "stock.after": "यानंतर स्टॉक",
   "toast.entry.STOCK_IN": "{name}: {qty} आला.",
-  "toast.entry.STOCK_OUT": "{name}: {qty} गेला."
+  "toast.entry.STOCK_OUT": "{name}: {qty} गेला.",
+  "bolo.hello.morning": "सुप्रभात",
+  "bolo.hello.afternoon": "नमस्कार",
+  "bolo.hello.evening": "शुभ संध्याकाळ",
+  "bolo.ask": "आज काय लिहायचं?",
+  "bolo.try": "बोला: “{text}”",
+  "bolo.example.1": "शर्माजींची 500 उधारी लिहा",
+  "bolo.example.2": "शर्माजींचे किती बाकी आहेत?",
+  "bolo.example.3": "रामू आज आला आहे",
+  "bolo.example.4": "कोणता माल कमी आहे?"
 }

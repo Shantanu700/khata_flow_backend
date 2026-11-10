@@ -343,5 +343,14 @@
   "toast.entry.SALARY_PAID": "{name}-কে {amount} বেতন লেখা হয়েছে।",
   "stock.after": "এর পরে স্টক",
   "toast.entry.STOCK_IN": "{name}: {qty} এল।",
-  "toast.entry.STOCK_OUT": "{name}: {qty} বেরোল।"
+  "toast.entry.STOCK_OUT": "{name}: {qty} বেরোল।",
+  "bolo.hello.morning": "সুপ্রভাত",
+  "bolo.hello.afternoon": "নমস্কার",
+  "bolo.hello.evening": "শুভ সন্ধ্যা",
+  "bolo.ask": "আজ কী লিখব?",
+  "bolo.try": "বলুন: “{text}”",
+  "bolo.example.1": "শর্মাজির 500 টাকা বাকি লিখে দাও",
+  "bolo.example.2": "শর্মাজির কত বাকি?",
+  "bolo.example.3": "রামু আজ এসেছে",
+  "bolo.example.4": "কোন জিনিস কম আছে?"
 }
