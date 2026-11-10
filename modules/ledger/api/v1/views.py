@@ -1,7 +1,7 @@
 from dataclasses import asdict
 from datetime import timedelta
 
-from django.db.models import Case, DecimalField, F, OuterRef, Q, Subquery, Sum, Value, When
+from django.db.models import Case, DecimalField, F, Max, OuterRef, Q, Subquery, Sum, Value, When
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -54,6 +54,9 @@ def _search(entries, q: str):
     if q.lstrip("#").isdigit():
         match |= Q(id=int(q.lstrip("#")))
     return entries.filter(match)
+
+
+DUE_AGE_DAYS = [7, 30, 90, None]
 
 
 class EntryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, BaseViewSet):
@@ -153,8 +156,23 @@ class SummaryAV(BaseAV):
             .select_related("party", "product", "reversal", "voice_command")
             .order_by("-id")[:6]
         )
+        owing = list(customers.filter(balance__gt=0))
+        last_entry = dict(
+            ledger.live_entries()
+            .filter(party__in=owing, kind__in=CUSTOMER_MONEY_KINDS)
+            .values_list("party")
+            .annotate(last=Max("occurred_on"))
+        )
+        # Udhaar by how long the khata has been quiet: the oldest needs chasing. Upper bounds in days.
+        ages = [{"max_days": days, "count": 0, "amount": ledger.ZERO} for days in DUE_AGE_DAYS]
+        for party in owing:
+            quiet = (today - last_entry.get(party.pk, today)).days
+            bucket = next(b for b in ages if b["max_days"] is None or quiet <= b["max_days"])
+            bucket["count"] += 1
+            bucket["amount"] += party.balance
         return {
             "total_outstanding": ledger.total_outstanding(shop),
+            "dues_by_age": ages,
             "owing_count": customers.filter(balance__gt=0).count(),
             "customer_count": customers.count(),
             "top_debtors": [{"id": p.pk, "name": p.name, "balance": p.balance, "photo_key": photos.key(p)} for p in ledger.top_debtors(shop)],

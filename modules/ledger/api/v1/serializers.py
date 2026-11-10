@@ -88,8 +88,15 @@ class DaySerializer(serializers.Serializer):
     payment = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
+class DueAgeSerializer(serializers.Serializer):
+    max_days = serializers.IntegerField(allow_null=True, help_text="Days since the customer's last udhaar or payment, up to this; null means older.")
+    count = serializers.IntegerField()
+    amount = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
 class SummarySerializer(serializers.Serializer):
     total_outstanding = serializers.DecimalField(max_digits=14, decimal_places=2)
+    dues_by_age = DueAgeSerializer(many=True, help_text="What customers owe, by how long their khata has been quiet.")
     owing_count = serializers.IntegerField()
     customer_count = serializers.IntegerField()
     top_debtors = DebtorSerializer(many=True)

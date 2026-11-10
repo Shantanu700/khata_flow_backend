@@ -362,5 +362,10 @@
   "photo.optional": "Zaroori nahi",
   "photo.bad": "Ye photo khul nahi payi. Doosri chuniye.",
   "photo.shop": "Dukaan ki photo",
-  "photo.shopBody": "Side bar par dikhegi. Sirf aap dekh sakte hain."
+  "photo.shopBody": "Side bar par dikhegi. Sirf aap dekh sakte hain.",
+  "dash.age.7": "Is hafte",
+  "dash.age.30": "Is mahine",
+  "dash.age.90": "1–3 mahine",
+  "dash.age.old": "Purana",
+  "dash.agePeople": "{count} log"
 }

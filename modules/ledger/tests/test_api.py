@@ -71,3 +71,15 @@ def test_summary_has_the_dashboard_figures(api, shop, sharma):
     assert (body["total_outstanding"], body["owing_count"], body["customer_count"]) == (700, 1, 1)
     assert len(body["daily"]) == 14 and body["daily"][-1]["credit"] == 700
     assert body["week_credit"] == 700 and body["recent"][0]["amount"] == 700
+
+
+def test_summary_splits_dues_by_how_long_the_khata_has_been_quiet(api, shop, sharma, verma):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    today = timezone.localdate()
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=Decimal("700"))
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=verma, amount=Decimal("300"), occurred_on=today - timedelta(45))
+    ages = api.get("/api/v1/summary/").json()["dues_by_age"]
+    assert [(a["max_days"], a["count"], a["amount"]) for a in ages] == [(7, 1, 700), (30, 0, 0), (90, 1, 300), (None, 0, 0)]

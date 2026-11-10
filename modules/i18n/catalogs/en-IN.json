@@ -362,5 +362,10 @@
   "photo.optional": "Optional",
   "photo.bad": "Couldn't open that photo. Try another.",
   "photo.shop": "Shop photo",
-  "photo.shopBody": "Shown on the side bar. Only you can see it."
+  "photo.shopBody": "Shown on the side bar. Only you can see it.",
+  "dash.age.7": "This week",
+  "dash.age.30": "This month",
+  "dash.age.90": "1–3 months",
+  "dash.age.old": "Older",
+  "dash.agePeople": "{count} people"
 }
