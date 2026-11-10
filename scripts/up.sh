@@ -39,6 +39,7 @@ done
 
 echo "2/4  HTTPS certificate (mkcert, trusted on this machine only)"
 if [ ! -f docker/nonprod/certs/localhost.pem ]; then
+  mkdir -p docker/nonprod/certs  # git-ignored, so a fresh clone has no such folder
   mkcert -install
   mkcert -cert-file docker/nonprod/certs/localhost.pem -key-file docker/nonprod/certs/localhost-key.pem \
     localhost 127.0.0.1 ::1
