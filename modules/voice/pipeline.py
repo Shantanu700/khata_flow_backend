@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta
 
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.db import transaction
 from django.utils import timezone
 
 from base.exceptions import DomainError
@@ -61,12 +62,31 @@ class Stop(Exception):
         self.code = code
 
 
+class Cancelled(Exception):
+    "The shopkeeper cancelled the command while it ran: stop, and save nothing more."
+
+
+def _live(command: VoiceCommand, lock: bool = False) -> None:
+    "Raises Cancelled once cancel() has run; `lock` holds the row to the end of the transaction, so a cancel waits."
+    rows = VoiceCommand.objects.filter(pk=command.pk)
+    if (rows.select_for_update() if lock else rows).values_list("stage", flat=True).get() == CommandStatus.CANCELLED:
+        command.stage = CommandStatus.CANCELLED
+        raise Cancelled
+
+
+def _save(command: VoiceCommand) -> None:
+    with transaction.atomic():
+        _live(command, lock=True)
+        command.save()
+
+
 class Timings:
     def __init__(self, command: VoiceCommand):
         self.command = command
 
     @contextmanager
     def __call__(self, stage: str):
+        _live(self.command)
         start = time.perf_counter()
         try:
             yield
@@ -78,7 +98,7 @@ class Timings:
 
 def _set_stage(command: VoiceCommand, stage: CommandStatus) -> None:
     command.stage = stage
-    command.save()
+    _save(command)
 
 
 def _shop_context(command: VoiceCommand) -> ShopContext:
@@ -265,9 +285,9 @@ def _answer(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, p
             return responses.stock_moves(period, ledger.stock_moves(shop, start, end))
         sums = ledger.totals(shop, PERIOD_KINDS[intent], start, end, party=party, product=product)
         return responses.period_total(intent, period, sums, party, product)
+    # Never by voice: a misheard undo reverses the wrong entry. The Entries screen has an Undo on each row.
     if intent == Intent.UNDO_LAST:
-        command.stage = CommandStatus.COMMITTED
-        return responses.undone(ledger.undo_last(shop, voice_command=command))
+        return responses.say("undo.by_hand")
     raise Stop(responses.fallback(), "UNKNOWN_INTENT")
 
 
@@ -284,7 +304,9 @@ def _resolve_and_act(command: VoiceCommand, parsed: ParsedCommand, answers: dict
             return
         if not _check_numbers(command, parsed, answers):
             return
-    with timings("commit"):
+    # Under the row lock: a cancel lands either before the write (which then never happens) or after (and reverses it).
+    with timings("commit"), transaction.atomic():
+        _live(command, lock=True)
         act = _write if parsed.intent in WRITE_KINDS else _answer
         command.response_text = act(command, parsed, party, product)
         command.clarification = None
@@ -310,6 +332,8 @@ def _run(command: VoiceCommand, timings: Timings, stages) -> None:
 def _stages(command: VoiceCommand, timings: Timings, stages) -> None:
     try:
         stages()
+    except Cancelled:
+        return
     except Stop as stop:
         if stop.code:
             _fail(command, stop.code, stop.text)
@@ -323,8 +347,11 @@ def _stages(command: VoiceCommand, timings: Timings, stages) -> None:
     except Exception as exc:
         log.exception("voice command %s crashed", command.pk)
         _fail(command, "INTERNAL_ERROR", responses.fallback(), type(exc).__name__)
-    _speak(command, timings)
-    command.save()
+    try:
+        _speak(command, timings)
+        _save(command)
+    except Cancelled:
+        pass
 
 
 def _speak(command: VoiceCommand, timings: Timings) -> None:
@@ -401,3 +428,17 @@ def clarify(command: VoiceCommand, option_id: str | None = None, confirm: bool |
     _run(command, timings, stages)
     return command
 
+
+
+def cancel(command: VoiceCommand) -> VoiceCommand:
+    "Stop a running command. Anything it already wrote is reversed, append-only like any undo."
+    with transaction.atomic():
+        command = VoiceCommand.objects.select_for_update().get(pk=command.pk)
+        if command.stage == CommandStatus.CANCELLED:
+            return command
+        for entry in command.entries.all() & ledger.live_entries():
+            ledger.reverse_entry(entry, voice_command=command)
+        command.stage = CommandStatus.CANCELLED
+        command.clarification = None
+        command.save(update_fields=["stage", "clarification", "updated_at"])
+    return command

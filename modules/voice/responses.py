@@ -217,18 +217,6 @@ def stock_moves(period, products: list[Product]) -> str:
     return say("stock_move.many", period=when, count=len(products), items="; ".join(items))
 
 
-def describe(entry: Entry) -> str:
-    kind, party, product = entry.kind, entry.party, entry.product
-    if kind in (EntryKind.STOCK_IN, EntryKind.STOCK_OUT):
-        return say(f"describe.{kind}", name=product.name, qty=qty(entry.quantity), unit=unit(product))
-    amount = format_inr(entry.amount) if entry.amount is not None else ""
-    return say(f"describe.{kind}", name=party.name, amount=amount)
-
-
-def undone(reversal: Entry) -> str:
-    return say("undone", what=describe(reversal.reverses))
-
-
 def negative_stock(product: Product, level: Decimal) -> str:
     return say("negative_stock", name=product.name, level=qty(level), unit=unit(product))
 

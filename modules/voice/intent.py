@@ -105,7 +105,7 @@ is still owed (this month unless another month is said). "Ramu ka kitna banta ha
 "Is mahine staff ko kitna diya?", "Shyam ko pichhle mahine kitne paise diye?"
 - QUERY_STOCK_MOVEMENT: how much stock came in or went out (was sold) in a period, of all items or one. \
 "Aaj kitni Maggi biki?", "इस हफ्ते क्या क्या माल आया", "kal kitna saamaan bika"
-- UNDO_LAST: undo the last entry. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो"
+- UNDO_LAST: any request to undo, delete, cancel, reverse or fix an entry, named or not. Voice never changes past entries; KhaataFlow only explains how to undo on screen. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो", "Gupta aunty ke 750 wapas karo"
 - UNKNOWN: greetings, or a request none of the intents above can serve even loosely.
 
 Choose the intent by what the shopkeeper wants to record or find out, not by matching words: people ask the \

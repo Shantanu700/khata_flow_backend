@@ -16,6 +16,7 @@ class CommandStatus(TextChoices):
     COMMITTED = "COMMITTED", "Committed"
     ANSWERED = "ANSWERED", "Answered"
     FAILED = "FAILED", "Failed"
+    CANCELLED = "CANCELLED", "Cancelled"
 
 
 class Intent(StrEnum):

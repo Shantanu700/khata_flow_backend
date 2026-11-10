@@ -29,7 +29,7 @@ from modules.voice.api.v1.serializers import (
 )
 from modules.voice.choices import InputMode
 from modules.voice.models import VoiceCommand
-from modules.voice.pipeline import clarify, handle_command
+from modules.voice.pipeline import cancel, clarify, handle_command
 
 log = logging.getLogger(__name__)
 
@@ -38,12 +38,13 @@ def _body(request, command: VoiceCommand) -> dict:
     return VoiceCommandSerializer(command, context={"request": request}).data
 
 
-def _respond(request, run: Callable[[], VoiceCommand]):
-    """The command as JSON; with ?progress=1, NDJSON instead: {"stage", "ms"} as each pipeline stage finishes,
-    then {"command": …} (or {"error": {"code", "message"}}), so the screen can tick steps off as they happen."""
+def _respond(request, command: VoiceCommand, run: Callable[[], VoiceCommand]):
+    """The command as JSON; with ?progress=1, NDJSON instead: {"id"} first (so the screen can cancel it), then
+    {"stage", "ms"} as each pipeline stage finishes, then {"command": …} (or {"error": {"code", "message"}})."""
     if not request.query_params.get("progress"):
         return _body(request, run())
     events: queue.Queue = queue.Queue()
+    events.put({"id": command.pk})
 
     def work() -> None:
         reset = pipeline.progress.set(lambda stage, ms: events.put({"stage": stage, "ms": ms}))
@@ -89,7 +90,7 @@ class AudioCommandAV(BaseAV):
             audio=data.validated_data["audio"],
             language=data.validated_data.get("language", shop.preferred_language),
         )
-        return _respond(request, lambda: handle_command(command))
+        return _respond(request, command, lambda: handle_command(command))
 
 
 class TextCommandAV(BaseAV):
@@ -107,7 +108,7 @@ class TextCommandAV(BaseAV):
             transcript=data.validated_data["text"].strip(),
             language=data.validated_data.get("language", shop.preferred_language),
         )
-        return _respond(request, lambda: handle_command(command))
+        return _respond(request, command, lambda: handle_command(command))
 
 
 class CommandDetailAV(BaseAV):
@@ -126,7 +127,16 @@ class ClarifyAV(BaseAV):
         data = ClarifySerializer(data=request.data)
         data.is_valid(raise_exception=True)
         answer = {"option_id": data.validated_data.get("option_id"), "confirm": data.validated_data.get("confirm")}
-        return _respond(request, lambda: clarify(command, **answer))
+        return _respond(request, command, lambda: clarify(command, **answer))
+
+
+class CancelAV(BaseAV):
+    "Cancel a command while it runs; an entry it already wrote is reversed."
+
+    @extend_schema(request=None)
+    @extend_response(VoiceCommandSerializer())
+    def post(self, request, pk: int):
+        return _body(request, cancel(get_object_or_404(VoiceCommand, pk=pk, shop=shop_for(request.user))))
 
 
 class StreamTicketAV(BaseAV):

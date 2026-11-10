@@ -16,6 +16,7 @@ from modules.shops.models import Party, Shop
 from modules.voice.choices import CommandStatus, Intent
 from modules.voice.intent import FakeIntentParser, ParsedCommand
 from modules.voice.models import VoiceCommand
+from modules.voice.pipeline import handle_command
 from modules.voice.providers import ProviderError
 from modules.voice.providers.fake import FakeSTT, silent_wav
 
@@ -112,13 +113,13 @@ def test_queries(api, llm, shop, sharma, verma, ramu, stocked):
     assert text(api)["response_text"].startswith("Ramu is mahine 1 din aaye.")
 
 
-def test_undo_last(api, llm, shop, sharma):
+def test_undo_is_never_done_by_voice(api, llm, shop, sharma):
     record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("500"))
     llm(Intent.UNDO_LAST)
-    body = text(api, "pichhli entry hata do")
-    assert body["response_text"] == "Pichhli entry hata di: Sharma ji ka ₹500 udhaar."
-    assert body["entry"]["kind"] == EntryKind.REVERSAL
-    assert customer_balance(sharma) == 0
+    body = text(api, "Gupta aunty ke 750 wapas karo")
+    assert body["stage"] == CommandStatus.ANSWERED and body["entry"] is None
+    assert body["response_text"].startswith("Awaaz se entry nahi palat sakta.")
+    assert customer_balance(sharma) == 500 and Entry.objects.count() == 1
 
 
 def test_ambiguous_name_round_trip(api, llm, sharma, verma):
@@ -303,8 +304,9 @@ def test_progress_streams_each_stage_then_the_command(api, llm, sharma):
     response = api.post("/api/v1/voice/text-commands/?progress=1", {"text": "Sharma ji ka kitna"}, format="json")
     assert response["Content-Type"] == "application/x-ndjson"
     events = [json.loads(line) for line in b"".join(response.streaming_content).decode().splitlines()]
-    assert [e["stage"] for e in events[:-1]] == ["intent", "resolve", "commit", "tts"]
-    assert all(isinstance(e["ms"], int) for e in events[:-1])
+    assert events[0] == {"id": events[-1]["command"]["id"]}
+    assert [e["stage"] for e in events[1:-1]] == ["intent", "resolve", "commit", "tts"]
+    assert all(isinstance(e["ms"], int) for e in events[1:-1])
     assert events[-1]["command"]["stage"] == CommandStatus.ANSWERED
     assert events[-1]["command"]["response_text"] == "Sharma ji ka koi baaki nahi hai."
 
@@ -315,7 +317,10 @@ def test_progress_reports_a_refused_answer_as_an_error_line(api, llm, sharma):
     command = text(api)
     response = api.post(f"/api/v1/voice/commands/{command['id']}/clarify/?progress=1", {"confirm": True}, format="json")
     events = [json.loads(line) for line in b"".join(response.streaming_content).decode().splitlines()]
-    assert events == [{"error": {"code": "NOT_WAITING", "message": "This command is not waiting for an answer."}}]
+    assert events == [
+        {"id": command["id"]},
+        {"error": {"code": "NOT_WAITING", "message": "This command is not waiting for an answer."}},
+    ]
 
 
 @pytest.mark.django_db(transaction=True)
@@ -324,3 +329,22 @@ def test_progress_carries_a_written_entry(api, llm, sharma):
     response = api.post("/api/v1/voice/text-commands/?progress=1", {"text": "Sharma ji ka 500 udhaar"}, format="json")
     last = json.loads(b"".join(response.streaming_content).decode().splitlines()[-1])
     assert last["command"]["stage"] == CommandStatus.COMMITTED and last["command"]["entry"]["amount"] == 500
+
+
+def test_cancel_before_the_write_leaves_the_ledger_alone(api, llm, sharma, shop):
+    llm(Intent.ADD_CREDIT, party_name="Sharma ji", amount=D("500"))
+    command = VoiceCommand.objects.create(shop=shop, input_mode="TEXT", transcript="Sharma ji ka 500", language="hi-Latn")
+    assert api.post(f"/api/v1/voice/commands/{command.pk}/cancel/").json()["stage"] == CommandStatus.CANCELLED
+    handle_command(command)
+    command.refresh_from_db()
+    assert command.stage == CommandStatus.CANCELLED and not command.response_audio
+    assert not Entry.objects.exists() and customer_balance(sharma) == 0
+
+
+def test_cancel_after_the_write_reverses_it(api, llm, sharma):
+    llm(Intent.ADD_CREDIT, party_name="Sharma ji", amount=D("500"))
+    command = text(api)
+    assert customer_balance(sharma) == 500
+    assert api.post(f"/api/v1/voice/commands/{command['id']}/cancel/").json()["stage"] == CommandStatus.CANCELLED
+    assert customer_balance(sharma) == 0
+    assert Entry.objects.filter(kind=EntryKind.REVERSAL, voice_command_id=command["id"]).count() == 1

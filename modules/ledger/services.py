@@ -253,15 +253,6 @@ def reverse_entry(entry: Entry, voice_command=None) -> Entry:
         )
 
 
-def undo_last(shop: Shop, voice_command=None) -> Entry:
-    with transaction.atomic():
-        Shop.objects.select_for_update().get(pk=shop.pk)
-        target = live_entries().filter(shop=shop).order_by("-id").first()
-        if target is None:
-            raise LedgerError("NOTHING_TO_UNDO", "There is no entry to undo.")
-        return reverse_entry(target, voice_command=voice_command)
-
-
 def format_inr(amount: Decimal | int) -> str:
     "Indian grouping: ₹1,25,000 and ₹1,250.50; paise only when non-zero."
     value = Decimal(amount).quantize(Decimal("0.01"), ROUND_HALF_UP)
