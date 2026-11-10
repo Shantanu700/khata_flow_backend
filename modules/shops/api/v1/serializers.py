@@ -48,12 +48,13 @@ class PartySerializer(ShopScopedNameMixin, BaseSerializer):
     present_today = serializers.SerializerMethodField()
     attendance_14d = serializers.SerializerMethodField()
     last_entry_on = serializers.DateField(read_only=True, allow_null=True, default=None)
+    first_entry_on = serializers.DateField(read_only=True, allow_null=True, default=None)
 
     class Meta:
         model = Party
         fields = ModelBase.BASE_MODEL_FIELDS + (
             "name", "aliases", "kind", "monthly_salary", "is_active", "balance", "staff_due", "present_today",
-            "attendance_14d", "last_entry_on",
+            "attendance_14d", "last_entry_on", "first_entry_on",
         )
         read_only_fields = ModelBase.BASE_MODEL_FIELDS
 

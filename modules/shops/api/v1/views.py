@@ -2,7 +2,7 @@ from datetime import date
 
 from django.contrib.auth import authenticate, get_user_model
 from django.db import transaction
-from django.db.models import F, Max, Q, TextField
+from django.db.models import F, Max, Min, Q, TextField
 from django.db.models.functions import Cast
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
@@ -96,7 +96,9 @@ class PartyViewSet(ShopScopedViewSet):
             last_entry_on=Max(
                 "entries__occurred_on",
                 filter=Q(entries__reversal__isnull=True, entries__kind__in=CUSTOMER_MONEY_KINDS),
-            )
+            ),
+            # Entries can be back-dated, so history may start before the party was added.
+            first_entry_on=Min("entries__occurred_on"),
         )
         if f.get("kind"):
             parties = parties.filter(kind=f["kind"])
