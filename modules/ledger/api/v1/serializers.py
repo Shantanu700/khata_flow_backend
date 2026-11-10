@@ -60,6 +60,7 @@ class DebtorSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     balance = serializers.DecimalField(max_digits=14, decimal_places=2)
+    photo_key = serializers.CharField(allow_null=True)
 
 
 class LowStockSerializer(serializers.Serializer):

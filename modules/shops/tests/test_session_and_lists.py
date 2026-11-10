@@ -27,7 +27,7 @@ def test_login_returns_token_and_shop_and_logout_revokes_it(shop):
     client = APIClient()
     assert client.post("/api/v1/auth/login/", {"username": "owner", "password": "wrong"}).status_code == 401
     body = client.post("/api/v1/auth/login/", {"username": "owner", "password": "test-pass-123"}).json()
-    assert body["shop"] == {"name": "Test Kirana", "preferred_language": "hi-Latn"}
+    assert body["shop"] == {"name": "Test Kirana", "preferred_language": "hi-Latn", "photo_key": None}
     client.credentials(HTTP_AUTHORIZATION=f"Token {body['token']}")
     assert client.get("/api/v1/me/").json()["username"] == "owner"
     assert client.post("/api/v1/auth/logout/").status_code == 201
@@ -91,7 +91,7 @@ def test_register_opens_a_shop_and_signs_in(db):
     client = APIClient()
     body = {"shop_name": "  Naya   Kirana ", "username": "naya_kirana", "password": "kirana-pass-2026", "preferred_language": "ta-IN"}
     session = client.post("/api/v1/auth/register/", body).json()
-    assert session["shop"] == {"name": "Naya Kirana", "preferred_language": "ta-IN"}
+    assert session["shop"] == {"name": "Naya Kirana", "preferred_language": "ta-IN", "photo_key": None}
     client.credentials(HTTP_AUTHORIZATION=f"Token {session['token']}")
     assert client.get("/api/v1/parties/").json()["count"] == 0
     again = APIClient().post("/api/v1/auth/register/", {**body, "username": "NAYA_kirana"})

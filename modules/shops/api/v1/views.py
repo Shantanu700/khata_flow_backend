@@ -11,6 +11,7 @@ from rest_framework import mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 
@@ -19,6 +20,7 @@ from base.enums import Status
 from base.views import BaseAV, BaseViewSet
 from modules.ledger import services as ledger
 from modules.ledger.choices import CUSTOMER_MONEY_KINDS
+from modules.shops import photos
 from modules.shops.api.v1.serializers import (
     LoginSerializer,
     MeSerializer,
@@ -121,6 +123,21 @@ class PartyViewSet(ShopScopedViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(methods=["get"], responses={(200, "image/*"): OpenApiTypes.BINARY})
+    @extend_schema(methods=["put"], request={"multipart/form-data": photos.PhotoSerializer}, responses={200: PartySerializer})
+    @extend_schema(methods=["delete"], responses={200: PartySerializer})
+    @action(detail=True, methods=["get", "put", "delete"], parser_classes=[MultiPartParser])
+    def photo(self, request, pk=None):
+        "The party's photo, served only to the shop's owner. PUT replaces it, DELETE removes it."
+        party = self.get_object()
+        if request.method == "GET":
+            return photos.serve(party)
+        if request.method == "PUT":
+            photos.put(party, request.data)
+        else:
+            photos.remove(party)
+        return Response(self.get_serializer(party).data)
+
     @extend_schema(parameters=[OpenApiParameter("month", str, description="YYYY-MM; default this month")], responses={200: StaffMonthSerializer})
     @action(detail=True, methods=["get"])
     def month(self, request, pk=None):
@@ -169,6 +186,29 @@ class ProductViewSet(ShopScopedViewSet):
 def _session(user, token: str | None = None) -> dict:
     body = {"username": user.username, "shop": ShopSerializer(shop_for(user)).data}
     return {**body, "token": token} if token else body
+
+
+class MePhotoAV(BaseAV):
+    "The shop's photo, served only to its owner. PUT replaces it, DELETE removes it."
+
+    http_method_names = ["get", "put", "delete", "options"]
+    parser_classes = [MultiPartParser]
+
+    @extend_schema(responses={(200, "image/*"): OpenApiTypes.BINARY})
+    def get(self, request):
+        return photos.serve(shop_for(request.user))
+
+    @extend_schema(request={"multipart/form-data": photos.PhotoSerializer})
+    @extend_response(MeSerializer())
+    def put(self, request):
+        photos.put(shop_for(request.user), request.data)
+        return _session(request.user)
+
+    @extend_schema(request=None)
+    @extend_response(MeSerializer())
+    def delete(self, request):
+        photos.remove(shop_for(request.user))
+        return _session(request.user)
 
 
 class LoginAV(BaseAV):

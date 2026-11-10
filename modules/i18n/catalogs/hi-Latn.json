@@ -354,5 +354,12 @@
   "bolo.example.2": "Sharma ji ka kitna baaki hai?",
   "bolo.example.3": "Ramu aaj aaya hai",
   "bolo.example.4": "Kaunsa saamaan kam hai?",
-  "loading": "Load ho raha hai…"
+  "loading": "Load ho raha hai…",
+  "photo.add": "Photo lagayein",
+  "photo.change": "Photo badlein",
+  "photo.remove": "Photo hatayein",
+  "photo.optional": "Zaroori nahi",
+  "photo.bad": "Ye photo khul nahi payi. Doosri chuniye.",
+  "photo.shop": "Dukaan ki photo",
+  "photo.shopBody": "Side bar par dikhegi. Sirf aap dekh sakte hain."
 }

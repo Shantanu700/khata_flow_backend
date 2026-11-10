@@ -9,6 +9,7 @@ from rest_framework import serializers
 from base.model import ModelBase
 from base.serializers import BaseSerializer
 from modules.ledger import services as ledger
+from modules.shops import photos
 from modules.shops.choices import SHOP_LANGUAGES, PartyKind, Unit
 from modules.shops.models import Party, Product, Shop
 
@@ -49,17 +50,21 @@ class PartySerializer(ShopScopedNameMixin, BaseSerializer):
     attendance_14d = serializers.SerializerMethodField()
     last_entry_on = serializers.DateField(read_only=True, allow_null=True, default=None)
     first_entry_on = serializers.DateField(read_only=True, allow_null=True, default=None)
+    photo_key = serializers.SerializerMethodField(help_text="Fetch the photo at photo/?v=<photo_key>; null when none.")
 
     class Meta:
         model = Party
         fields = ModelBase.BASE_MODEL_FIELDS + (
             "name", "aliases", "kind", "monthly_salary", "is_active", "balance", "staff_due", "present_today",
-            "attendance_14d", "last_entry_on", "first_entry_on",
+            "attendance_14d", "last_entry_on", "first_entry_on", "photo_key",
         )
         read_only_fields = ModelBase.BASE_MODEL_FIELDS
 
     def validate_aliases(self, value: list) -> list[str]:
         return _aliases(value)
+
+    def get_photo_key(self, party: Party) -> str | None:
+        return photos.key(party)
 
     def get_balance(self, party: Party) -> Decimal | None:
         if party.kind != PartyKind.CUSTOMER:
@@ -145,10 +150,15 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ShopSerializer(BaseSerializer):
+    photo_key = serializers.SerializerMethodField(help_text="Fetch the photo at me/photo/?v=<photo_key>; null when none.")
+
     class Meta:
         model = Shop
-        fields = ("name", "preferred_language")
+        fields = ("name", "preferred_language", "photo_key")
         read_only_fields = ("name",)
+
+    def get_photo_key(self, shop: Shop) -> str | None:
+        return photos.key(shop)
 
     def validate_preferred_language(self, value: str) -> str:
         if value not in SHOP_LANGUAGES:

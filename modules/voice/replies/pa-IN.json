@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "ਨਵਾਂ ਸਮਾਨ {name}, {unit} ਵਿੱਚ, ਹੁਣ {qty} {unit} ਸਟਾਕ, {alert} {unit} ਤੋਂ ਘੱਟ ਹੋਣ 'ਤੇ ਯਾਦ ਕਰਾਵਾਂਗਾ। ਜੋੜ ਦਿਆਂ?",
   "added.ADD_CUSTOMER": "{name} ਦਾ ਖਾਤਾ ਖੁੱਲ੍ਹ ਗਿਆ। {balance}",
   "added.ADD_STAFF": "{name} ਸਟਾਫ਼ ਵਿੱਚ ਜੁੜ ਗਏ। ਤਨਖਾਹ {amount} ਮਹੀਨਾ।",
-  "added.ADD_PRODUCT": "{name} ਸਟਾਕ ਵਿੱਚ ਜੁੜ ਗਿਆ। ਹੁਣ {qty} {unit} ਹੈ।"
+  "added.ADD_PRODUCT": "{name} ਸਟਾਕ ਵਿੱਚ ਜੁੜ ਗਿਆ। ਹੁਣ {qty} {unit} ਹੈ।",
+  "error.LLM_HTTP_429": "ਖਾਤਾ ਹੁਣ ਬਹੁਤ ਰੁੱਝਿਆ ਹੈ। ਥੋੜ੍ਹੀ ਦੇਰ ਬਾਅਦ ਬੋਲੋ।"
 }

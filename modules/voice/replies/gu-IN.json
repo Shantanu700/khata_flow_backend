@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "નવો સામાન {name}, {unit}માં, હમણાં {qty} {unit} સ્ટોક, {alert} {unit}થી ઓછું થાય ત્યારે યાદ કરાવીશ. ઉમેરું?",
   "added.ADD_CUSTOMER": "{name}નું ખાતું ખુલી ગયું. {balance}",
   "added.ADD_STAFF": "{name} સ્ટાફમાં ઉમેરાયા. પગાર {amount} મહિને.",
-  "added.ADD_PRODUCT": "{name} સ્ટોકમાં ઉમેરાયું. હમણાં {qty} {unit} છે."
+  "added.ADD_PRODUCT": "{name} સ્ટોકમાં ઉમેરાયું. હમણાં {qty} {unit} છે.",
+  "error.LLM_HTTP_429": "ખાતા હમણાં બહુ વ્યસ્ત છે. થોડી વાર પછી બોલો."
 }

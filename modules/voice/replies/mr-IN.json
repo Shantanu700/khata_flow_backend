@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "नवीन माल {name}, {unit} मध्ये, सध्या {qty} {unit} स्टॉक, {alert} {unit} पेक्षा कमी झाल्यावर आठवण करून देईन. जोडू का?",
   "added.ADD_CUSTOMER": "{name} यांचं खातं उघडलं. {balance}",
   "added.ADD_STAFF": "{name} कामगारांमध्ये जोडले. पगार महिन्याला {amount}.",
-  "added.ADD_PRODUCT": "{name} स्टॉकमध्ये जोडला. सध्या {qty} {unit} आहे."
+  "added.ADD_PRODUCT": "{name} स्टॉकमध्ये जोडला. सध्या {qty} {unit} आहे.",
+  "error.LLM_HTTP_429": "खाता सध्या खूप व्यस्त आहे. थोड्या वेळाने सांगा."
 }

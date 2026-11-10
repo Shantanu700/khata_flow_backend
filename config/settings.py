@@ -186,6 +186,8 @@ GNANI_TTS_LANGUAGE = os.environ.get("GNANI_TTS_LANGUAGE", "hi-IN")
 LLM_PROVIDER = os.environ.get("LLM_PROVIDER") or "groq"
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_MODEL = os.environ.get("LLM_MODEL") or "openai/gpt-oss-120b"
+# Used when LLM_MODEL has hit its daily token limit; empty turns that off.
+LLM_FALLBACK_MODEL = os.environ.get("LLM_FALLBACK_MODEL", "openai/gpt-oss-20b")
 # medium, not low: at low, gpt-oss-120b on Groq garbled some names ("Rathore ji" -> "Rathoth ji").
 LLM_REASONING_EFFORT = os.environ.get("LLM_REASONING_EFFORT") or "medium"
 # Any OpenAI-compatible chat completions base URL.
@@ -193,6 +195,7 @@ LLM_BASE_URL = (os.environ.get("LLM_BASE_URL") or "https://api.groq.com/openai/v
 
 MAX_AUDIO_SECONDS = float(os.environ.get("MAX_AUDIO_SECONDS", "20"))
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+MAX_PHOTO_BYTES = 1024 * 1024
 LEDGER_AMOUNT_CAP = int(os.environ.get("LEDGER_AMOUNT_CAP", "50000"))
 CLARIFICATION_TTL_SECONDS = 120
 RESOLVER_AUTO_SCORE = float(os.environ.get("RESOLVER_AUTO_SCORE", "88"))

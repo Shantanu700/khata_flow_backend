@@ -354,5 +354,12 @@
   "bolo.example.2": "How much does Sharma ji owe?",
   "bolo.example.3": "Ramu is here today",
   "bolo.example.4": "What is running low?",
-  "loading": "Loading…"
+  "loading": "Loading…",
+  "photo.add": "Add photo",
+  "photo.change": "Change photo",
+  "photo.remove": "Remove photo",
+  "photo.optional": "Optional",
+  "photo.bad": "Couldn't open that photo. Try another.",
+  "photo.shop": "Shop photo",
+  "photo.shopBody": "Shown on the side bar. Only you can see it."
 }

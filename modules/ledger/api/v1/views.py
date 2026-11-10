@@ -21,6 +21,7 @@ from modules.ledger.api.v1.serializers import (
 )
 from modules.ledger.choices import CUSTOMER_MONEY_KINDS, STAFF_MONEY_KINDS, STOCK_KINDS, EntryKind
 from modules.ledger.models import Entry
+from modules.shops import photos
 from modules.shops.choices import PartyKind
 from modules.shops.models import Party, Product
 from modules.shops.services import shop_for
@@ -156,7 +157,7 @@ class SummaryAV(BaseAV):
             "total_outstanding": ledger.total_outstanding(shop),
             "owing_count": customers.filter(balance__gt=0).count(),
             "customer_count": customers.count(),
-            "top_debtors": [{"id": p.pk, "name": p.name, "balance": p.balance} for p in ledger.top_debtors(shop)],
+            "top_debtors": [{"id": p.pk, "name": p.name, "balance": p.balance, "photo_key": photos.key(p)} for p in ledger.top_debtors(shop)],
             "low_stock": [
                 {"id": p.pk, "name": p.name, "unit": p.unit, "stock_level": p.stock_level, "threshold": p.low_stock_threshold}
                 for p in ledger.low_stock_products(shop)

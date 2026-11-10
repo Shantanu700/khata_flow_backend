@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "नया सामान {name}, {unit} में, अभी {qty} {unit} स्टॉक, {alert} {unit} से कम होने पर याद दिलाऊँगा। जोड़ दूँ?",
   "added.ADD_CUSTOMER": "{name} का खाता खुल गया। {balance}",
   "added.ADD_STAFF": "{name} स्टाफ़ में जुड़ गए। तनख्वाह {amount} महीना।",
-  "added.ADD_PRODUCT": "{name} स्टॉक में जुड़ गया। अभी {qty} {unit} है।"
+  "added.ADD_PRODUCT": "{name} स्टॉक में जुड़ गया। अभी {qty} {unit} है।",
+  "error.LLM_HTTP_429": "खाता अभी बहुत व्यस्त है। थोड़ी देर बाद बोलिए।"
 }

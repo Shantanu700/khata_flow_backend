@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "కొత్త సరుకు {name}, {unit} లెక్కలో, ఇప్పుడు {qty} {unit} స్టాక్, {alert} {unit} కంటే తగ్గితే గుర్తు చేస్తాను. చేర్చనా?",
   "added.ADD_CUSTOMER": "{name} ఖాతా తెరిచాను. {balance}",
   "added.ADD_STAFF": "{name}ని సిబ్బందిలో చేర్చాను. నెల జీతం {amount}.",
-  "added.ADD_PRODUCT": "{name} స్టాక్‌లో చేర్చాను. ఇప్పుడు {qty} {unit} ఉంది."
+  "added.ADD_PRODUCT": "{name} స్టాక్‌లో చేర్చాను. ఇప్పుడు {qty} {unit} ఉంది.",
+  "error.LLM_HTTP_429": "ఖాతా ఇప్పుడు చాలా బిజీగా ఉంది. కొద్దిసేపటి తర్వాత చెప్పండి."
 }

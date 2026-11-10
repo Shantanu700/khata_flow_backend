@@ -59,3 +59,22 @@ def test_strict_json_failure_falls_back_to_plain_json(llm, monkeypatch):
     parsed = GroqIntentParser().parse("Rathore ji ka kitna baaki hai", ShopContext())
     assert (parsed.intent, parsed.party_name) == (Intent.QUERY_CUSTOMER_BALANCE, "Rathore ji")
     assert "response_format" in sent[0] and "response_format" not in sent[1]
+
+
+def test_daily_limit_switches_to_the_fallback_model(monkeypatch, settings):
+    import httpx
+
+    from modules.voice.intent import GroqIntentParser, ShopContext
+
+    settings.LLM_API_KEY, settings.LLM_MODEL, settings.LLM_FALLBACK_MODEL = "k", "big", "small"
+    asked = []
+
+    def post(url, headers, json, timeout):
+        asked.append(json["model"])
+        if json["model"] == "big":
+            return httpx.Response(429, text='{"error":{"message":"Rate limit ... tokens per day (TPD): Limit 200000"}}')
+        return httpx.Response(200, json={"choices": [{"message": {"content": '{"intent": "UNKNOWN", "party_name": null, "product_name": null, "amount": null, "quantity": null, "unit": null, "date_hint": null, "period": null}'}}]})
+
+    monkeypatch.setattr(httpx, "post", post)
+    assert GroqIntentParser().parse("namaste", ShopContext()).intent == "UNKNOWN"
+    assert asked == ["big", "small"]

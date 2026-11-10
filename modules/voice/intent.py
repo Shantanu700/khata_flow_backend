@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 from dataclasses import dataclass, field
 from datetime import date
@@ -11,6 +12,8 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from modules.voice.choices import Intent, Period
 from modules.voice.providers.base import ProviderError
+
+log = logging.getLogger(__name__)
 
 MAX_RATE_LIMIT_WAIT = 10.0
 PLAIN_JSON_HINT = (
@@ -204,7 +207,8 @@ class GroqIntentParser:
                 "type": "json_schema",
                 "json_schema": {"name": "parsed_command", "strict": True, "schema": RESPONSE_SCHEMA},
             }
-        for attempt in (1, 2):
+        waited = False
+        while True:
             try:
                 response = httpx.post(
                     f"{settings.LLM_BASE_URL}/chat/completions",
@@ -214,9 +218,18 @@ class GroqIntentParser:
                 )
             except httpx.HTTPError as exc:
                 raise ProviderError("LLM_NETWORK", type(exc).__name__) from exc
-            # Groq's free tier allows 8,000 tokens a minute (~6 commands); one short wait rides out a burst.
-            if response.status_code != 429 or attempt == 2:
+            if response.status_code != 429:
                 break
+            # The day's tokens are used up: waiting won't help, but the smaller model has its own daily allowance.
+            daily = "(TPD)" in response.text
+            if daily and settings.LLM_FALLBACK_MODEL not in ("", payload["model"]):
+                log.warning("LLM daily limit on %s; using %s", payload["model"], settings.LLM_FALLBACK_MODEL)
+                payload["model"] = settings.LLM_FALLBACK_MODEL
+                continue
+            if daily or waited:
+                break
+            # Groq's free tier allows 8,000 tokens a minute (~6 commands); one short wait rides out a burst.
+            waited = True
             time.sleep(min(float(response.headers.get("retry-after") or 5), MAX_RATE_LIMIT_WAIT))
         if response.status_code == 400 and "json_validate_failed" in response.text:
             raise ProviderError("LLM_JSON_FAILED", response.text[:200])

@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "Naya saamaan {name}, {unit} mein, abhi {qty} {unit} stock, {alert} {unit} se kam hone par yaad dilaunga. Jod doon?",
   "added.ADD_CUSTOMER": "{name} ka khata khul gaya. {balance}",
   "added.ADD_STAFF": "{name} staff mein jud gaye. Salary {amount} mahina.",
-  "added.ADD_PRODUCT": "{name} stock mein jud gaya. Abhi {qty} {unit} hai."
+  "added.ADD_PRODUCT": "{name} stock mein jud gaya. Abhi {qty} {unit} hai.",
+  "error.LLM_HTTP_429": "Khata abhi bahut vyast hai. Thodi der baad boliye."
 }

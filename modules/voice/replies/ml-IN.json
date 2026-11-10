@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "പുതിയ സാധനം {name}, {unit} കണക്കിൽ, ഇപ്പോൾ {qty} {unit} സ്റ്റോക്ക്, {alert} {unit}-ൽ താഴെയായാൽ ഓർമ്മിപ്പിക്കും. ചേർക്കട്ടെ?",
   "added.ADD_CUSTOMER": "{name}-ന്റെ കണക്ക് തുറന്നു. {balance}",
   "added.ADD_STAFF": "{name}-നെ ജീവനക്കാരുടെ കൂട്ടത്തിൽ ചേർത്തു. മാസശമ്പളം {amount}.",
-  "added.ADD_PRODUCT": "{name} സ്റ്റോക്കിൽ ചേർത്തു. ഇപ്പോൾ {qty} {unit} ഉണ്ട്."
+  "added.ADD_PRODUCT": "{name} സ്റ്റോക്കിൽ ചേർത്തു. ഇപ്പോൾ {qty} {unit} ഉണ്ട്.",
+  "error.LLM_HTTP_429": "ഖാത ഇപ്പോൾ തിരക്കിലാണ്. കുറച്ചു കഴിഞ്ഞ് വീണ്ടും പറയൂ."
 }

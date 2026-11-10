@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "New item {name}, counted in {unit}, {qty} {unit} in stock, low-stock alert at {alert} {unit}. Shall I add it?",
   "added.ADD_CUSTOMER": "Opened a khata for {name}. {balance}",
   "added.ADD_STAFF": "Added {name} to staff, on {amount} a month.",
-  "added.ADD_PRODUCT": "Added {name} to stock. There are {qty} {unit} now."
+  "added.ADD_PRODUCT": "Added {name} to stock. There are {qty} {unit} now.",
+  "error.LLM_HTTP_429": "Khata is too busy right now. Please try again in a little while."
 }

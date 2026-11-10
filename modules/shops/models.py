@@ -14,6 +14,7 @@ class Shop(ModelBase):
     owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="shop")
     name = models.CharField(max_length=200)
     preferred_language = models.CharField(max_length=16, default="en-IN")
+    photo = models.FileField(upload_to="photos/%Y/%m/", null=True, blank=True)
 
     def __str__(self) -> str:
         return self.name
@@ -25,6 +26,7 @@ class Party(ModelBase):
     aliases = models.JSONField(default=list, blank=True)
     kind = models.CharField(max_length=16, choices=PartyKind.choices, default=PartyKind.CUSTOMER)
     monthly_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    photo = models.FileField(upload_to="photos/%Y/%m/", null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:

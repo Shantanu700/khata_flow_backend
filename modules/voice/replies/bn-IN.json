@@ -95,5 +95,6 @@
   "confirm.ADD_PRODUCT": "নতুন জিনিস {name}, {unit}-এ গোনা, এখন {qty} {unit} স্টক, {alert} {unit}-এর কম হলে মনে করিয়ে দেব। যোগ করব?",
   "added.ADD_CUSTOMER": "{name}-এর খাতা খোলা হল। {balance}",
   "added.ADD_STAFF": "{name} কর্মচারী হিসেবে যোগ হলেন। মাসিক বেতন {amount}।",
-  "added.ADD_PRODUCT": "{name} স্টকে যোগ হল। এখন {qty} {unit} আছে।"
+  "added.ADD_PRODUCT": "{name} স্টকে যোগ হল। এখন {qty} {unit} আছে।",
+  "error.LLM_HTTP_429": "খাতা এখন খুব ব্যস্ত। একটু পরে আবার বলুন।"
 }
