@@ -367,5 +367,6 @@
   "dash.age.30": "આ મહિને",
   "dash.age.90": "1–3 મહિના",
   "dash.age.old": "જૂનું",
-  "dash.agePeople": "{count} લોકો"
+  "dash.agePeople": "{count} લોકો",
+  "staff.deleteBody": "સ્ટાફની યાદીમાંથી હટી જશે. જૂની હાજરી અને ચુકવણી એન્ટ્રીઝમાં રહેશે, કંઈ ભૂંસાશે નહીં."
 }

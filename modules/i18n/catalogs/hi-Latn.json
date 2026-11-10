@@ -367,5 +367,6 @@
   "dash.age.30": "Is mahine",
   "dash.age.90": "1–3 mahine",
   "dash.age.old": "Purana",
-  "dash.agePeople": "{count} log"
+  "dash.agePeople": "{count} log",
+  "staff.deleteBody": "Staff ki list se hat jayenge. Unki purani haazri aur payments Entries mein rahengi, kuch mitega nahi."
 }

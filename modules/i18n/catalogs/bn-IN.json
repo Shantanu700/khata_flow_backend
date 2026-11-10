@@ -367,5 +367,6 @@
   "dash.age.30": "এই মাসে",
   "dash.age.90": "১–৩ মাস",
   "dash.age.old": "পুরনো",
-  "dash.agePeople": "{count} জন"
+  "dash.agePeople": "{count} জন",
+  "staff.deleteBody": "কর্মচারীর তালিকা থেকে সরানো হবে। আগের হাজিরা আর পেমেন্ট এন্ট্রিতে থাকবে, কিছুই মোছা হবে না।"
 }

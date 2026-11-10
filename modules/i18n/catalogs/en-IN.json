@@ -367,5 +367,6 @@
   "dash.age.30": "This month",
   "dash.age.90": "1–3 months",
   "dash.age.old": "Older",
-  "dash.agePeople": "{count} people"
+  "dash.agePeople": "{count} people",
+  "staff.deleteBody": "They'll be removed from the staff list. Their past attendance and payments stay in Entries, nothing is erased."
 }
