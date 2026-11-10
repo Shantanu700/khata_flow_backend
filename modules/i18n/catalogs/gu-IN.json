@@ -28,7 +28,6 @@
   "bolo.stop": "બસ, મોકલો",
   "bolo.sub": "તમારી ભાષામાં બોલો",
   "bolo.typePlaceholder": "રામુને 500 એડવાન્સ આપ્યા",
-  "bolo.typeSub": "ઘોંઘાટ હોય તો લખી દો",
   "bolo.typeTitle": "લખીને કહો",
   "bolo.working": "સમજું છું…",
   "chart.credit": "ઉધાર આપ્યું",
@@ -331,5 +330,18 @@
   "auth.notchTitle": "આજની વસૂલી",
   "auth.notchSub": "3 ગ્રાહક · ઉદાહરણ",
   "bolo.queue.todo": "{count} બાકી",
-  "bolo.queue.done": "{count} થઈ ગયા"
+  "bolo.queue.done": "{count} થઈ ગયા",
+  "toast.added": "{name} ઉમેર્યું.",
+  "toast.updated": "{name} બદલ્યું.",
+  "toast.removed": "{name} કાઢી નાખ્યું.",
+  "toast.undone": "એન્ટ્રી રદ કરી.",
+  "toast.unmarked": "{name}: હાજરી કાઢી.",
+  "toast.entry.CREDIT_GIVEN": "{name}: {amount} ઉધાર લખ્યું.",
+  "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} મળ્યા, લખ્યું.",
+  "toast.entry.ATTENDANCE": "{name}: હાજરી પૂરી.",
+  "toast.entry.STAFF_ADVANCE": "{name}: {amount} એડવાન્સ લખ્યું.",
+  "toast.entry.SALARY_PAID": "{name}: {amount} પગાર લખ્યો.",
+  "stock.after": "આ પછી સ્ટોક",
+  "toast.entry.STOCK_IN": "{name}: {qty} આવ્યું.",
+  "toast.entry.STOCK_OUT": "{name}: {qty} ગયું."
 }

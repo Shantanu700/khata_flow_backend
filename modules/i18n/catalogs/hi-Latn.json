@@ -56,7 +56,6 @@
   "bolo.stop": "Bas, bhej do",
   "bolo.sub": "Apni bhasha mein boliye",
   "bolo.typePlaceholder": "Ramu ko 500 advance diya",
-  "bolo.typeSub": "Shor ho to type kar dijiye",
   "bolo.typeTitle": "Likh ke bolo",
   "bolo.working": "Samajh raha hoon…",
   "chart.credit": "Udhaar diya",
@@ -331,5 +330,18 @@
   "view.table": "Table",
   "weekday.short": "So,Ma,Bu,Gu,Shu,Sha,Ra",
   "bolo.queue.todo": "{count} baaki",
-  "bolo.queue.done": "{count} ho gaye"
+  "bolo.queue.done": "{count} ho gaye",
+  "toast.added": "{name} jod diya.",
+  "toast.updated": "{name} badal diya.",
+  "toast.removed": "{name} hata diya.",
+  "toast.undone": "Entry palat di.",
+  "toast.unmarked": "{name} ki haaziri hata di.",
+  "toast.entry.CREDIT_GIVEN": "{name} ka {amount} udhaar likh diya.",
+  "toast.entry.PAYMENT_RECEIVED": "{name} se {amount} mile, likh diya.",
+  "toast.entry.ATTENDANCE": "{name} ki haaziri lag gayi.",
+  "toast.entry.STAFF_ADVANCE": "{name} ko {amount} advance likh diya.",
+  "toast.entry.SALARY_PAID": "{name} ko {amount} tankhwah likh di.",
+  "stock.after": "Iske baad stock",
+  "toast.entry.STOCK_IN": "{name} mein {qty} aaya.",
+  "toast.entry.STOCK_OUT": "{name} se {qty} nikla."
 }

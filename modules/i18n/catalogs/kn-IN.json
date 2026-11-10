@@ -28,7 +28,6 @@
   "bolo.stop": "ಸಾಕು, ಕಳಿಸಿ",
   "bolo.sub": "ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಮಾತಾಡಿ",
   "bolo.typePlaceholder": "ರಾಮುಗೆ 500 ಅಡ್ವಾನ್ಸ್ ಕೊಟ್ಟೆ",
-  "bolo.typeSub": "ಗಲಾಟೆ ಇದ್ರೆ ಟೈಪ್ ಮಾಡಿ",
   "bolo.typeTitle": "ಬರೆದು ಹೇಳಿ",
   "bolo.working": "ಅರ್ಥ ಮಾಡ್ಕೊಳ್ತಿದ್ದೀನಿ…",
   "chart.credit": "ಸಾಲ ಕೊಟ್ಟಿದ್ದು",
@@ -331,5 +330,18 @@
   "auth.notchTitle": "ಇಂದಿನ ವಸೂಲಿ",
   "auth.notchSub": "3 ಗ್ರಾಹಕರು · ಉದಾಹರಣೆ",
   "bolo.queue.todo": "{count} ಬಾಕಿ",
-  "bolo.queue.done": "{count} ಆಯಿತು"
+  "bolo.queue.done": "{count} ಆಯಿತು",
+  "toast.added": "{name} ಸೇರಿಸಲಾಗಿದೆ.",
+  "toast.updated": "{name} ಬದಲಿಸಲಾಗಿದೆ.",
+  "toast.removed": "{name} ತೆಗೆದುಹಾಕಲಾಗಿದೆ.",
+  "toast.undone": "ಎಂಟ್ರಿ ರದ್ದಾಯಿತು.",
+  "toast.unmarked": "{name}: ಹಾಜರಿ ತೆಗೆಯಲಾಗಿದೆ.",
+  "toast.entry.CREDIT_GIVEN": "{name}: {amount} ಸಾಲ ಬರೆಯಲಾಗಿದೆ.",
+  "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} ಬಂದಿದೆ, ಬರೆಯಲಾಗಿದೆ.",
+  "toast.entry.ATTENDANCE": "{name}: ಹಾಜರಿ ಹಾಕಲಾಗಿದೆ.",
+  "toast.entry.STAFF_ADVANCE": "{name}: {amount} ಮುಂಗಡ ಬರೆಯಲಾಗಿದೆ.",
+  "toast.entry.SALARY_PAID": "{name}: {amount} ಸಂಬಳ ಬರೆಯಲಾಗಿದೆ.",
+  "stock.after": "ಇದರ ನಂತರ ಸ್ಟಾಕ್",
+  "toast.entry.STOCK_IN": "{name}: {qty} ಬಂತು.",
+  "toast.entry.STOCK_OUT": "{name}: {qty} ಹೋಯಿತು."
 }

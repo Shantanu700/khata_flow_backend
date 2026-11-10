@@ -28,7 +28,6 @@
   "bolo.stop": "ব্যস, পাঠাও",
   "bolo.sub": "নিজের ভাষায় বলুন",
   "bolo.typePlaceholder": "রামুকে 500 অ্যাডভান্স দিলাম",
-  "bolo.typeSub": "আওয়াজ বেশি হলে টাইপ করুন",
   "bolo.typeTitle": "লিখে বলুন",
   "bolo.working": "বুঝছি…",
   "chart.credit": "বাকি দেওয়া",
@@ -331,5 +330,18 @@
   "auth.notchTitle": "আজকের আদায়",
   "auth.notchSub": "3 জন খদ্দের · উদাহরণ",
   "bolo.queue.todo": "{count}টা বাকি",
-  "bolo.queue.done": "{count}টা হয়ে গেছে"
+  "bolo.queue.done": "{count}টা হয়ে গেছে",
+  "toast.added": "{name} যোগ করা হয়েছে।",
+  "toast.updated": "{name} বদলানো হয়েছে।",
+  "toast.removed": "{name} সরানো হয়েছে।",
+  "toast.undone": "এন্ট্রি ফেরানো হয়েছে।",
+  "toast.unmarked": "{name}-এর হাজিরা সরানো হয়েছে।",
+  "toast.entry.CREDIT_GIVEN": "{name}-এর {amount} বাকি লেখা হয়েছে।",
+  "toast.entry.PAYMENT_RECEIVED": "{name}-এর থেকে {amount} পাওয়া গেছে, লেখা হয়েছে।",
+  "toast.entry.ATTENDANCE": "{name}-এর হাজিরা দেওয়া হয়েছে।",
+  "toast.entry.STAFF_ADVANCE": "{name}-কে {amount} অ্যাডভান্স লেখা হয়েছে।",
+  "toast.entry.SALARY_PAID": "{name}-কে {amount} বেতন লেখা হয়েছে।",
+  "stock.after": "এর পরে স্টক",
+  "toast.entry.STOCK_IN": "{name}: {qty} এল।",
+  "toast.entry.STOCK_OUT": "{name}: {qty} বেরোল।"
 }

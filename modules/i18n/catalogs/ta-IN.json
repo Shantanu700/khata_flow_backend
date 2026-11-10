@@ -28,7 +28,6 @@
   "bolo.stop": "போதும், அனுப்பு",
   "bolo.sub": "உங்க மொழியில் பேசுங்க",
   "bolo.typePlaceholder": "ராமுக்கு 500 அட்வான்ஸ் கொடுத்தேன்",
-  "bolo.typeSub": "சத்தமா இருந்தா டைப் பண்ணுங்க",
   "bolo.typeTitle": "எழுதிச் சொல்லுங்க",
   "bolo.working": "புரிஞ்சுக்கிறேன்…",
   "chart.credit": "கடன் கொடுத்தது",
@@ -331,5 +330,18 @@
   "auth.notchTitle": "இன்றைய வசூல்",
   "auth.notchSub": "3 வாடிக்கையாளர் · உதாரணம்",
   "bolo.queue.todo": "{count} மீதம்",
-  "bolo.queue.done": "{count} முடிந்தது"
+  "bolo.queue.done": "{count} முடிந்தது",
+  "toast.added": "{name} சேர்க்கப்பட்டது.",
+  "toast.updated": "{name} மாற்றப்பட்டது.",
+  "toast.removed": "{name} நீக்கப்பட்டது.",
+  "toast.undone": "பதிவு ரத்து செய்யப்பட்டது.",
+  "toast.unmarked": "{name}: வருகை நீக்கப்பட்டது.",
+  "toast.entry.CREDIT_GIVEN": "{name}: {amount} கடன் எழுதப்பட்டது.",
+  "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} வந்தது, எழுதப்பட்டது.",
+  "toast.entry.ATTENDANCE": "{name}: வருகை பதிவானது.",
+  "toast.entry.STAFF_ADVANCE": "{name}: {amount} முன்பணம் எழுதப்பட்டது.",
+  "toast.entry.SALARY_PAID": "{name}: {amount} சம்பளம் எழுதப்பட்டது.",
+  "stock.after": "இதற்குப் பிறகு ஸ்டாக்",
+  "toast.entry.STOCK_IN": "{name}: {qty} வந்தது.",
+  "toast.entry.STOCK_OUT": "{name}: {qty} போனது."
 }

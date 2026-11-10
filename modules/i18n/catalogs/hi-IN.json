@@ -28,7 +28,6 @@
   "bolo.stop": "बस, भेज दो",
   "bolo.sub": "अपनी भाषा में बोलिए",
   "bolo.typePlaceholder": "रामू को 500 एडवांस दिया",
-  "bolo.typeSub": "शोर हो तो टाइप कर दीजिए",
   "bolo.typeTitle": "लिख के बोलो",
   "bolo.working": "समझ रहा हूँ…",
   "chart.credit": "उधार दिया",
@@ -331,5 +330,18 @@
   "auth.notchTitle": "आज की वसूली",
   "auth.notchSub": "3 ग्राहक · उदाहरण",
   "bolo.queue.todo": "{count} बाकी",
-  "bolo.queue.done": "{count} हो गए"
+  "bolo.queue.done": "{count} हो गए",
+  "toast.added": "{name} जोड़ दिया।",
+  "toast.updated": "{name} बदल दिया।",
+  "toast.removed": "{name} हटा दिया।",
+  "toast.undone": "एंट्री पलट दी।",
+  "toast.unmarked": "{name} की हाज़िरी हटा दी।",
+  "toast.entry.CREDIT_GIVEN": "{name} का {amount} उधार लिख दिया।",
+  "toast.entry.PAYMENT_RECEIVED": "{name} से {amount} मिले, लिख दिया।",
+  "toast.entry.ATTENDANCE": "{name} की हाज़िरी लग गई।",
+  "toast.entry.STAFF_ADVANCE": "{name} को {amount} एडवांस लिख दिया।",
+  "toast.entry.SALARY_PAID": "{name} को {amount} तनख्वाह लिख दी।",
+  "stock.after": "इसके बाद स्टॉक",
+  "toast.entry.STOCK_IN": "{name} में {qty} आया।",
+  "toast.entry.STOCK_OUT": "{name} से {qty} निकला।"
 }

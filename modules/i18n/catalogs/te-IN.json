@@ -28,7 +28,6 @@
   "bolo.stop": "చాలు, పంపండి",
   "bolo.sub": "మీ భాషలో మాట్లాడండి",
   "bolo.typePlaceholder": "రాముకి 500 అడ్వాన్స్ ఇచ్చాను",
-  "bolo.typeSub": "శబ్దం ఉంటే టైప్ చేయండి",
   "bolo.typeTitle": "రాసి చెప్పండి",
   "bolo.working": "అర్థం చేసుకుంటున్నా…",
   "chart.credit": "అప్పు ఇచ్చింది",
@@ -331,5 +330,18 @@
   "auth.notchTitle": "ఈరోజు వసూలు",
   "auth.notchSub": "3 కస్టమర్లు · ఉదాహరణ",
   "bolo.queue.todo": "{count} మిగిలాయి",
-  "bolo.queue.done": "{count} అయిపోయాయి"
+  "bolo.queue.done": "{count} అయిపోయాయి",
+  "toast.added": "{name} చేర్చాం.",
+  "toast.updated": "{name} మార్చాం.",
+  "toast.removed": "{name} తీసేశాం.",
+  "toast.undone": "ఎంట్రీ రద్దు చేశాం.",
+  "toast.unmarked": "{name}: హాజరు తీసేశాం.",
+  "toast.entry.CREDIT_GIVEN": "{name}: {amount} అప్పు రాశాం.",
+  "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} వచ్చింది, రాశాం.",
+  "toast.entry.ATTENDANCE": "{name}: హాజరు వేశాం.",
+  "toast.entry.STAFF_ADVANCE": "{name}: {amount} అడ్వాన్స్ రాశాం.",
+  "toast.entry.SALARY_PAID": "{name}: {amount} జీతం రాశాం.",
+  "stock.after": "దీని తర్వాత స్టాక్",
+  "toast.entry.STOCK_IN": "{name}: {qty} వచ్చింది.",
+  "toast.entry.STOCK_OUT": "{name}: {qty} వెళ్ళింది."
 }

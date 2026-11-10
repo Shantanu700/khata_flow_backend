@@ -28,7 +28,6 @@
   "bolo.stop": "Done, send",
   "bolo.sub": "Speak in your language",
   "bolo.typePlaceholder": "Gave Ramu 500 advance",
-  "bolo.typeSub": "Too noisy? Type it instead",
   "bolo.typeTitle": "Type it",
   "bolo.working": "Working it out…",
   "chart.credit": "Credit given",
@@ -331,5 +330,18 @@
   "auth.notchTitle": "Today's payments",
   "auth.notchSub": "3 customers · Example",
   "bolo.queue.todo": "{count} to do",
-  "bolo.queue.done": "{count} done"
+  "bolo.queue.done": "{count} done",
+  "toast.added": "{name} added.",
+  "toast.updated": "{name} updated.",
+  "toast.removed": "{name} removed.",
+  "toast.undone": "Entry undone.",
+  "toast.unmarked": "{name}'s attendance removed.",
+  "toast.entry.CREDIT_GIVEN": "{amount} credit written for {name}.",
+  "toast.entry.PAYMENT_RECEIVED": "{amount} received from {name}.",
+  "toast.entry.ATTENDANCE": "{name} marked present.",
+  "toast.entry.STAFF_ADVANCE": "{amount} advance written for {name}.",
+  "toast.entry.SALARY_PAID": "{amount} salary written for {name}.",
+  "stock.after": "Stock after this",
+  "toast.entry.STOCK_IN": "{qty} added to {name}.",
+  "toast.entry.STOCK_OUT": "{qty} taken out of {name}."
 }

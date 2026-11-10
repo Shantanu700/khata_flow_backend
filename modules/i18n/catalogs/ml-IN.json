@@ -28,7 +28,6 @@
   "bolo.stop": "മതി, അയയ്ക്കൂ",
   "bolo.sub": "നിങ്ങളുടെ ഭാഷയിൽ പറയൂ",
   "bolo.typePlaceholder": "രാമുവിന് 500 അഡ്വാൻസ് കൊടുത്തു",
-  "bolo.typeSub": "ബഹളമാണെങ്കിൽ ടൈപ്പ് ചെയ്യൂ",
   "bolo.typeTitle": "എഴുതി പറയൂ",
   "bolo.working": "മനസ്സിലാക്കുന്നു…",
   "chart.credit": "കടം കൊടുത്തത്",
@@ -331,5 +330,18 @@
   "auth.notchTitle": "ഇന്നത്തെ പിരിവ്",
   "auth.notchSub": "3 ഉപഭോക്താക്കൾ · ഉദാഹരണം",
   "bolo.queue.todo": "{count} ബാക്കി",
-  "bolo.queue.done": "{count} കഴിഞ്ഞു"
+  "bolo.queue.done": "{count} കഴിഞ്ഞു",
+  "toast.added": "{name} ചേർത്തു.",
+  "toast.updated": "{name} മാറ്റി.",
+  "toast.removed": "{name} നീക്കി.",
+  "toast.undone": "എൻട്രി റദ്ദാക്കി.",
+  "toast.unmarked": "{name}: ഹാജർ നീക്കി.",
+  "toast.entry.CREDIT_GIVEN": "{name}: {amount} കടം എഴുതി.",
+  "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} കിട്ടി, എഴുതി.",
+  "toast.entry.ATTENDANCE": "{name}: ഹാജർ രേഖപ്പെടുത്തി.",
+  "toast.entry.STAFF_ADVANCE": "{name}: {amount} അഡ്വാൻസ് എഴുതി.",
+  "toast.entry.SALARY_PAID": "{name}: {amount} ശമ്പളം എഴുതി.",
+  "stock.after": "ഇതിനു ശേഷം സ്റ്റോക്ക്",
+  "toast.entry.STOCK_IN": "{name}: {qty} വന്നു.",
+  "toast.entry.STOCK_OUT": "{name}: {qty} പോയി."
 }
