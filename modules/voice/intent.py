@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 MAX_RATE_LIMIT_WAIT = 10.0
 PLAIN_JSON_HINT = (
     "\nReply with only one JSON object with exactly these keys: intent, party_name, product_name, amount, "
-    "quantity, unit, date_hint, period. Use null for unused keys. No other text."
+    "quantity, unit, date_hint, period, low_stock_alert. Use null for unused keys. No other text."
 )
 
 
@@ -33,6 +33,7 @@ class ParsedCommand(BaseModel):
     unit: str | None = None
     date_hint: str | None = None
     period: Period | None = None
+    low_stock_alert: Decimal | None = None
 
 
 @dataclass
@@ -63,6 +64,7 @@ RESPONSE_SCHEMA = {
         "unit": _nullable("string"),
         "date_hint": _nullable("string"),
         "period": {"type": ["string", "null"], "enum": [*(p.value for p in Period), None]},
+        "low_stock_alert": _nullable("number"),
     },
     "required": list(ParsedCommand.model_fields),
     "additionalProperties": False,
@@ -133,6 +135,11 @@ QUERY_TOTAL_OUTSTANDING is what is still owed now; QUERY_CREDIT_GIVEN is what wa
 Rules:
 - A command can be several sentences: Khata asked for a missing detail and the last sentence answers it \
 ("Naya staff Raju jodo. 8000" is ADD_STAFF, Raju, amount 8000; "Naya saamaan Maggi. Packet" is ADD_PRODUCT, unit packet).
+- After Khata reads back a new customer, staff member or product, the shopkeeper may change a detail instead \
+of saying yes ("Naya staff Bebo, salary 2000. Nahi, salary 3000 kar do" is ADD_STAFF, Bebo, amount 3000; \
+"Naya saamaan Kurkure, packet. Low stock alert 6 packet pe" adds low_stock_alert 6; "...Naam Bebo Sharma hai" \
+renames). A later sentence that changes a detail wins; keep every detail it does not change, and the intent \
+unless it is changed too ("ye staff hai, customer nahi").
 - ADD_CUSTOMER, ADD_STAFF, ADD_PRODUCT: the name is new, so write it as said, in Latin script and Title Case; \
 never swap in a known name.
 - party_name / product_name: always Latin script. If it matches a known name below (even loosely, \
@@ -147,6 +154,8 @@ before yesterday, "pichhle mahine" the first day of last month); null for today 
 - period: only for QUERY_CREDIT_GIVEN, QUERY_PAYMENTS_RECEIVED, QUERY_STAFF_PAID, QUERY_STOCK_MOVEMENT and \
 QUERY_STAFF_DUE (its month), and only when said: TODAY (aaj), YESTERDAY (kal), THIS_WEEK, LAST_WEEK, THIS_MONTH, LAST_MONTH, or ALL (ab tak, \
 kul milake, total). Those intents use period, never date_hint.
+- low_stock_alert: ADD_PRODUCT only, the stock level at which to warn that it is running low, when said \
+("alert 6 pe", "10 se kam ho to batana").
 - Every field not used by the intent is null.
 """
 

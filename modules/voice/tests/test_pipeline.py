@@ -455,3 +455,34 @@ def test_typed_no_cancels_a_missing_detail_question(api, llm, shop):
 
 def test_yes_without_a_question_is_a_fresh_command(api, llm, shop):
     assert text(api, "yes")["error_code"] == "UNKNOWN_INTENT"
+
+
+def test_a_change_at_the_read_back_is_applied_and_read_back_again(api, llm, shop, monkeypatch):
+    llm(Intent.ADD_STAFF, party_name="Bebo", amount=D("2000"))
+    body = text(api, "Naya staff Bebo, salary 2000")
+    heard = []
+    monkeypatch.setattr(
+        FakeIntentParser, "parse", lambda self, said, context: heard.append(said) or ParsedCommand(intent=Intent.ADD_STAFF, party_name="Bebo", amount=D("3000"))
+    )
+    changed = reply(api, body, "nahi, salary 3000 kar do")
+    assert heard == ["Naya staff Bebo, salary 2000. nahi, salary 3000 kar do"]
+    assert changed["clarification"]["kind"] == "confirm_create"
+    assert changed["response_text"] == "Naya staff Bebo, salary ₹3,000 mahina. Jod doon?"
+    assert not Party.objects.filter(name="Bebo").exists()
+    reply(api, changed, "haan ji")
+    assert Party.objects.get(name="Bebo").monthly_salary == D("3000")
+
+
+def test_low_stock_alert_can_be_set_by_voice(api, llm, shop):
+    llm(Intent.ADD_PRODUCT, product_name="Kurkure", unit="packet", low_stock_alert=D("6"))
+    body = text(api)
+    assert "6 packet se kam hone par" in body["response_text"]
+    reply(api, body, "हाँ")
+    assert shop.products.get(name="Kurkure").low_stock_threshold == D("6")
+
+
+def test_yes_no_needs_a_reply_of_only_yes_or_no_words():
+    from modules.voice.pipeline import NO, YES, _yes_no
+
+    assert [_yes_no(t) for t in ["haan jod do", "Yes, please.", "हाँ", "nahi ji", "no thanks"]] == [YES, YES, YES, NO, NO]
+    assert [_yes_no(t) for t in ["nahi, salary 3000", "haan naam Bebo Sharma", "Sharma ji ka hisaab", ""]] == [None] * 4

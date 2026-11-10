@@ -223,7 +223,7 @@ def _new_details(command: VoiceCommand, parsed: ParsedCommand, answers: dict) ->
         "amount": max(parsed.amount or Decimal(0), Decimal(0)),
         "unit": unit,
         "quantity": max(parsed.quantity or Decimal(0), Decimal(0)),
-        "alert": NEW_PRODUCT_ALERT,
+        "alert": NEW_PRODUCT_ALERT if parsed.low_stock_alert is None else max(parsed.low_stock_alert, Decimal(0)),
     }
     if not answers.get("create_confirmed"):
         _ask(command, "confirm_create", responses.confirm_new(intent, new), list(zip((YES, NO), responses.yes_no())), answers)
@@ -438,24 +438,28 @@ def _speak(command: VoiceCommand, timings: Timings) -> None:
 # Beyond each language's own Yes/No labels: what shopkeepers also type or say.
 YES_WORDS = {"yes", "y", "ok", "okay", "sure", "haan", "han", "ha", "haa", "hanji", "ji", "theek", "thik", "jod", "kar", "add"}
 NO_WORDS = {"no", "n", "nahi", "nahin", "nai", "na", "mat", "cancel", "rehne", "ruko", "stop"}
+FILLER_WORDS = {"ji", "do", "dijiye", "karo", "please", "thanks", "it", "hai", "sahi", "bilkul"}
 
 
 def _yes_no(text: str) -> str | None:
-    "YES or NO for a short reply that starts with one ('haan jod do', 'no thanks'); None for anything else."
-    words = re.sub(r"[^\w\s]", " ", text.lower()).split()
-    if not 0 < len(words) <= 4:
-        return None
+    """YES or NO for a reply made only of yes (or only of no) words, such as 'haan jod do' or 'no thanks'.
+    Anything more ('nahi, salary 3000') is None: a detail to change, not an answer."""
+    # Only punctuation goes: \W would also strip Devanagari vowel signs (हाँ).
+    words = re.sub(r"[.,!?;:'\"।|]", " ", text.lower()).split()
     labels = [(responses.catalog(code)["yes"].lower(), responses.catalog(code)["no"].lower()) for code in SHOP_LANGUAGES]
-    if words[0] in YES_WORDS or words[0] in {yes for yes, _ in labels}:
+    yes = YES_WORDS | {label for label, _ in labels}
+    no = NO_WORDS | {label for _, label in labels}
+    if words and set(words) <= yes | FILLER_WORDS and set(words) & yes:
         return YES
-    if words[0] in NO_WORDS or words[0] in {no for _, no in labels}:
+    if words and set(words) <= no | FILLER_WORDS and set(words) & no:
         return NO
     return None
 
 
 def _take_question(command: VoiceCommand, reply_to: int | None) -> tuple[dict, dict, str | None] | None:
     """The question `reply_to` still waits on, when this command answers it: (clarification, its parsed command,
-    YES/NO or None for a missing detail). That question is closed; this command carries on from it."""
+    YES/NO, or None for a missing detail or a change to the details). That question is closed; this command
+    carries on from it."""
     if not reply_to:
         return None
     with transaction.atomic():
@@ -466,6 +470,8 @@ def _take_question(command: VoiceCommand, reply_to: int | None) -> tuple[dict, d
         answer = _yes_no(command.transcript)
         if asked["kind"] == "fill":
             answer = NO if answer == NO else None
+        elif asked["kind"] == "confirm_create":
+            pass  # neither yes nor no: a change to the details read back, parsed with the earlier words
         elif answer is None or {option["id"] for option in asked["options"]} != {YES, NO}:
             return None
         pending.stage = CommandStatus.ANSWERED
@@ -518,7 +524,7 @@ def handle_command(command: VoiceCommand, reply_to: int | None = None) -> VoiceC
             _resume(command, question[0], question[2], timings)
             return
         # The answer to "what is the salary?" is parsed together with what came before it, so it has a meaning.
-        earlier = question[0]["answers"]["said"] if question else ""
+        earlier = question[0]["answers"].get("said", "") if question else ""
         said = ". ".join(filter(None, [earlier, command.transcript.strip()]))
         with timings("intent"):
             parsed = get_intent_parser().parse(said, context)
