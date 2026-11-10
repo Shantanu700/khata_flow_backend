@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 from decimal import Decimal
 
@@ -10,10 +11,12 @@ from rest_framework.test import APIClient
 from modules.ledger.choices import EntryKind
 from modules.ledger.models import Entry
 from modules.ledger.services import customer_balance, record_entry, stock_level
+from modules.shops.choices import PartyKind
 from modules.shops.models import Party, Shop
 from modules.voice.choices import CommandStatus, Intent
 from modules.voice.intent import FakeIntentParser, ParsedCommand
 from modules.voice.models import VoiceCommand
+from modules.voice.pipeline import handle_command
 from modules.voice.providers import ProviderError
 from modules.voice.providers.fake import FakeSTT, silent_wav
 
@@ -53,7 +56,7 @@ def test_add_credit_writes_entry_and_speaks(api, llm, sharma):
     assert body["stage"] == CommandStatus.COMMITTED
     assert body["response_text"] == "Theek hai. Sharma ji ka ₹500 udhaar likh diya. Ab kul baaki ₹500 hai."
     assert body["entry"]["kind"] == EntryKind.CREDIT_GIVEN and body["entry"]["amount"] == 500
-    assert body["response_audio_url"].endswith(".wav")
+    assert body["response_audio_url"].endswith(f"/api/v1/voice/commands/{body['id']}/audio/")
     assert set(body["timings_ms"]) == {"intent", "resolve", "commit", "tts"}
 
 
@@ -110,13 +113,13 @@ def test_queries(api, llm, shop, sharma, verma, ramu, stocked):
     assert text(api)["response_text"].startswith("Ramu is mahine 1 din aaye.")
 
 
-def test_undo_last(api, llm, shop, sharma):
+def test_undo_is_never_done_by_voice(api, llm, shop, sharma):
     record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("500"))
     llm(Intent.UNDO_LAST)
-    body = text(api, "pichhli entry hata do")
-    assert body["response_text"] == "Pichhli entry hata di: Sharma ji ka ₹500 udhaar."
-    assert body["entry"]["kind"] == EntryKind.REVERSAL
-    assert customer_balance(sharma) == 0
+    body = text(api, "Gupta aunty ke 750 wapas karo")
+    assert body["stage"] == CommandStatus.ANSWERED and body["entry"] is None
+    assert body["response_text"].startswith("Awaaz se entry nahi palat sakta.")
+    assert customer_balance(sharma) == 500 and Entry.objects.count() == 1
 
 
 def test_ambiguous_name_round_trip(api, llm, sharma, verma):
@@ -224,3 +227,262 @@ def test_commands_are_scoped_to_the_owners_shop(api, llm, sharma, django_user_mo
     response = stranger.get(f"/api/v1/voice/commands/{body['id']}/")
     assert (response.status_code, response.json()["error"]["code"]) == (404, "NOT_FOUND")
     assert stranger.get("/api/v1/parties/").json()["count"] == 0
+
+
+def test_shop_overview_questions(api, llm, shop, sharma, verma, ramu):
+    shyam = Party.objects.create(shop=shop, name="Shyam", kind=PartyKind.STAFF)
+    Party.objects.create(shop=shop, name="Gone", kind=PartyKind.STAFF, is_active=False)
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("500"))
+    record_entry(shop, EntryKind.ATTENDANCE, party=ramu)
+    cases = [
+        (Intent.QUERY_STAFF_LIST, "Dukaan mein 2 log kaam karte hain: Ramu aur Shyam."),
+        (Intent.QUERY_ATTENDANCE_TODAY, "Aaj Ramu aaye hain. Shyam abhi nahi aaye."),
+        (Intent.QUERY_CUSTOMER_COUNT, "Aapke 2 customer hain, 1 par udhaar baaki hai."),
+    ]
+    for intent, expected in cases:
+        llm(intent)
+        body = text(api)
+        assert (body["stage"], body["response_text"]) == (CommandStatus.ANSWERED, expected)
+    record_entry(shop, EntryKind.ATTENDANCE, party=shyam)
+    llm(Intent.QUERY_ATTENDANCE_TODAY)
+    assert text(api)["response_text"] == "Aaj sab aaye hain: Ramu aur Shyam."
+    shop.parties.filter(kind=PartyKind.STAFF).update(is_active=False)
+    llm(Intent.QUERY_STAFF_LIST)
+    assert text(api)["response_text"] == "Abhi koi staff nahi joda gaya hai."
+
+
+def test_staff_due_names_the_month_asked_about(api, llm, ramu):
+    last_month = (timezone.localdate().replace(day=1) - timedelta(days=1)).replace(day=1)
+    llm(Intent.QUERY_STAFF_DUE, party_name="Ramu", date_hint=last_month.isoformat())
+    assert text(api)["response_text"] == "Ramu pichhle mahine 0 din aaye. ₹0 bane, kuch nahi diya, ₹0 dena baaki hai."
+    llm(Intent.QUERY_STAFF_DUE, party_name="Ramu", period="LAST_MONTH")
+    assert text(api)["response_text"].startswith("Ramu pichhle mahine 0 din aaye.")
+
+
+def test_aggregate_questions(api, llm, shop, sharma, verma, ramu, aata, maggi):
+    today = timezone.localdate()
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=verma, amount=D("1000"), occurred_on=today - timedelta(days=40))
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("500"))
+    record_entry(shop, EntryKind.CREDIT_GIVEN, party=verma, amount=D("200"))
+    record_entry(shop, EntryKind.PAYMENT_RECEIVED, party=sharma, amount=D("100"))
+    record_entry(shop, EntryKind.STAFF_ADVANCE, party=ramu, amount=D("300"))
+    record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("1000"))
+    record_entry(shop, EntryKind.STOCK_IN, product=maggi, quantity=D("10"))
+    record_entry(shop, EntryKind.STOCK_OUT, product=maggi, quantity=D("4"))
+    record_entry(shop, EntryKind.STOCK_IN, product=aata, quantity=D("5"))
+    cases = [
+        (dict(intent=Intent.QUERY_STOCK_LIST), "Stock mein 2 cheezein hain: Aashirvaad Aata 5kg 5 packet aur Maggi 6 packet."),
+        (dict(intent=Intent.QUERY_DEBTOR_LIST), "2 logon par udhaar baaki hai: Verma ji ₹1,200 aur Sharma ji ₹400."),
+        (dict(intent=Intent.QUERY_CREDIT_GIVEN), "Aaj ₹700 ka udhaar diya gaya."),
+        (dict(intent=Intent.QUERY_CREDIT_GIVEN, party_name="Verma"), "Ab tak Verma ji ko ₹1,200 ka udhaar diya gaya."),
+        (dict(intent=Intent.QUERY_PAYMENTS_RECEIVED, period="THIS_WEEK"), "Is hafte ₹100 ki vasooli hui."),
+        (dict(intent=Intent.QUERY_PAYMENTS_RECEIVED, party_name="Sharma ji", period="LAST_MONTH"), "Pichhle mahine Sharma ji se ₹0 mile."),
+        (dict(intent=Intent.QUERY_STAFF_PAID), "Aaj staff ko ₹1,300 diye gaye: ₹300 advance, ₹1,000 tankhwah."),
+        (dict(intent=Intent.QUERY_STAFF_PAID, party_name="Ramu", period="THIS_MONTH"), "Is mahine Ramu ko ₹1,300 diye gaye: ₹300 advance, ₹1,000 tankhwah."),
+        (dict(intent=Intent.QUERY_STOCK_MOVEMENT, product_name="maggi"), "Aaj Maggi ke 10 packet aaye aur 4 packet nikle."),
+        (
+            dict(intent=Intent.QUERY_STOCK_MOVEMENT),
+            "Aaj 2 cheezon mein aana-jaana hua: Aashirvaad Aata 5kg: 5 packet aaye, 0 packet nikle; Maggi: 10 packet aaye, 4 packet nikle.",
+        ),
+        (dict(intent=Intent.QUERY_STOCK_MOVEMENT, period="YESTERDAY"), "Kal stock mein kuch aaya ya nikla nahi."),
+    ]
+    for fields, expected in cases:
+        llm(**fields)
+        body = text(api)
+        assert (body["stage"], body["response_text"]) == (CommandStatus.ANSWERED, expected), fields
+
+
+def test_query_for_unknown_customer_does_not_offer_to_create(api, llm, sharma):
+    llm(Intent.QUERY_CREDIT_GIVEN, party_name="Pandey ji")
+    body = text(api)
+    assert body["stage"] == CommandStatus.FAILED and body["clarification"] is None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_progress_streams_each_stage_then_the_command(api, llm, sharma):
+    llm(Intent.QUERY_CUSTOMER_BALANCE, party_name="Sharma ji")
+    response = api.post("/api/v1/voice/text-commands/?progress=1", {"text": "Sharma ji ka kitna"}, format="json")
+    assert response["Content-Type"] == "application/x-ndjson"
+    events = [json.loads(line) for line in b"".join(response.streaming_content).decode().splitlines()]
+    assert events[0] == {"id": events[-1]["command"]["id"]}
+    assert [e["stage"] for e in events[1:-1]] == ["intent", "resolve", "commit", "tts"]
+    assert all(isinstance(e["ms"], int) for e in events[1:-1])
+    assert events[-1]["command"]["stage"] == CommandStatus.ANSWERED
+    assert events[-1]["command"]["response_text"] == "Sharma ji ka koi baaki nahi hai."
+
+
+@pytest.mark.django_db(transaction=True)
+def test_progress_reports_a_refused_answer_as_an_error_line(api, llm, sharma):
+    llm(Intent.QUERY_CUSTOMER_BALANCE, party_name="Sharma ji")
+    command = text(api)
+    response = api.post(f"/api/v1/voice/commands/{command['id']}/clarify/?progress=1", {"confirm": True}, format="json")
+    events = [json.loads(line) for line in b"".join(response.streaming_content).decode().splitlines()]
+    assert events == [
+        {"id": command["id"]},
+        {"error": {"code": "NOT_WAITING", "message": "This command is not waiting for an answer."}},
+    ]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_progress_carries_a_written_entry(api, llm, sharma):
+    llm(Intent.ADD_CREDIT, party_name="Sharma ji", amount=D("500"))
+    response = api.post("/api/v1/voice/text-commands/?progress=1", {"text": "Sharma ji ka 500 udhaar"}, format="json")
+    last = json.loads(b"".join(response.streaming_content).decode().splitlines()[-1])
+    assert last["command"]["stage"] == CommandStatus.COMMITTED and last["command"]["entry"]["amount"] == 500
+
+
+def test_cancel_before_the_write_leaves_the_ledger_alone(api, llm, sharma, shop):
+    llm(Intent.ADD_CREDIT, party_name="Sharma ji", amount=D("500"))
+    command = VoiceCommand.objects.create(shop=shop, input_mode="TEXT", transcript="Sharma ji ka 500", language="hi-Latn")
+    assert api.post(f"/api/v1/voice/commands/{command.pk}/cancel/").json()["stage"] == CommandStatus.CANCELLED
+    handle_command(command)
+    command.refresh_from_db()
+    assert command.stage == CommandStatus.CANCELLED and not command.response_audio
+    assert not Entry.objects.exists() and customer_balance(sharma) == 0
+
+
+def test_cancel_after_the_write_reverses_it(api, llm, sharma):
+    llm(Intent.ADD_CREDIT, party_name="Sharma ji", amount=D("500"))
+    command = text(api)
+    assert customer_balance(sharma) == 500
+    assert api.post(f"/api/v1/voice/commands/{command['id']}/cancel/").json()["stage"] == CommandStatus.CANCELLED
+    assert customer_balance(sharma) == 0
+    assert Entry.objects.filter(kind=EntryKind.REVERSAL, voice_command_id=command["id"]).count() == 1
+
+
+def clarify(api, body: dict, **answer) -> dict:
+    return api.post(f"/api/v1/voice/commands/{body['id']}/clarify/", answer, format="json").json()
+
+
+def test_new_customer_is_added_only_after_confirming(api, llm, sharma):
+    llm(Intent.ADD_CUSTOMER, party_name="Rahul Verma", amount=D("300"))
+    body = text(api, "Naya customer Rahul Verma, pichhla udhaar 300")
+    assert body["clarification"]["kind"] == "confirm_create"
+    assert body["response_text"] == "Naya customer Rahul Verma, pichhla udhaar ₹300. Jod doon?"
+    assert not Party.objects.filter(name="Rahul Verma").exists()
+    done = clarify(api, body, confirm=True)
+    assert done["stage"] == CommandStatus.COMMITTED
+    assert done["response_text"] == "Rahul Verma ka khata khul gaya. Ab kul baaki ₹300 hai."
+    assert customer_balance(Party.objects.get(name="Rahul Verma", kind=PartyKind.CUSTOMER)) == D("300")
+
+
+def test_declining_a_new_entity_adds_nothing(api, llm, shop):
+    llm(Intent.ADD_STAFF, party_name="Raju", amount=D("8000"))
+    body = text(api)
+    assert body["response_text"] == "Naya staff Raju, salary ₹8,000 mahina. Jod doon?"
+    clarify(api, body, confirm=False)
+    assert not Party.objects.filter(name="Raju").exists()
+
+
+def test_missing_details_are_asked_for_then_added(api, llm, shop):
+    llm(Intent.ADD_STAFF, party_name="Raju")
+    body = text(api, "Naya staff Raju jodo")
+    assert (body["stage"], body["clarification"]["kind"]) == (CommandStatus.NEEDS_CLARIFICATION, "fill")
+    assert body["response_text"] == "Raju ki mahine ki salary kitni hai?"
+    assert [o["id"] for o in body["clarification"]["options"]] == ["no"]
+    llm(Intent.ADD_STAFF, party_name="Raju", amount=D("8000"))
+    answer = api.post("/api/v1/voice/text-commands/", {"text": "aath hazaar", "reply_to": body["id"]}, format="json").json()
+    assert answer["parsed"]["amount"] == "8000" and answer["clarification"]["kind"] == "confirm_create"
+    assert VoiceCommand.objects.get(pk=body["id"]).stage == CommandStatus.ANSWERED
+    done = clarify(api, answer, confirm=True)
+    assert done["response_text"] == "Raju staff mein jud gaye. Salary ₹8,000 mahina."
+    assert Party.objects.get(name="Raju").monthly_salary == D("8000")
+
+
+def test_answer_parses_with_the_earlier_words(api, llm, shop, monkeypatch):
+    llm(Intent.ADD_PRODUCT, product_name="Maggi Masala")
+    body = text(api, "Naya saamaan Maggi Masala")
+    assert body["response_text"] == "Maggi Masala kis mein ginte hain: packet, kilo, litre ya piece?"
+    heard = []
+    monkeypatch.setattr(
+        FakeIntentParser, "parse", lambda self, said, context: heard.append(said) or ParsedCommand(intent=Intent.ADD_PRODUCT, product_name="Maggi Masala", unit="packets", quantity=D("12"))
+    )
+    answer = api.post("/api/v1/voice/text-commands/", {"text": "packet, 12 hain", "reply_to": body["id"]}, format="json").json()
+    assert heard == ["Naya saamaan Maggi Masala. packet, 12 hain"]
+    assert answer["response_text"].startswith("Naya saamaan Maggi Masala, packet mein, abhi 12 packet stock")
+    clarify(api, answer, confirm=True)
+    assert stock_level(shop.products.get(name="Maggi Masala")) == D("12")
+
+
+def test_an_answer_to_a_closed_question_is_a_fresh_command(api, llm, shop, sharma):
+    llm(Intent.ADD_CUSTOMER)
+    body = text(api)
+    assert body["response_text"] == "Naye customer ka naam kya hai?"
+    clarify(api, body, confirm=False)
+    llm(Intent.QUERY_CUSTOMER_BALANCE, party_name="Sharma ji")
+    answer = api.post("/api/v1/voice/text-commands/", {"text": "Sharma ji ka hisaab", "reply_to": body["id"]}, format="json").json()
+    assert answer["stage"] == CommandStatus.ANSWERED and answer["transcript"] == "Sharma ji ka hisaab"
+
+
+def test_an_existing_name_is_not_added_twice(api, llm, sharma):
+    llm(Intent.ADD_CUSTOMER, party_name="sharma ji")
+    body = text(api)
+    assert (body["error_code"], body["response_text"]) == ("ALREADY_EXISTS", "sharma ji pehle se hai. Doosra naam boliye.")
+
+
+def reply(api, body: dict, words: str) -> dict:
+    return api.post("/api/v1/voice/text-commands/", {"text": words, "reply_to": body["id"]}, format="json").json()
+
+
+def test_product_without_opening_stock_is_confirmed_with_zero(api, llm, shop):
+    llm(Intent.ADD_PRODUCT, product_name="Kinder Joy", unit="packet")
+    body = text(api, "Naya saamaan Kinder Joy, packet")
+    assert body["clarification"]["kind"] == "confirm_create"
+    assert body["response_text"].startswith("Naya saamaan Kinder Joy, packet mein, abhi 0 packet stock")
+
+
+def test_typed_yes_or_no_answers_the_question(api, llm, shop, monkeypatch):
+    llm(Intent.ADD_STAFF, party_name="Bebo", amount=D("2000"))
+    body = text(api, "Naya staff Bebo, salary 2000")
+    parse = lambda self, said, context: pytest.fail("a yes/no answer is not parsed")  # noqa: E731
+    monkeypatch.setattr(FakeIntentParser, "parse", parse)
+    done = reply(api, body, "Haan, jod do")
+    assert done["stage"] == CommandStatus.COMMITTED and Party.objects.get(name="Bebo").monthly_salary == D("2000")
+    assert VoiceCommand.objects.get(pk=body["id"]).stage == CommandStatus.ANSWERED
+    monkeypatch.undo()
+    llm(Intent.ADD_CUSTOMER, party_name="Mohan")
+    body = text(api)
+    done = reply(api, body, "no")
+    assert done["response_text"] == "Theek hai, kuch nahi likha." and not Party.objects.filter(name="Mohan").exists()
+
+
+def test_typed_no_cancels_a_missing_detail_question(api, llm, shop):
+    llm(Intent.ADD_PRODUCT, product_name="Kinder Joy")
+    body = text(api)
+    assert body["clarification"]["kind"] == "fill"
+    assert reply(api, body, "nahi rehne do")["response_text"] == "Theek hai, kuch nahi likha."
+
+
+def test_yes_without_a_question_is_a_fresh_command(api, llm, shop):
+    assert text(api, "yes")["error_code"] == "UNKNOWN_INTENT"
+
+
+def test_a_change_at_the_read_back_is_applied_and_read_back_again(api, llm, shop, monkeypatch):
+    llm(Intent.ADD_STAFF, party_name="Bebo", amount=D("2000"))
+    body = text(api, "Naya staff Bebo, salary 2000")
+    heard = []
+    monkeypatch.setattr(
+        FakeIntentParser, "parse", lambda self, said, context: heard.append(said) or ParsedCommand(intent=Intent.ADD_STAFF, party_name="Bebo", amount=D("3000"))
+    )
+    changed = reply(api, body, "nahi, salary 3000 kar do")
+    assert heard == ["Naya staff Bebo, salary 2000. nahi, salary 3000 kar do"]
+    assert changed["clarification"]["kind"] == "confirm_create"
+    assert changed["response_text"] == "Naya staff Bebo, salary ₹3,000 mahina. Jod doon?"
+    assert not Party.objects.filter(name="Bebo").exists()
+    reply(api, changed, "haan ji")
+    assert Party.objects.get(name="Bebo").monthly_salary == D("3000")
+
+
+def test_low_stock_alert_can_be_set_by_voice(api, llm, shop):
+    llm(Intent.ADD_PRODUCT, product_name="Kurkure", unit="packet", low_stock_alert=D("6"))
+    body = text(api)
+    assert "6 packet se kam hone par" in body["response_text"]
+    reply(api, body, "हाँ")
+    assert shop.products.get(name="Kurkure").low_stock_threshold == D("6")
+
+
+def test_yes_no_needs_a_reply_of_only_yes_or_no_words():
+    from modules.voice.pipeline import NO, YES, _yes_no
+
+    assert [_yes_no(t) for t in ["haan jod do", "Yes, please.", "हाँ", "nahi ji", "no thanks"]] == [YES, YES, YES, NO, NO]
+    assert [_yes_no(t) for t in ["nahi, salary 3000", "haan naam Bebo Sharma", "Sharma ji ka hisaab", ""]] == [None] * 4

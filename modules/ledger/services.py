@@ -106,6 +106,66 @@ def staff_due(party: Party, month: date) -> StaffDue:
     )
 
 
+def totals(
+    shop: Shop, kinds, start: date | None, end: date, *, party: Party | None = None, product: Product | None = None
+) -> dict[str, Decimal]:
+    "Sum of amount (money kinds) or quantity (stock kinds) per kind from start (None: the beginning) to end."
+    entries = live_entries().filter(shop=shop, kind__in=kinds, occurred_on__lte=end)
+    if start:
+        entries = entries.filter(occurred_on__gte=start)
+    if party:
+        entries = entries.filter(party=party)
+    if product:
+        entries = entries.filter(product=product)
+    sums = {
+        kind: Coalesce(Sum("quantity" if kind in STOCK_KINDS else "amount", filter=Q(kind=kind)), Value(ZERO), output_field=MONEY)
+        for kind in kinds
+    }
+    return entries.aggregate(**sums)
+
+
+def stock_moves(shop: Shop, start: date | None, end: date) -> list[Product]:
+    "Products that moved in the period, annotated with moved_in and moved_out."
+    live = Q(entries__reversal__isnull=True, entries__occurred_on__lte=end)
+    if start:
+        live &= Q(entries__occurred_on__gte=start)
+    moves = {
+        f"moved_{name}": Coalesce(Sum("entries__quantity", filter=live & Q(entries__kind=kind)), Value(ZERO), output_field=MONEY)
+        for name, kind in (("in", EntryKind.STOCK_IN), ("out", EntryKind.STOCK_OUT))
+    }
+    products = shop.products.annotate(**moves).filter(Q(moved_in__gt=0) | Q(moved_out__gt=0))
+    return list(products.order_by("name"))
+
+
+def month_bounds(month: date) -> tuple[date, date]:
+    return month.replace(day=1), month.replace(day=calendar.monthrange(month.year, month.month)[1])
+
+
+def attendance_entry_id(party: Party, on: date) -> int | None:
+    return live_entries().filter(kind=EntryKind.ATTENDANCE, party=party, occurred_on=on).values_list("id", flat=True).first()
+
+
+def present_days(party: Party, start: date, end: date) -> list[date]:
+    days = live_entries().filter(kind=EntryKind.ATTENDANCE, party=party, occurred_on__range=(start, end))
+    return sorted(set(days.values_list("occurred_on", flat=True)))
+
+
+def with_month_advances(parties: QuerySet[Party], month: date) -> QuerySet[Party]:
+    start, end = month_bounds(month)
+    live = Q(
+        entries__reversal__isnull=True,
+        entries__kind=EntryKind.STAFF_ADVANCE,
+        entries__occurred_on__range=(start, end),
+    )
+    return parties.annotate(month_advances=Coalesce(Sum("entries__amount", filter=live), Value(ZERO), output_field=MONEY))
+
+
+def salary_left(party: Party, month: date) -> Decimal:
+    "What can still be handed over this month as advance or salary: the monthly salary less both."
+    due = staff_due(party, month)
+    return (party.monthly_salary or ZERO) - due.advances - due.salary_paid
+
+
 def _validate(
     shop: Shop,
     kind: EntryKind,
@@ -191,15 +251,6 @@ def reverse_entry(entry: Entry, voice_command=None) -> Entry:
             quantity=entry.quantity,
             voice_command=voice_command,
         )
-
-
-def undo_last(shop: Shop, voice_command=None) -> Entry:
-    with transaction.atomic():
-        Shop.objects.select_for_update().get(pk=shop.pk)
-        target = live_entries().filter(shop=shop).order_by("-id").first()
-        if target is None:
-            raise LedgerError("NOTHING_TO_UNDO", "There is no entry to undo.")
-        return reverse_entry(target, voice_command=voice_command)
 
 
 def format_inr(amount: Decimal | int) -> str:

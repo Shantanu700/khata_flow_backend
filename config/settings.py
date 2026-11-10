@@ -30,7 +30,9 @@ ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1" if DEBUG else ""
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
 
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "https://localhost:8000,https://127.0.0.1:8000" if DEBUG else "")
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 DJANGO_APPS = [
     "django.contrib.admin",
@@ -53,9 +55,13 @@ LOCAL_APPS = [
     "modules.shops",
     "modules.ledger",
     "modules.voice",
+    "modules.i18n",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+# runsslserver: the dev server over HTTPS (docker/nonprod).
+DEV_APPS = ["sslserver"] if DEBUG else []
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + DEV_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -119,6 +125,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["base.permissions.APIAuthenticationPermission"],
     "DEFAULT_PAGINATION_CLASS": "base.pagination.DefaultPagination",
     "COERCE_DECIMAL_TO_STRING": False,
+    "DEFAULT_THROTTLE_RATES": {"login": "10/min"},
 }
 
 SPECTACULAR_SETTINGS = {
@@ -157,7 +164,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-DEFAULT_LANGUAGE = os.environ.get("DEFAULT_LANGUAGE", "hi-IN")
+DEFAULT_LANGUAGE = os.environ.get("DEFAULT_LANGUAGE", "en-IN")
 
 STT_PROVIDER = os.environ.get("STT_PROVIDER", "gnani")
 TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "gnani")
@@ -165,6 +172,9 @@ TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "gnani")
 GNANI_API_KEY = os.environ.get("GNANI_API_KEY", "")
 GNANI_BASE_URL = os.environ.get("GNANI_BASE_URL", "https://api.vachana.ai").rstrip("/")
 GNANI_STT_MODEL = os.environ.get("GNANI_STT_MODEL", "prisma-v3.0")
+GNANI_STREAM_URL = os.environ.get("GNANI_STREAM_URL", "wss://api.vachana.ai/stt/v3/stream")
+# Where browsers reach the live-transcript WebSocket (the `stream` service, an ASGI server beside the API).
+VOICE_STREAM_URL = os.environ.get("VOICE_STREAM_URL", "wss://localhost:8001/api/v1/voice/stream/")
 # transcribe: digits and ₹ for numbers, English words in Latin, Hindi in Devanagari.
 GNANI_STT_FORMAT = os.environ.get("GNANI_STT_FORMAT", "transcribe")
 GNANI_TTS_MODEL = os.environ.get("GNANI_TTS_MODEL", "timbre-v2.5")
@@ -176,6 +186,8 @@ GNANI_TTS_LANGUAGE = os.environ.get("GNANI_TTS_LANGUAGE", "hi-IN")
 LLM_PROVIDER = os.environ.get("LLM_PROVIDER") or "groq"
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_MODEL = os.environ.get("LLM_MODEL") or "openai/gpt-oss-120b"
+# Used when LLM_MODEL has hit its daily token limit; empty turns that off.
+LLM_FALLBACK_MODEL = os.environ.get("LLM_FALLBACK_MODEL", "openai/gpt-oss-20b")
 # medium, not low: at low, gpt-oss-120b on Groq garbled some names ("Rathore ji" -> "Rathoth ji").
 LLM_REASONING_EFFORT = os.environ.get("LLM_REASONING_EFFORT") or "medium"
 # Any OpenAI-compatible chat completions base URL.
@@ -183,6 +195,7 @@ LLM_BASE_URL = (os.environ.get("LLM_BASE_URL") or "https://api.groq.com/openai/v
 
 MAX_AUDIO_SECONDS = float(os.environ.get("MAX_AUDIO_SECONDS", "20"))
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+MAX_PHOTO_BYTES = 1024 * 1024
 LEDGER_AMOUNT_CAP = int(os.environ.get("LEDGER_AMOUNT_CAP", "50000"))
 CLARIFICATION_TTL_SECONDS = 120
 RESOLVER_AUTO_SCORE = float(os.environ.get("RESOLVER_AUTO_SCORE", "88"))

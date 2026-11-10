@@ -2,7 +2,7 @@
 
     docker compose exec web python scripts/eval_intents.py
 
-A case passes only if intent, names, amount, quantity and date_hint all match (unit is ignored).
+A case passes only if intent, names, amount, quantity, date_hint and period all match (unit is ignored).
 Calls are spaced PACE_SECONDS apart to stay under Groq's free-tier 8,000 tokens/minute (~1,230 per call),
 so the latencies printed are not inflated by rate-limit waits.
 """
@@ -29,7 +29,7 @@ from modules.voice.intent import GroqIntentParser, ParsedCommand, ShopContext  #
 
 GOLDEN = ROOT / "modules/voice/tests/golden_commands.yaml"
 PACE_SECONDS = float(os.environ.get("PACE_SECONDS", "9"))
-COMPARED = ("intent", "party_name", "product_name", "amount", "quantity", "date_hint")
+COMPARED = ("intent", "party_name", "product_name", "amount", "quantity", "date_hint", "period")
 
 
 def same(expected: ParsedCommand, actual: ParsedCommand) -> bool:

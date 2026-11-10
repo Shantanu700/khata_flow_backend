@@ -15,7 +15,6 @@ from modules.ledger.services import (
     staff_due,
     stock_level,
     total_outstanding,
-    undo_last,
 )
 
 D = Decimal
@@ -38,20 +37,10 @@ def test_total_outstanding_counts_only_positive_balances(shop, sharma, verma):
 def test_reversed_entries_and_reversals_are_excluded(shop, sharma):
     record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("500"))
     mistake = record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("5000"))
-    reversal = undo_last(shop)
+    reversal = reverse_entry(mistake)
     assert reversal.kind == EntryKind.REVERSAL and reversal.reverses == mistake
     assert customer_balance(sharma) == D("500")
     assert Entry.objects.count() == 3
-
-
-def test_undo_last_skips_already_reversed_entries(shop, sharma):
-    first = record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("100"))
-    record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("200"))
-    undo_last(shop)
-    assert undo_last(shop).reverses == first
-    with pytest.raises(LedgerError) as err:
-        undo_last(shop)
-    assert err.value.code == "NOTHING_TO_UNDO"
 
 
 def test_entry_cannot_be_reversed_twice(shop, sharma):

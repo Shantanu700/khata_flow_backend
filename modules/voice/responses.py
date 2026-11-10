@@ -1,31 +1,49 @@
+import json
 import re
+from contextvars import ContextVar
+from datetime import date
 from decimal import Decimal
+from functools import cache
+from pathlib import Path
+
+from django.utils import timezone
 
 from modules.ledger.choices import EntryKind
 from modules.ledger.models import Entry
 from modules.ledger.services import StaffDue, format_inr
-from modules.shops.choices import Unit
 from modules.shops.models import Party, Product
 
-UNIT_WORDS = {Unit.PACKET: "packet", Unit.KG: "kilo", Unit.LITRE: "litre", Unit.PIECE: "piece"}
+DIR = Path(__file__).parent / "replies"
+# hi-Latn (Hinglish, the original wording) is the source: every other catalog has exactly its keys.
+BASE = "hi-Latn"
 COUNT_WORDS = ["", "Ek", "Do", "Teen", "Chaar", "Paanch", "Chhah", "Saat", "Aath", "Nau", "Das"]
 
-FALLBACK = "Maaf kijiye, samajh nahi aaya. Dobara boliye."
-SPOKEN_ERRORS = {
-    "EMPTY_TRANSCRIPT": "Kuch sunai nahi diya. Dobara boliye.",
-    "AUDIO_TOO_SHORT": "Awaaz bahut chhoti thi. Dobara boliye.",
-    "AUDIO_TOO_LONG": "Thoda chhota boliye, bees second se kam.",
-    "MISSING_NAME": "Kiska naam? Naam ke saath dobara boliye.",
-    "MISSING_AMOUNT": "Kitne rupaye? Poori baat dobara boliye.",
-    "MISSING_QUANTITY": "Kitna saamaan? Poori baat dobara boliye.",
-    "NOTHING_TO_UNDO": "Hatane ke liye koi entry nahi hai.",
-    "CLARIFICATION_EXPIRED": "Samay khatam ho gaya. Poori baat dobara boliye.",
-    "CANCELLED": "Theek hai, kuch nahi likha.",
-}
+# The command being answered sets this, so every reply below comes in its language.
+language: ContextVar[str] = ContextVar("reply_language", default=BASE)
+
+
+@cache
+def catalog(code: str) -> dict[str, str]:
+    base = json.loads((DIR / f"{BASE}.json").read_text("utf-8"))
+    path = DIR / f"{code}.json"
+    return {**base, **json.loads(path.read_text("utf-8"))} if code != BASE and path.exists() else base
+
+
+def say(key: str, **values) -> str:
+    return catalog(language.get())[key].format(**values)
+
+
+def fallback() -> str:
+    return say("fallback")
 
 
 def spoken_error(code: str) -> str:
-    return SPOKEN_ERRORS.get(code, FALLBACK)
+    key = f"error.{code}"
+    return say(key) if key in catalog(language.get()) else fallback()
+
+
+def yes_no() -> tuple[str, str]:
+    return say("yes"), say("no")
 
 
 def qty(value: Decimal) -> str:
@@ -33,124 +51,206 @@ def qty(value: Decimal) -> str:
 
 
 def unit(product: Product) -> str:
-    return UNIT_WORDS.get(product.unit, "")
+    return say(f"unit.{product.unit}")
 
 
 def join_names(names: list[str]) -> str:
-    return names[0] if len(names) == 1 else f"{', '.join(names[:-1])} aur {names[-1]}"
+    return names[0] if len(names) == 1 else f"{', '.join(names[:-1])} {say('and')} {names[-1]}"
 
 
 def count_word(n: int) -> str:
-    return COUNT_WORDS[n] if n < len(COUNT_WORDS) else str(n)
+    if language.get() == BASE and n < len(COUNT_WORDS):
+        return COUNT_WORDS[n]
+    return str(n)
 
 
 def balance_line(balance: Decimal) -> str:
     if balance > 0:
-        return f"Ab kul baaki {format_inr(balance)} hai."
+        return say("balance.owing", amount=format_inr(balance))
     if balance < 0:
-        return f"Ab {format_inr(-balance)} advance jama hai."
-    return "Ab koi baaki nahi hai."
+        return say("balance.advance", amount=format_inr(-balance))
+    return say("balance.clear")
 
 
 def credit_added(party: Party, amount: Decimal, balance: Decimal) -> str:
-    return f"Theek hai. {party.name} ka {format_inr(amount)} udhaar likh diya. {balance_line(balance)}"
+    return say("credit_added", name=party.name, amount=format_inr(amount), balance=balance_line(balance))
 
 
 def payment_received(party: Party, amount: Decimal, balance: Decimal) -> str:
-    return f"{party.name} se {format_inr(amount)} mil gaye. {balance_line(balance)}"
+    return say("payment_received", name=party.name, amount=format_inr(amount), balance=balance_line(balance))
 
 
 def stock_changed(entry: Entry, level: Decimal) -> str:
+    key = "stock_in" if entry.kind == EntryKind.STOCK_IN else "stock_out"
     product = entry.product
-    verb = "jod diye" if entry.kind == EntryKind.STOCK_IN else "ghata diye"
-    return f"{product.name} ke {qty(entry.quantity)} {unit(product)} {verb}. Ab stock {qty(level)} {unit(product)}."
+    return say(key, name=product.name, qty=qty(entry.quantity), unit=unit(product), level=qty(level))
 
 
 def attendance_marked(party: Party, already: bool) -> str:
-    if already:
-        return f"{party.name} ki haaziri pehle se lagi hai."
-    return f"{party.name} ki haaziri lag gayi."
+    return say("attendance_already" if already else "attendance_marked", name=party.name)
 
 
 def staff_paid(entry: Entry, due: StaffDue) -> str:
-    what = "advance" if entry.kind == EntryKind.STAFF_ADVANCE else "tankhwah"
-    return f"{entry.party.name} ko {format_inr(entry.amount)} {what} likh diya. Is mahine {format_inr(due.due)} dena baaki hai."
+    key = "advance_paid" if entry.kind == EntryKind.STAFF_ADVANCE else "salary_paid"
+    return say(key, name=entry.party.name, amount=format_inr(entry.amount), due=format_inr(due.due))
 
 
 def customer_balance(party: Party, balance: Decimal) -> str:
     if balance > 0:
-        return f"{party.name} ka {format_inr(balance)} baaki hai."
+        return say("customer.owes", name=party.name, amount=format_inr(balance))
     if balance < 0:
-        return f"{party.name} ka {format_inr(-balance)} advance jama hai."
-    return f"{party.name} ka koi baaki nahi hai."
+        return say("customer.advance", name=party.name, amount=format_inr(-balance))
+    return say("customer.clear", name=party.name)
 
 
 def total_outstanding(total: Decimal, debtors: int) -> str:
     if total <= 0:
-        return "Kisi par koi udhaar baaki nahi hai."
-    return f"Kul {format_inr(total)} udhaar baaki hai, {debtors} logon par."
+        return say("total.none")
+    return say("total.some", amount=format_inr(total), count=debtors)
 
 
 def low_stock(products: list[Product]) -> str:
     if not products:
-        return "Sab saamaan theek hai, kuch kam nahi hai."
+        return say("low.none")
     names = join_names([p.name for p in products])
     if len(products) == 1:
-        return f"Ek cheez kam hai: {names}."
-    return f"{count_word(len(products))} cheezein kam hain: {names}."
+        return say("low.one", names=names)
+    return say("low.many", count=count_word(len(products)), names=names)
 
 
 def stock_level(product: Product, level: Decimal) -> str:
-    return f"{product.name} ka stock {qty(level)} {unit(product)} hai."
+    return say("stock_level", name=product.name, qty=qty(level), unit=unit(product))
 
 
-def staff_due(party: Party, due: StaffDue) -> str:
-    parts = [f"{format_inr(due.earned)} bane"]
+def month_label(month: date) -> str:
+    today = timezone.localdate()
+    back = (today.year - month.year) * 12 + today.month - month.month
+    if back <= 0:
+        return say("when.this_month")
+    return say("when.last_month") if back == 1 else say("when.months_ago", months=back)
+
+
+def staff_due(party: Party, due: StaffDue, month: date) -> str:
+    parts = [say("staff.earned", amount=format_inr(due.earned))]
     if due.advances:
-        parts.append(f"{format_inr(due.advances)} advance gaya")
+        parts.append(say("staff.advances", amount=format_inr(due.advances)))
     if due.salary_paid:
-        parts.append(f"{format_inr(due.salary_paid)} tankhwah di")
-    owed = f"{format_inr(due.due)} dena baaki hai" if due.due >= 0 else f"{format_inr(-due.due)} zyada de diye"
-    return f"{party.name} is mahine {due.days_present} din aaye. {', '.join(parts)}, {owed}."
+        parts.append(say("staff.paid", amount=format_inr(due.salary_paid)))
+    if not due.advances and not due.salary_paid:
+        parts.append(say("staff.none_paid"))
+    owed = say("staff.left", amount=format_inr(due.due)) if due.due >= 0 else say("staff.over", amount=format_inr(-due.due))
+    return f"{say('staff.head', name=party.name, days=due.days_present, when=month_label(month))} {', '.join(parts)}, {owed}."
 
 
-def describe(entry: Entry) -> str:
-    kind, party, product = entry.kind, entry.party, entry.product
-    if kind == EntryKind.CREDIT_GIVEN:
-        return f"{party.name} ka {format_inr(entry.amount)} udhaar"
-    if kind == EntryKind.PAYMENT_RECEIVED:
-        return f"{party.name} se {format_inr(entry.amount)} mile"
-    if kind in (EntryKind.STOCK_IN, EntryKind.STOCK_OUT):
-        verb = "aaye" if kind == EntryKind.STOCK_IN else "nikle"
-        return f"{product.name} ke {qty(entry.quantity)} {unit(product)} {verb}"
-    if kind == EntryKind.ATTENDANCE:
-        return f"{party.name} ki haaziri"
-    what = "advance" if kind == EntryKind.STAFF_ADVANCE else "tankhwah"
-    return f"{party.name} ko {format_inr(entry.amount)} {what}"
+def staff_list(staff: list[Party]) -> str:
+    if not staff:
+        return say("staff_list.none")
+    names = join_names([p.name for p in staff])
+    return say("staff_list.one", names=names) if len(staff) == 1 else say("staff_list.many", count=len(staff), names=names)
 
 
-def undone(reversal: Entry) -> str:
-    return f"Pichhli entry hata di: {describe(reversal.reverses)}."
+def attendance_today(staff: list[Party], present: list[Party]) -> str:
+    if not staff:
+        return say("staff_list.none")
+    if not present:
+        return say("attendance.none")
+    if len(present) == len(staff):
+        return say("attendance.all", names=join_names([p.name for p in staff]))
+    absent = [p for p in staff if p not in present]
+    return say("attendance.some", present=join_names([p.name for p in present]), absent=join_names([p.name for p in absent]))
+
+
+def customer_count(customers: int, owing: int) -> str:
+    if not customers:
+        return say("customers.none")
+    return say("customers.owing" if owing else "customers.clear", count=customers, owing=owing)
+
+
+def _list(key: str, items: list[str], cap: int) -> str:
+    "Speaks the first `cap` items and only counts the rest, so a long list stays short to listen to."
+    text = say(key, count=len(items), items=join_names(items[:cap]))
+    return f"{text} {say('more', count=len(items) - cap)}" if len(items) > cap else text
+
+
+def debtor_list(debtors: list[Party]) -> str:
+    if not debtors:
+        return say("total.none")
+    return _list("debtors.some", [f"{p.name} {format_inr(p.balance)}" for p in debtors], cap=5)
+
+
+def stock_list(products: list[Product]) -> str:
+    if not products:
+        return say("stock_list.none")
+    return _list("stock_list.some", [f"{p.name} {qty(p.stock_level)} {unit(p)}" for p in products], cap=8)
+
+
+def period_total(intent, period, sums: dict, party: Party | None, product: Product | None) -> str:
+    when = say(f"period.{period}")
+    if product:
+        return say(
+            "stock_move.product",
+            period=when,
+            name=product.name,
+            moved_in=qty(sums[EntryKind.STOCK_IN]),
+            moved_out=qty(sums[EntryKind.STOCK_OUT]),
+            unit=unit(product),
+        )
+    key = {"QUERY_CREDIT_GIVEN": "credit", "QUERY_PAYMENTS_RECEIVED": "payments", "QUERY_STAFF_PAID": "staff_paid"}[intent]
+    money = {
+        "amount": format_inr(sum(sums.values())),
+        "advance": format_inr(sums.get(EntryKind.STAFF_ADVANCE, 0)),
+        "salary": format_inr(sums.get(EntryKind.SALARY_PAID, 0)),
+    }
+    if party:
+        return say(f"{key}.party", period=when, name=party.name, **money)
+    return say(f"{key}.total", period=when, **money)
+
+
+def stock_moves(period, products: list[Product]) -> str:
+    when = say(f"period.{period}")
+    if not products:
+        return say("stock_move.none", period=when)
+    items = [
+        say("stock_move.item", name=p.name, moved_in=qty(p.moved_in), moved_out=qty(p.moved_out), unit=unit(p))
+        for p in products
+    ]
+    return say("stock_move.many", period=when, count=len(products), items="; ".join(items))
 
 
 def negative_stock(product: Product, level: Decimal) -> str:
-    return f"{product.name} ka stock sirf {qty(level)} {unit(product)} hai. Itna nahi nikal sakta."
+    return say("negative_stock", name=product.name, level=qty(level), unit=unit(product))
 
 
 def choose(labels: list[str]) -> str:
-    return f"{' ya '.join(labels)}?"
+    return f"{f' {say("or")} '.join(labels)}?"
 
 
 def not_found(name: str, offer_create: bool) -> str:
-    if offer_create:
-        return f"Ye naam nahi mila: {name}. Naya customer banaun?"
-    return f"Ye naam nahi mila: {name}. Dobara boliye."
+    return say("not_found.create" if offer_create else "not_found", name=name)
 
 
 def confirm_amount(amount: Decimal) -> str:
-    return f"{format_inr(amount)} bahut zyada hai. Pakka likh doon?"
+    return say("confirm_amount", amount=format_inr(amount))
+
+
+def ask_detail(intent: str, missing: str, name: str) -> str:
+    return say(f"ask.name.{intent}") if missing == "name" else say(f"ask.{missing}", name=name)
+
+
+def confirm_new(intent: str, new: dict) -> str:
+    if intent == "ADD_PRODUCT":
+        units = say(f"unit.{new['unit']}")
+        return say("confirm.ADD_PRODUCT", name=new["name"], unit=units, qty=qty(new["quantity"]), alert=qty(new["alert"]))
+    if intent == "ADD_STAFF":
+        return say("confirm.ADD_STAFF", name=new["name"], amount=format_inr(new["amount"]))
+    key = "confirm.ADD_CUSTOMER.owing" if new["amount"] else "confirm.ADD_CUSTOMER"
+    return say(key, name=new["name"], amount=format_inr(new["amount"]))
+
+
+def product_added(product: Product, quantity: Decimal) -> str:
+    return say("added.ADD_PRODUCT", name=product.name, qty=qty(Decimal(quantity)), unit=unit(product))
 
 
 def for_speech(text: str) -> str:
-    "₹1,250.50 -> 1250.50 rupaye: plain digits and the word read more naturally in Hinglish TTS."
-    return re.sub(r"₹([\d,]+(?:\.\d+)?)", lambda m: f"{m.group(1).replace(',', '')} rupaye", text)
+    "₹1,250.50 -> '1250.50 rupaye' (in the reply's language): plain digits and the word read more naturally."
+    return re.sub(r"₹([\d,]+(?:\.\d+)?)", lambda m: say("rupees", amount=m.group(1).replace(",", "")), text)

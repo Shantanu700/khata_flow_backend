@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -12,7 +10,8 @@ urlpatterns = [
     path("api/v1/", include("modules.shops.api.v1.urls")),
     path("api/v1/", include("modules.ledger.api.v1.urls")),
     path("api/v1/voice/", include("modules.voice.api.v1.urls")),
+    path("api/v1/i18n/", include("modules.i18n.api.v1.urls")),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Media (recordings and reply audio) is never served directly: reply audio goes through
+# /api/v1/voice/commands/<id>/audio/, which checks the owner.

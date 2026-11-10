@@ -10,7 +10,7 @@ from modules.shops.models import Party, Product, Shop
 @pytest.fixture
 def shop(db) -> Shop:
     owner = get_user_model().objects.create_user(username="owner", password="test-pass-123")
-    return Shop.objects.create(owner=owner, name="Test Kirana")
+    return Shop.objects.create(owner=owner, name="Test Kirana", preferred_language="hi-Latn")
 
 
 @pytest.fixture
