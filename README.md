@@ -1,6 +1,6 @@
-# KhaataFlow backend
+# KhataFlow backend
 
-KhaataFlow is a voice-first shop book for Indian kirana merchants. The shopkeeper speaks in any of the 10 Indian languages Gnani supports, or Hinglish ("Sharma ji ka paanch sau udhaar likh do"), and KhaataFlow records customer udhaar, stock movement and staff attendance and advances, then answers back in voice. It is built for small shop owners who keep their accounts in a paper khata today.
+KhataFlow is a voice-first shop book for Indian kirana merchants. The shopkeeper speaks in any of the 10 Indian languages Gnani supports, or Hinglish ("Sharma ji ka paanch sau udhaar likh do"), and KhataFlow records customer udhaar, stock movement and staff attendance and advances, then answers back in voice. It is built for small shop owners who keep their accounts in a paper khata today.
 
 Built for Gnani AI's Great Indian AI Internship Challenge.
 
@@ -8,7 +8,7 @@ Built for Gnani AI's Great Indian AI Internship Challenge.
 [khata_flow_frontend](https://github.com/Shantanu700/khata_flow_frontend) (Next.js). Clone both side by side:
 
 ```bash
-mkdir KhaataFlow && cd KhaataFlow
+mkdir KhataFlow && cd KhataFlow
 git clone https://github.com/Shantanu700/khata_flow_backend.git backend
 git clone https://github.com/Shantanu700/khata_flow_frontend.git frontend
 ```
@@ -71,7 +71,7 @@ Every stage records its time in `VoiceCommand.timings_ms` and moves `stage` forw
 - **Append-only ledger with reversals.** `ledger.Entry` rows are never updated or deleted. "Undo" writes a `REVERSAL` entry that points at the original, so the history of every mistake and correction stays visible. A database check constraint enforces which fields each entry kind needs.
 - **Derived balances.** Customer balances, stock levels and staff dues are always computed from entries, never stored, so they cannot drift out of sync. Reversed entries and reversals are excluded in one place (`live_entries()`).
 - **Deterministic response templates.** The LLM only proposes a structured command. Replies come from fixed per-language templates (`modules/voice/responses.py`, wording in `modules/voice/replies/<code>.json`), so they are fast, testable and never invent a number.
-- **Clarification instead of guessing.** If a name is ambiguous ("Varma ji" sits between Verma ji and Sharma ji), unknown, or an amount is unusually large, KhaataFlow asks a yes/no or either/or question and waits up to 2 minutes for the answer. Nothing is written until it is sure.
+- **Clarification instead of guessing.** If a name is ambiguous ("Varma ji" sits between Verma ji and Sharma ji), unknown, or an amount is unusually large, KhataFlow asks a yes/no or either/or question and waits up to 2 minutes for the answer. Nothing is written until it is sure.
 - **Provider interfaces with fakes.** Speech-to-text, text-to-speech and the intent parser sit behind small interfaces. Tests and the text-command path run on fakes, so the test suite never calls Gnani or the LLM.
 
 ## Code conventions

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The whole KhaataFlow stack in one command: the API in Docker with the two demo shops, then the web app.
+# The whole KhataFlow stack in one command: the API in Docker with the two demo shops, then the web app.
 #
 #   ./scripts/up.sh                       # from this repo; expects the frontend repo at ../frontend
 #   FRONTEND_DIR=~/code/khata_flow_frontend ./scripts/up.sh
@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 FRONTEND_DIR="${FRONTEND_DIR:-../frontend}"
 export COMPOSE_FILE=docker/nonprod/docker-compose.yml
 
-need() { command -v "$1" >/dev/null 2>&1 || { echo "KhaataFlow needs $1: $2" >&2; exit 1; }; }
+need() { command -v "$1" >/dev/null 2>&1 || { echo "KhataFlow needs $1: $2" >&2; exit 1; }; }
 random() { openssl rand -base64 64 | tr -dc 'A-Za-z0-9' | cut -c "1-$1"; }
 env_value() { sed -n "s/^$1=//p" .env | tail -1; }
 set_env() {

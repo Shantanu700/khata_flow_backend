@@ -129,7 +129,7 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "KhaataFlow API",
+    "TITLE": "KhataFlow API",
     "DESCRIPTION": "Voice-first shop book for kirana merchants.",
     "VERSION": "0.1.0",
     "OPERATION_ID_METHOD_POSITION": "PRE",
