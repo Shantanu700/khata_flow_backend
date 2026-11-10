@@ -4,6 +4,41 @@ KhaataFlow is a voice-first shop book for Indian kirana merchants. The shopkeepe
 
 Built for Gnani AI's Great Indian AI Internship Challenge.
 
+**Two repos.** This is the API (Django, voice pipeline, ledger). The web app is in
+[khata_flow_frontend](https://github.com/Shantanu700/khata_flow_frontend) (Next.js). Clone both side by side:
+
+```bash
+mkdir KhaataFlow && cd KhaataFlow
+git clone https://github.com/Shantanu700/khata_flow_backend.git backend
+git clone https://github.com/Shantanu700/khata_flow_frontend.git frontend
+```
+
+## Quick start: one command
+
+Needs Docker, [mkcert](https://github.com/FiloSottile/mkcert#installation) and [Bun](https://bun.sh).
+
+```bash
+cd backend && ./scripts/up.sh
+```
+
+It creates `.env` from `.env.example` (with a fresh `SECRET_KEY` and demo password), makes the local HTTPS
+certificate, starts Postgres, Redis, the API and the live-transcript service in Docker, loads the two demo
+shops, then installs and starts the web app on http://localhost:3100. Rerunning it keeps your settings and data.
+`NO_FRONTEND=1` starts the API only; `FRONTEND_DIR=<path>` points at the web app elsewhere.
+
+Set `GNANI_API_KEY` and `LLM_API_KEY` in `.env` for voice and typed commands (everything else works without them).
+
+**Demo shops** (synthetic data: customers with udhaar, stock with low-stock items, staff with attendance and
+advances, two weeks of history):
+
+| Username | Shop |
+| - | - |
+| `gupta_store` | Gupta General Store |
+| `patel_store` | Patel Provision Store |
+
+Both use the password in `DEMO_PASSWORD` in `.env`; the script prints it when it finishes. It is generated on
+your machine, so it is never in the repo.
+
 ## Gnani models used
 
 | Model | What it does here | Where in the pipeline |
@@ -69,9 +104,9 @@ Only numbers from real runs, measured on 9 November 2026 on a laptop running the
 
 - Groq's free tier allows 8,000 tokens a minute and each command uses about 1,450, so roughly 5 commands a minute. On a rate limit the parser waits up to 10 seconds and retries once. If Groq's strict JSON mode fails on a reply, the parser retries once without it and validates the result itself.
 
-## Setup
+## Setup, step by step
 
-Needs Docker. Python 3.13 and `uv` only if you want to run things outside Docker.
+`./scripts/up.sh` does all of this. Needs Docker. Python 3.13 and `uv` only if you want to run things outside Docker.
 
 ```bash
 cp .env.example .env          # then set SECRET_KEY, GNANI_API_KEY and LLM_API_KEY
