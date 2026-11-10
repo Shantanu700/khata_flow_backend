@@ -15,6 +15,9 @@ LANGUAGES = SHOP_LANGUAGES
 class AudioCommandSerializer(serializers.Serializer):
     audio = serializers.FileField()
     language = serializers.ChoiceField(choices=LANGUAGES, required=False)
+    reply_to = serializers.IntegerField(
+        required=False, help_text="The command asking for a missing detail (clarification kind \"fill\") that this answers."
+    )
 
     def validate_audio(self, audio):
         if audio.size > settings.MAX_UPLOAD_BYTES:
@@ -30,6 +33,9 @@ class StreamTicketSerializer(serializers.Serializer):
 class TextCommandSerializer(serializers.Serializer):
     text = serializers.CharField(max_length=500)
     language = serializers.ChoiceField(choices=LANGUAGES, required=False)
+    reply_to = serializers.IntegerField(
+        required=False, help_text="The command asking for a missing detail (clarification kind \"fill\") that this answers."
+    )
 
 
 class ClarifySerializer(serializers.Serializer):

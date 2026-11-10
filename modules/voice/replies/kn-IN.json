@@ -81,5 +81,19 @@
   "stock_list.none": "ಸ್ಟಾಕ್‌ನಲ್ಲಿ ಇನ್ನೂ ಏನೂ ಇಲ್ಲ.",
   "stock_list.some": "ಸ್ಟಾಕ್‌ನಲ್ಲಿ {count} ಸಾಮಾನುಗಳಿವೆ: {items}.",
   "debtors.some": "{count} ಜನರ ಸಾಲ ಬಾಕಿ ಇದೆ: {items}.",
-  "more": "ಇನ್ನೂ {count} ಇವೆ."
+  "more": "ಇನ್ನೂ {count} ಇವೆ.",
+  "cancel": "ಬೇಡ",
+  "exists": "{name} ಈಗಾಗಲೇ ಇದೆ. ಬೇರೆ ಹೆಸರು ಹೇಳಿ.",
+  "ask.name.ADD_CUSTOMER": "ಹೊಸ ಗ್ರಾಹಕರ ಹೆಸರೇನು?",
+  "ask.name.ADD_STAFF": "ಹೊಸ ಸಿಬ್ಬಂದಿಯ ಹೆಸರೇನು?",
+  "ask.name.ADD_PRODUCT": "ಹೊಸ ಸಾಮಾನಿನ ಹೆಸರೇನು?",
+  "ask.salary": "{name} ಅವರ ತಿಂಗಳ ಸಂಬಳ ಎಷ್ಟು?",
+  "ask.unit": "{name} ಅನ್ನು ಯಾವುದರಲ್ಲಿ ಎಣಿಸುತ್ತೀರಿ: ಪ್ಯಾಕೆಟ್, ಕಿಲೋ, ಲೀಟರ್ ಅಥವಾ ಪೀಸ್?",
+  "confirm.ADD_CUSTOMER": "ಹೊಸ ಗ್ರಾಹಕ {name} ಅವರನ್ನು ಸೇರಿಸಲೇ?",
+  "confirm.ADD_CUSTOMER.owing": "ಹೊಸ ಗ್ರಾಹಕ {name}, ಹಳೆಯ ಬಾಕಿ {amount}. ಸೇರಿಸಲೇ?",
+  "confirm.ADD_STAFF": "ಹೊಸ ಸಿಬ್ಬಂದಿ {name}, ತಿಂಗಳ ಸಂಬಳ {amount}. ಸೇರಿಸಲೇ?",
+  "confirm.ADD_PRODUCT": "ಹೊಸ ಸಾಮಾನು {name}, {unit} ಲೆಕ್ಕದಲ್ಲಿ, ಈಗ {qty} {unit} ಸ್ಟಾಕ್, {alert} {unit} ಗಿಂತ ಕಡಿಮೆಯಾದಾಗ ನೆನಪಿಸುತ್ತೇನೆ. ಸೇರಿಸಲೇ?",
+  "added.ADD_CUSTOMER": "{name} ಅವರ ಖಾತೆ ತೆರೆಯಲಾಗಿದೆ. {balance}",
+  "added.ADD_STAFF": "{name} ಅವರನ್ನು ಸಿಬ್ಬಂದಿಗೆ ಸೇರಿಸಲಾಗಿದೆ. ತಿಂಗಳ ಸಂಬಳ {amount}.",
+  "added.ADD_PRODUCT": "{name} ಸ್ಟಾಕ್‌ಗೆ ಸೇರಿದೆ. ಈಗ {qty} {unit} ಇದೆ."
 }

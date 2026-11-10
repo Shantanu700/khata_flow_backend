@@ -105,6 +105,12 @@ is still owed (this month unless another month is said). "Ramu ka kitna banta ha
 "Is mahine staff ko kitna diya?", "Shyam ko pichhle mahine kitne paise diye?"
 - QUERY_STOCK_MOVEMENT: how much stock came in or went out (was sold) in a period, of all items or one. \
 "Aaj kitni Maggi biki?", "इस हफ्ते क्या क्या माल आया", "kal kitna saamaan bika"
+- ADD_CUSTOMER: open a khata for a new customer; amount is udhaar they already owe, if said. "Naya customer Rahul \
+Verma jodo", "नया ग्राहक मोहन, पुराना उधार 300", "Pandey ji ka naya khata kholo"
+- ADD_STAFF: a new person starts working in the shop; amount is their monthly salary. "Naya staff Raju, salary 8000", \
+"मोहन को काम पर रखा, तनख्वाह नौ हज़ार महीना", "Naya ladka rakha hai Sonu"
+- ADD_PRODUCT: a new item the shop will keep in stock; unit is how it is counted, quantity the stock there is \
+now, if said. "Naya saamaan Tata Salt jodo, packet mein", "नया सामान चीनी, किलो में, 50 किलो है", "Surf Excel add karo"
 - UNDO_LAST: any request to undo, delete, cancel, reverse or fix an entry, named or not. Voice never changes past entries; KhaataFlow only explains how to undo on screen. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो", "Gupta aunty ke 750 wapas karo"
 - UNKNOWN: greetings, or a request none of the intents above can serve even loosely.
 
@@ -122,13 +128,17 @@ The same intents in other languages, for example: "শর্মা জির ৫
 QUERY_TOTAL_OUTSTANDING is what is still owed now; QUERY_CREDIT_GIVEN is what was given in a period.
 
 Rules:
+- A command can be several sentences: Khata asked for a missing detail and the last sentence answers it \
+("Naya staff Raju jodo. 8000" is ADD_STAFF, Raju, amount 8000; "Naya saamaan Maggi. Packet" is ADD_PRODUCT, unit packet).
+- ADD_CUSTOMER, ADD_STAFF, ADD_PRODUCT: the name is new, so write it as said, in Latin script and Title Case; \
+never swap in a known name.
 - party_name / product_name: always Latin script. If it matches a known name below (even loosely, \
 by alias, honorific or Devanagari spelling), copy the known name exactly. Otherwise transliterate what was said.
 - amount: rupees as a number. quantity: count as a number. Native digits become ASCII digits, and number \
 words in any of the languages become digits (ஐநூறு = 500, পাঁচশো = 500, ಸಾವಿರ = 1000). Hindi number words: \
 paanch sau = 500, dhai sau = 250, dedh sau = 150, dedh = 1.5, dhai = 2.5, sava = 1.25, saade teen = 3.5, \
 ek hazaar = 1000, dedh hazaar = 1500, do hazaar = 2000.
-- unit: packet, kg, litre or piece when said, else null.
+- unit: exactly packet, kg, litre or piece when said (kilo is kg, dabba or pack is packet, nag or pcs is piece), else null.
 - date_hint: ISO date (YYYY-MM-DD) only when a past day is said ("kal" means yesterday, "parson" the day \
 before yesterday, "pichhle mahine" the first day of last month); null for today ("aaj") or no day.
 - period: only for QUERY_CREDIT_GIVEN, QUERY_PAYMENTS_RECEIVED, QUERY_STAFF_PAID, QUERY_STOCK_MOVEMENT and \

@@ -16,7 +16,8 @@ class VoiceCommand(ModelBase):
     parsed = models.JSONField(null=True, blank=True)
     # Pipeline progress; `status` (from ModelBase) is the row's lifecycle like every other model.
     stage = models.CharField(max_length=24, choices=CommandStatus.choices, default=CommandStatus.RECEIVED)
-    # {"question": str, "kind": "choose" | "create_party" | "confirm_amount", "options": [{"id", "label"}], "expires_at": iso}
+    # {"question": str, "kind": "choose" | "create_party" | "confirm_amount" | "confirm_create" | "fill", "options": [{"id", "label"}],
+    #  "answers": {"said": the words so far, …}, "expires_at": iso}
     clarification = models.JSONField(null=True, blank=True)
     response_text = models.TextField(blank=True, default="")
     response_audio = models.FileField(upload_to="responses/%Y/%m/", null=True, blank=True)

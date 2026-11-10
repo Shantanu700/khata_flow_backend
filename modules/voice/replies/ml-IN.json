@@ -81,5 +81,19 @@
   "stock_list.none": "സ്റ്റോക്കിൽ ഇപ്പോൾ ഒന്നുമില്ല.",
   "stock_list.some": "സ്റ്റോക്കിൽ {count} സാധനങ്ങളുണ്ട്: {items}.",
   "debtors.some": "{count} പേർക്ക് കടം ബാക്കിയുണ്ട്: {items}.",
-  "more": "ഇനിയും {count} എണ്ണമുണ്ട്."
+  "more": "ഇനിയും {count} എണ്ണമുണ്ട്.",
+  "cancel": "വേണ്ട",
+  "exists": "{name} ഇപ്പോൾത്തന്നെ ഉണ്ട്. വേറെ പേര് പറയൂ.",
+  "ask.name.ADD_CUSTOMER": "പുതിയ കസ്റ്റമറുടെ പേര് എന്താണ്?",
+  "ask.name.ADD_STAFF": "പുതിയ ജീവനക്കാരന്റെ പേര് എന്താണ്?",
+  "ask.name.ADD_PRODUCT": "പുതിയ സാധനത്തിന്റെ പേര് എന്താണ്?",
+  "ask.salary": "{name}-ന്റെ മാസശമ്പളം എത്രയാണ്?",
+  "ask.unit": "{name} എങ്ങനെയാണ് എണ്ണുന്നത്: പാക്കറ്റ്, കിലോ, ലിറ്റർ അതോ പീസ്?",
+  "confirm.ADD_CUSTOMER": "പുതിയ കസ്റ്റമർ {name}-നെ ചേർക്കട്ടെ?",
+  "confirm.ADD_CUSTOMER.owing": "പുതിയ കസ്റ്റമർ {name}, പഴയ കടം {amount}. ചേർക്കട്ടെ?",
+  "confirm.ADD_STAFF": "പുതിയ ജീവനക്കാരൻ {name}, മാസശമ്പളം {amount}. ചേർക്കട്ടെ?",
+  "confirm.ADD_PRODUCT": "പുതിയ സാധനം {name}, {unit} കണക്കിൽ, ഇപ്പോൾ {qty} {unit} സ്റ്റോക്ക്, {alert} {unit}-ൽ താഴെയായാൽ ഓർമ്മിപ്പിക്കും. ചേർക്കട്ടെ?",
+  "added.ADD_CUSTOMER": "{name}-ന്റെ കണക്ക് തുറന്നു. {balance}",
+  "added.ADD_STAFF": "{name}-നെ ജീവനക്കാരുടെ കൂട്ടത്തിൽ ചേർത്തു. മാസശമ്പളം {amount}.",
+  "added.ADD_PRODUCT": "{name} സ്റ്റോക്കിൽ ചേർത്തു. ഇപ്പോൾ {qty} {unit} ഉണ്ട്."
 }

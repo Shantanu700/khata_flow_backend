@@ -81,5 +81,19 @@
   "stock_list.none": "ஸ்டாக்கில் இப்போது எதுவும் இல்லை.",
   "stock_list.some": "ஸ்டாக்கில் {count} பொருள் இருக்கு: {items}.",
   "debtors.some": "{count} பேரிடம் கடன் பாக்கி: {items}.",
-  "more": "இன்னும் {count} இருக்கு."
+  "more": "இன்னும் {count} இருக்கு.",
+  "cancel": "வேண்டாம்",
+  "exists": "{name} ஏற்கனவே இருக்கிறது. வேறு பெயர் சொல்லுங்கள்.",
+  "ask.name.ADD_CUSTOMER": "புதிய வாடிக்கையாளரின் பெயர் என்ன?",
+  "ask.name.ADD_STAFF": "புதிய பணியாளரின் பெயர் என்ன?",
+  "ask.name.ADD_PRODUCT": "புதிய பொருளின் பெயர் என்ன?",
+  "ask.salary": "{name} அவர்களின் மாதச் சம்பளம் எவ்வளவு?",
+  "ask.unit": "{name} எதில் கணக்கிடப்படுகிறது: பாக்கெட், கிலோ, லிட்டர் அல்லது பீஸ்?",
+  "confirm.ADD_CUSTOMER": "புதிய வாடிக்கையாளர் {name} சேர்க்கவா?",
+  "confirm.ADD_CUSTOMER.owing": "புதிய வாடிக்கையாளர் {name}, பழைய கடன் {amount}. சேர்க்கவா?",
+  "confirm.ADD_STAFF": "புதிய பணியாளர் {name}, மாதச் சம்பளம் {amount}. சேர்க்கவா?",
+  "confirm.ADD_PRODUCT": "புதிய பொருள் {name}, {unit} கணக்கில், இப்போது {qty} {unit} இருப்பு, {alert} {unit}-க்கு கீழே குறைந்தால் நினைவூட்டுகிறேன். சேர்க்கவா?",
+  "added.ADD_CUSTOMER": "{name} கணக்கு திறக்கப்பட்டது. {balance}",
+  "added.ADD_STAFF": "{name} பணியாளராக சேர்க்கப்பட்டார். மாதச் சம்பளம் {amount}.",
+  "added.ADD_PRODUCT": "{name} இருப்பில் சேர்க்கப்பட்டது. இப்போது {qty} {unit} உள்ளது."
 }

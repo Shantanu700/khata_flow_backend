@@ -99,6 +99,14 @@ cases:
     expect: {intent: QUERY_CUSTOMER_COUNT}
   - text: "श्याम की इस महीने की पगार कितनी बनी"
     expect: {intent: QUERY_STAFF_DUE, party_name: Shyam}
+  - text: "Naya customer Rahul Verma jodo, purana udhaar 300"
+    expect: {intent: ADD_CUSTOMER, party_name: Rahul Verma, amount: 300}
+  - text: "नया स्टाफ़ सोनू, तनख्वाह आठ हज़ार महीना"
+    expect: {intent: ADD_STAFF, party_name: Sonu, amount: 8000}
+  - text: "Naya saamaan Tata Salt, packet mein, 20 packet hai"
+    expect: {intent: ADD_PRODUCT, product_name: Tata Salt, unit: packet, quantity: 20}
+  - text: "Naya staff Raju jodo. 9000"
+    expect: {intent: ADD_STAFF, party_name: Raju, amount: 9000}
   - text: "abhi wala galat ho gaya, hata do"
     expect: {intent: UNDO_LAST}
   - text: "पिछली एंट्री गलत है, उसे मिटा दो"

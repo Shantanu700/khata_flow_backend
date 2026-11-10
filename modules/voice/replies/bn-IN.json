@@ -81,5 +81,19 @@
   "stock_list.none": "স্টকে এখন কিছু নেই।",
   "stock_list.some": "স্টকে {count}টা জিনিস আছে: {items}।",
   "debtors.some": "{count} জনের কাছে বাকি আছে: {items}।",
-  "more": "আরও {count}টা আছে।"
+  "more": "আরও {count}টা আছে।",
+  "cancel": "থাক",
+  "exists": "{name} আগে থেকেই আছে। অন্য নাম বলুন।",
+  "ask.name.ADD_CUSTOMER": "নতুন খদ্দেরের নাম কী?",
+  "ask.name.ADD_STAFF": "নতুন কর্মচারীর নাম কী?",
+  "ask.name.ADD_PRODUCT": "নতুন জিনিসের নাম কী?",
+  "ask.salary": "{name}-এর মাসিক বেতন কত?",
+  "ask.unit": "{name} কীসে গোনা হয়: প্যাকেট, কিলো, লিটার না পিস?",
+  "confirm.ADD_CUSTOMER": "নতুন খদ্দের {name} যোগ করব?",
+  "confirm.ADD_CUSTOMER.owing": "নতুন খদ্দের {name}, আগের বাকি {amount}। যোগ করব?",
+  "confirm.ADD_STAFF": "নতুন কর্মচারী {name}, মাসিক বেতন {amount}। যোগ করব?",
+  "confirm.ADD_PRODUCT": "নতুন জিনিস {name}, {unit}-এ গোনা, এখন {qty} {unit} স্টক, {alert} {unit}-এর কম হলে মনে করিয়ে দেব। যোগ করব?",
+  "added.ADD_CUSTOMER": "{name}-এর খাতা খোলা হল। {balance}",
+  "added.ADD_STAFF": "{name} কর্মচারী হিসেবে যোগ হলেন। মাসিক বেতন {amount}।",
+  "added.ADD_PRODUCT": "{name} স্টকে যোগ হল। এখন {qty} {unit} আছে।"
 }

@@ -81,5 +81,19 @@
   "stock_list.none": "స్టాక్‌లో ఇప్పుడు ఏమీ లేదు.",
   "stock_list.some": "స్టాక్‌లో {count} సరుకులు ఉన్నాయి: {items}.",
   "debtors.some": "{count} మంది దగ్గర అప్పు బాకీ ఉంది: {items}.",
-  "more": "ఇంకా {count} ఉన్నాయి."
+  "more": "ఇంకా {count} ఉన్నాయి.",
+  "cancel": "వద్దు",
+  "exists": "{name} ఇప్పటికే ఉంది. వేరే పేరు చెప్పండి.",
+  "ask.name.ADD_CUSTOMER": "కొత్త కస్టమర్ పేరు ఏమిటి?",
+  "ask.name.ADD_STAFF": "కొత్త సిబ్బంది పేరు ఏమిటి?",
+  "ask.name.ADD_PRODUCT": "కొత్త సరుకు పేరు ఏమిటి?",
+  "ask.salary": "{name} గారి నెల జీతం ఎంత?",
+  "ask.unit": "{name} దేనిలో లెక్కిస్తారు: ప్యాకెట్, కిలో, లీటర్ లేదా పీస్?",
+  "confirm.ADD_CUSTOMER": "కొత్త కస్టమర్ {name}ని చేర్చనా?",
+  "confirm.ADD_CUSTOMER.owing": "కొత్త కస్టమర్ {name}, పాత బాకీ {amount}. చేర్చనా?",
+  "confirm.ADD_STAFF": "కొత్త సిబ్బంది {name}, నెల జీతం {amount}. చేర్చనా?",
+  "confirm.ADD_PRODUCT": "కొత్త సరుకు {name}, {unit} లెక్కలో, ఇప్పుడు {qty} {unit} స్టాక్, {alert} {unit} కంటే తగ్గితే గుర్తు చేస్తాను. చేర్చనా?",
+  "added.ADD_CUSTOMER": "{name} ఖాతా తెరిచాను. {balance}",
+  "added.ADD_STAFF": "{name}ని సిబ్బందిలో చేర్చాను. నెల జీతం {amount}.",
+  "added.ADD_PRODUCT": "{name} స్టాక్‌లో చేర్చాను. ఇప్పుడు {qty} {unit} ఉంది."
 }

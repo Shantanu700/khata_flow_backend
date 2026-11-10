@@ -81,5 +81,19 @@
   "stock_list.none": "Nothing is in stock yet.",
   "stock_list.some": "Items in stock ({count}): {items}.",
   "debtors.some": "Customers who owe money ({count}): {items}.",
-  "more": "And {count} more."
+  "more": "And {count} more.",
+  "cancel": "Cancel",
+  "exists": "{name} is already in your shop. Please say a different name.",
+  "ask.name.ADD_CUSTOMER": "What is the new customer's name?",
+  "ask.name.ADD_STAFF": "What is the new staff member's name?",
+  "ask.name.ADD_PRODUCT": "What is the new item called?",
+  "ask.salary": "What is {name}'s monthly salary?",
+  "ask.unit": "How is {name} counted: packets, kilos, litres or pieces?",
+  "confirm.ADD_CUSTOMER": "Add {name} as a new customer?",
+  "confirm.ADD_CUSTOMER.owing": "Add {name} as a new customer, with {amount} already owed?",
+  "confirm.ADD_STAFF": "Add {name} as new staff, on a salary of {amount} a month?",
+  "confirm.ADD_PRODUCT": "New item {name}, counted in {unit}, {qty} {unit} in stock, low-stock alert at {alert} {unit}. Shall I add it?",
+  "added.ADD_CUSTOMER": "Opened a khata for {name}. {balance}",
+  "added.ADD_STAFF": "Added {name} to staff, on {amount} a month.",
+  "added.ADD_PRODUCT": "Added {name} to stock. There are {qty} {unit} now."
 }

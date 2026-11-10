@@ -81,5 +81,19 @@
   "stock_list.none": "સ્ટોકમાં હજી કંઈ નથી.",
   "stock_list.some": "સ્ટોકમાં {count} વસ્તુઓ છે: {items}.",
   "debtors.some": "{count} લોકો પાસે ઉધાર બાકી છે: {items}.",
-  "more": "બીજી {count} પણ છે."
+  "more": "બીજી {count} પણ છે.",
+  "cancel": "રહેવા દો",
+  "exists": "{name} પહેલેથી છે. બીજું નામ બોલો.",
+  "ask.name.ADD_CUSTOMER": "નવા ગ્રાહકનું નામ શું છે?",
+  "ask.name.ADD_STAFF": "નવા સ્ટાફનું નામ શું છે?",
+  "ask.name.ADD_PRODUCT": "નવા સામાનનું નામ શું છે?",
+  "ask.salary": "{name}નો મહિનાનો પગાર કેટલો છે?",
+  "ask.unit": "{name} શેમાં ગણાય છે: પેકેટ, કિલો, લિટર કે પીસ?",
+  "confirm.ADD_CUSTOMER": "નવો ગ્રાહક {name} ઉમેરું?",
+  "confirm.ADD_CUSTOMER.owing": "નવો ગ્રાહક {name}, જૂની ઉધાર {amount}. ઉમેરું?",
+  "confirm.ADD_STAFF": "નવો સ્ટાફ {name}, પગાર {amount} મહિને. ઉમેરું?",
+  "confirm.ADD_PRODUCT": "નવો સામાન {name}, {unit}માં, હમણાં {qty} {unit} સ્ટોક, {alert} {unit}થી ઓછું થાય ત્યારે યાદ કરાવીશ. ઉમેરું?",
+  "added.ADD_CUSTOMER": "{name}નું ખાતું ખુલી ગયું. {balance}",
+  "added.ADD_STAFF": "{name} સ્ટાફમાં ઉમેરાયા. પગાર {amount} મહિને.",
+  "added.ADD_PRODUCT": "{name} સ્ટોકમાં ઉમેરાયું. હમણાં {qty} {unit} છે."
 }

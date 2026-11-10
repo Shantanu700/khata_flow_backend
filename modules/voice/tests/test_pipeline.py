@@ -348,3 +348,73 @@ def test_cancel_after_the_write_reverses_it(api, llm, sharma):
     assert api.post(f"/api/v1/voice/commands/{command['id']}/cancel/").json()["stage"] == CommandStatus.CANCELLED
     assert customer_balance(sharma) == 0
     assert Entry.objects.filter(kind=EntryKind.REVERSAL, voice_command_id=command["id"]).count() == 1
+
+
+def clarify(api, body: dict, **answer) -> dict:
+    return api.post(f"/api/v1/voice/commands/{body['id']}/clarify/", answer, format="json").json()
+
+
+def test_new_customer_is_added_only_after_confirming(api, llm, sharma):
+    llm(Intent.ADD_CUSTOMER, party_name="Rahul Verma", amount=D("300"))
+    body = text(api, "Naya customer Rahul Verma, pichhla udhaar 300")
+    assert body["clarification"]["kind"] == "confirm_create"
+    assert body["response_text"] == "Naya customer Rahul Verma, pichhla udhaar ₹300. Jod doon?"
+    assert not Party.objects.filter(name="Rahul Verma").exists()
+    done = clarify(api, body, confirm=True)
+    assert done["stage"] == CommandStatus.COMMITTED
+    assert done["response_text"] == "Rahul Verma ka khata khul gaya. Ab kul baaki ₹300 hai."
+    assert customer_balance(Party.objects.get(name="Rahul Verma", kind=PartyKind.CUSTOMER)) == D("300")
+
+
+def test_declining_a_new_entity_adds_nothing(api, llm, shop):
+    llm(Intent.ADD_STAFF, party_name="Raju", amount=D("8000"))
+    body = text(api)
+    assert body["response_text"] == "Naya staff Raju, salary ₹8,000 mahina. Jod doon?"
+    clarify(api, body, confirm=False)
+    assert not Party.objects.filter(name="Raju").exists()
+
+
+def test_missing_details_are_asked_for_then_added(api, llm, shop):
+    llm(Intent.ADD_STAFF, party_name="Raju")
+    body = text(api, "Naya staff Raju jodo")
+    assert (body["stage"], body["clarification"]["kind"]) == (CommandStatus.NEEDS_CLARIFICATION, "fill")
+    assert body["response_text"] == "Raju ki mahine ki salary kitni hai?"
+    assert [o["id"] for o in body["clarification"]["options"]] == ["no"]
+    llm(Intent.ADD_STAFF, party_name="Raju", amount=D("8000"))
+    answer = api.post("/api/v1/voice/text-commands/", {"text": "aath hazaar", "reply_to": body["id"]}, format="json").json()
+    assert answer["parsed"]["amount"] == "8000" and answer["clarification"]["kind"] == "confirm_create"
+    assert VoiceCommand.objects.get(pk=body["id"]).stage == CommandStatus.ANSWERED
+    done = clarify(api, answer, confirm=True)
+    assert done["response_text"] == "Raju staff mein jud gaye. Salary ₹8,000 mahina."
+    assert Party.objects.get(name="Raju").monthly_salary == D("8000")
+
+
+def test_answer_parses_with_the_earlier_words(api, llm, shop, monkeypatch):
+    llm(Intent.ADD_PRODUCT, product_name="Maggi Masala")
+    body = text(api, "Naya saamaan Maggi Masala")
+    assert body["response_text"] == "Maggi Masala kis mein ginte hain: packet, kilo, litre ya piece?"
+    heard = []
+    monkeypatch.setattr(
+        FakeIntentParser, "parse", lambda self, said, context: heard.append(said) or ParsedCommand(intent=Intent.ADD_PRODUCT, product_name="Maggi Masala", unit="packets", quantity=D("12"))
+    )
+    answer = api.post("/api/v1/voice/text-commands/", {"text": "packet, 12 hain", "reply_to": body["id"]}, format="json").json()
+    assert heard == ["Naya saamaan Maggi Masala. packet, 12 hain"]
+    assert answer["response_text"].startswith("Naya saamaan Maggi Masala, packet mein, abhi 12 packet stock")
+    clarify(api, answer, confirm=True)
+    assert stock_level(shop.products.get(name="Maggi Masala")) == D("12")
+
+
+def test_an_answer_to_a_closed_question_is_a_fresh_command(api, llm, shop, sharma):
+    llm(Intent.ADD_CUSTOMER)
+    body = text(api)
+    assert body["response_text"] == "Naye customer ka naam kya hai?"
+    clarify(api, body, confirm=False)
+    llm(Intent.QUERY_CUSTOMER_BALANCE, party_name="Sharma ji")
+    answer = api.post("/api/v1/voice/text-commands/", {"text": "Sharma ji ka hisaab", "reply_to": body["id"]}, format="json").json()
+    assert answer["stage"] == CommandStatus.ANSWERED and answer["transcript"] == "Sharma ji ka hisaab"
+
+
+def test_an_existing_name_is_not_added_twice(api, llm, sharma):
+    llm(Intent.ADD_CUSTOMER, party_name="sharma ji")
+    body = text(api)
+    assert (body["error_code"], body["response_text"]) == ("ALREADY_EXISTS", "sharma ji pehle se hai. Doosra naam boliye.")

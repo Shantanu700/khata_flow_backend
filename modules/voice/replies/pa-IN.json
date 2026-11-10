@@ -81,5 +81,19 @@
   "stock_list.none": "ਸਟਾਕ ਵਿੱਚ ਹਾਲੇ ਕੁਝ ਨਹੀਂ ਹੈ।",
   "stock_list.some": "ਸਟਾਕ ਵਿੱਚ {count} ਚੀਜ਼ਾਂ ਹਨ: {items}।",
   "debtors.some": "{count} ਲੋਕਾਂ ਵੱਲ ਉਧਾਰ ਬਾਕੀ ਹੈ: {items}।",
-  "more": "ਹੋਰ {count} ਵੀ ਹਨ।"
+  "more": "ਹੋਰ {count} ਵੀ ਹਨ।",
+  "cancel": "ਰਹਿਣ ਦਿਓ",
+  "exists": "{name} ਪਹਿਲਾਂ ਹੀ ਹੈ। ਕੋਈ ਹੋਰ ਨਾਮ ਬੋਲੋ।",
+  "ask.name.ADD_CUSTOMER": "ਨਵੇਂ ਗਾਹਕ ਦਾ ਨਾਮ ਕੀ ਹੈ?",
+  "ask.name.ADD_STAFF": "ਨਵੇਂ ਸਟਾਫ਼ ਦਾ ਨਾਮ ਕੀ ਹੈ?",
+  "ask.name.ADD_PRODUCT": "ਨਵੇਂ ਸਮਾਨ ਦਾ ਨਾਮ ਕੀ ਹੈ?",
+  "ask.salary": "{name} ਦੀ ਮਹੀਨੇ ਦੀ ਤਨਖਾਹ ਕਿੰਨੀ ਹੈ?",
+  "ask.unit": "{name} ਕਿਸ ਵਿੱਚ ਗਿਣਦੇ ਹੋ: ਪੈਕਟ, ਕਿੱਲੋ, ਲੀਟਰ ਜਾਂ ਪੀਸ?",
+  "confirm.ADD_CUSTOMER": "ਨਵਾਂ ਗਾਹਕ {name} ਜੋੜ ਦਿਆਂ?",
+  "confirm.ADD_CUSTOMER.owing": "ਨਵਾਂ ਗਾਹਕ {name}, ਪਿਛਲਾ ਉਧਾਰ {amount}। ਜੋੜ ਦਿਆਂ?",
+  "confirm.ADD_STAFF": "ਨਵਾਂ ਸਟਾਫ਼ {name}, ਤਨਖਾਹ {amount} ਮਹੀਨਾ। ਜੋੜ ਦਿਆਂ?",
+  "confirm.ADD_PRODUCT": "ਨਵਾਂ ਸਮਾਨ {name}, {unit} ਵਿੱਚ, ਹੁਣ {qty} {unit} ਸਟਾਕ, {alert} {unit} ਤੋਂ ਘੱਟ ਹੋਣ 'ਤੇ ਯਾਦ ਕਰਾਵਾਂਗਾ। ਜੋੜ ਦਿਆਂ?",
+  "added.ADD_CUSTOMER": "{name} ਦਾ ਖਾਤਾ ਖੁੱਲ੍ਹ ਗਿਆ। {balance}",
+  "added.ADD_STAFF": "{name} ਸਟਾਫ਼ ਵਿੱਚ ਜੁੜ ਗਏ। ਤਨਖਾਹ {amount} ਮਹੀਨਾ।",
+  "added.ADD_PRODUCT": "{name} ਸਟਾਕ ਵਿੱਚ ਜੁੜ ਗਿਆ। ਹੁਣ {qty} {unit} ਹੈ।"
 }

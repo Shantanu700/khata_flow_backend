@@ -90,7 +90,8 @@ class AudioCommandAV(BaseAV):
             audio=data.validated_data["audio"],
             language=data.validated_data.get("language", shop.preferred_language),
         )
-        return _respond(request, command, lambda: handle_command(command))
+        reply_to = data.validated_data.get("reply_to")
+        return _respond(request, command, lambda: handle_command(command, reply_to))
 
 
 class TextCommandAV(BaseAV):
@@ -108,7 +109,8 @@ class TextCommandAV(BaseAV):
             transcript=data.validated_data["text"].strip(),
             language=data.validated_data.get("language", shop.preferred_language),
         )
-        return _respond(request, command, lambda: handle_command(command))
+        reply_to = data.validated_data.get("reply_to")
+        return _respond(request, command, lambda: handle_command(command, reply_to))
 
 
 class CommandDetailAV(BaseAV):

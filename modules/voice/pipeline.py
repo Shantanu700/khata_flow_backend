@@ -4,6 +4,7 @@ from collections.abc import Callable
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -13,11 +14,13 @@ from django.utils import timezone
 from base.exceptions import DomainError
 from modules.ledger import services as ledger
 from modules.ledger.choices import EntryKind
-from modules.shops.choices import SHOP_LANGUAGES, PartyKind, voice_language
+from modules.ledger.services import format_inr
+from modules.shops.choices import SHOP_LANGUAGES, PartyKind, Unit, voice_language
 from modules.shops.models import Party, Product
 from modules.voice import responses
 from modules.voice.audio import normalise
 from modules.voice.choices import (
+    CREATE_INTENTS,
     CUSTOMER_INTENTS,
     OPTIONAL_CUSTOMER_INTENTS,
     OPTIONAL_PRODUCT_INTENTS,
@@ -51,6 +54,9 @@ WRITE_KINDS = {
 AMOUNT_INTENTS = {Intent.ADD_CREDIT, Intent.RECORD_PAYMENT, Intent.STAFF_ADVANCE, Intent.SALARY_PAID}
 QUANTITY_INTENTS = {Intent.STOCK_IN, Intent.STOCK_OUT}
 YES, NO = "yes", "no"
+UNITS = {"packet": Unit.PACKET, "kg": Unit.KG, "kilo": Unit.KG, "litre": Unit.LITRE, "liter": Unit.LITRE, "piece": Unit.PIECE}
+# The add form's default too; the shopkeeper changes it on the Stock screen.
+NEW_PRODUCT_ALERT = Decimal(5)
 
 
 class Stop(Exception):
@@ -193,6 +199,58 @@ def _check_numbers(command: VoiceCommand, parsed: ParsedCommand, answers: dict) 
     return True
 
 
+def _new_details(command: VoiceCommand, parsed: ParsedCommand, answers: dict) -> dict | None:
+    "What the new customer, staff member or product is saved with; None after asking for a missing detail or to confirm."
+    intent = parsed.intent
+    name = " ".join(((parsed.product_name if intent == Intent.ADD_PRODUCT else parsed.party_name) or "").split())
+    unit = UNITS.get((parsed.unit or "").strip().lower().removesuffix("s"))
+    salary = parsed.amount if parsed.amount and parsed.amount > 0 else None
+    missing = (
+        "name" if not name
+        else "salary" if intent == Intent.ADD_STAFF and not salary
+        else "unit" if intent == Intent.ADD_PRODUCT and not unit
+        else None
+    )
+    if missing:
+        _ask(command, "fill", responses.ask_detail(intent, missing, name), [(NO, responses.say("cancel"))], answers)
+        return None
+    rows = command.shop.products if intent == Intent.ADD_PRODUCT else command.shop.parties
+    if rows.filter(name__iexact=name).exists():
+        raise Stop(responses.say("exists", name=name), "ALREADY_EXISTS")
+    new = {
+        "name": name,
+        "amount": max(parsed.amount or 0, 0),
+        "unit": unit,
+        "quantity": max(parsed.quantity or 0, 0),
+        "alert": NEW_PRODUCT_ALERT,
+    }
+    if not answers.get("create_confirmed"):
+        _ask(command, "confirm_create", responses.confirm_new(intent, new), list(zip((YES, NO), responses.yes_no())), answers)
+        return None
+    return new
+
+
+def _create(command: VoiceCommand, intent: Intent, new: dict) -> str:
+    shop = command.shop
+    command.stage = CommandStatus.COMMITTED
+    if intent == Intent.ADD_PRODUCT:
+        product = shop.products.create(name=new["name"], unit=new["unit"], low_stock_threshold=new["alert"])
+        if new["quantity"]:
+            ledger.record_entry(shop, EntryKind.STOCK_IN, product=product, quantity=new["quantity"], voice_command=command)
+        return responses.product_added(product, new["quantity"])
+    staff = intent == Intent.ADD_STAFF
+    party = shop.parties.create(
+        name=new["name"],
+        kind=PartyKind.STAFF if staff else PartyKind.CUSTOMER,
+        monthly_salary=new["amount"] if staff else None,
+    )
+    if staff:
+        return responses.say("added.ADD_STAFF", name=party.name, amount=format_inr(new["amount"]))
+    if new["amount"]:
+        ledger.record_entry(shop, EntryKind.CREDIT_GIVEN, party=party, amount=new["amount"], voice_command=command)
+    return responses.say("added.ADD_CUSTOMER", name=party.name, balance=responses.balance_line(new["amount"]))
+
+
 def _write(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, product: Product | None) -> str:
     kind = WRITE_KINDS[parsed.intent]
     on = _occurred_on(parsed)
@@ -291,24 +349,33 @@ def _answer(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, p
     raise Stop(responses.fallback(), "UNKNOWN_INTENT")
 
 
+def _resolve(command: VoiceCommand, parsed: ParsedCommand, answers: dict) -> Callable[[], str] | None:
+    "The write or answer to run, or None after asking the shopkeeper something."
+    if parsed.intent in CREATE_INTENTS:
+        new = _new_details(command, parsed, answers)
+        return new and (lambda: _create(command, parsed.intent, new))
+    named = parsed.intent in CUSTOMER_INTENTS | STAFF_INTENTS
+    optional = parsed.intent in OPTIONAL_CUSTOMER_INTENTS | OPTIONAL_STAFF_INTENTS and parsed.party_name
+    party = _party(command, parsed, answers) if named or optional else None
+    if command.stage == CommandStatus.NEEDS_CLARIFICATION:
+        return None
+    optional = parsed.intent in OPTIONAL_PRODUCT_INTENTS and parsed.product_name
+    product = _product(command, parsed, answers) if parsed.intent in PRODUCT_INTENTS or optional else None
+    if command.stage == CommandStatus.NEEDS_CLARIFICATION or not _check_numbers(command, parsed, answers):
+        return None
+    act = _write if parsed.intent in WRITE_KINDS else _answer
+    return lambda: act(command, parsed, party, product)
+
+
 def _resolve_and_act(command: VoiceCommand, parsed: ParsedCommand, answers: dict, timings: Timings) -> None:
     with timings("resolve"):
-        named = parsed.intent in CUSTOMER_INTENTS | STAFF_INTENTS
-        optional = parsed.intent in OPTIONAL_CUSTOMER_INTENTS | OPTIONAL_STAFF_INTENTS and parsed.party_name
-        party = _party(command, parsed, answers) if named or optional else None
-        if command.stage == CommandStatus.NEEDS_CLARIFICATION:
-            return
-        optional = parsed.intent in OPTIONAL_PRODUCT_INTENTS and parsed.product_name
-        product = _product(command, parsed, answers) if parsed.intent in PRODUCT_INTENTS or optional else None
-        if command.stage == CommandStatus.NEEDS_CLARIFICATION:
-            return
-        if not _check_numbers(command, parsed, answers):
-            return
+        act = _resolve(command, parsed, answers)
+    if act is None:
+        return
     # Under the row lock: a cancel lands either before the write (which then never happens) or after (and reverses it).
     with timings("commit"), transaction.atomic():
         _live(command, lock=True)
-        act = _write if parsed.intent in WRITE_KINDS else _answer
-        command.response_text = act(command, parsed, party, product)
+        command.response_text = act()
         command.clarification = None
 
 
@@ -367,7 +434,23 @@ def _speak(command: VoiceCommand, timings: Timings) -> None:
     command.response_audio.save(f"{command.pk}.wav", ContentFile(audio), save=False)
 
 
-def handle_command(command: VoiceCommand) -> VoiceCommand:
+def _earlier_words(command: VoiceCommand, reply_to: int | None) -> str:
+    "What was said before, when `reply_to` is still asking for a missing detail; that question is closed by this answer."
+    if not reply_to:
+        return ""
+    with transaction.atomic():
+        pending = VoiceCommand.objects.select_for_update().filter(pk=reply_to, shop=command.shop).first()
+        asked = pending and pending.stage == CommandStatus.NEEDS_CLARIFICATION and pending.clarification
+        if not asked or asked["kind"] != "fill" or timezone.now() > datetime.fromisoformat(asked["expires_at"]):
+            return ""
+        pending.stage = CommandStatus.ANSWERED
+        pending.clarification = None
+        pending.save(update_fields=["stage", "clarification", "updated_at"])
+    return asked["answers"]["said"]
+
+
+def handle_command(command: VoiceCommand, reply_to: int | None = None) -> VoiceCommand:
+    "`reply_to`: a command asking for a missing detail, which this one answers."
     timings = Timings(command)
 
     def stages() -> None:
@@ -384,13 +467,15 @@ def handle_command(command: VoiceCommand) -> VoiceCommand:
             _set_stage(command, CommandStatus.TRANSCRIBED)
         if not command.transcript.strip():
             raise Stop(responses.spoken_error("EMPTY_TRANSCRIPT"), "EMPTY_TRANSCRIPT")
+        # The answer to "what is the salary?" is parsed together with what came before it, so it has a meaning.
+        said = ". ".join(filter(None, [_earlier_words(command, reply_to), command.transcript.strip()]))
         with timings("intent"):
-            parsed = get_intent_parser().parse(command.transcript, context)
+            parsed = get_intent_parser().parse(said, context)
         command.parsed = parsed.model_dump(mode="json")
         _set_stage(command, CommandStatus.PARSED)
         if parsed.intent == Intent.UNKNOWN:
             raise Stop(responses.fallback(), "UNKNOWN_INTENT")
-        _resolve_and_act(command, parsed, {}, timings)
+        _resolve_and_act(command, parsed, {"said": said}, timings)
 
     _run(command, timings, stages)
     return command
@@ -419,6 +504,8 @@ def clarify(command: VoiceCommand, option_id: str | None = None, confirm: bool |
             answers["create_party"] = True
         elif pending["kind"] == "confirm_amount":
             answers["amount_confirmed"] = True
+        elif pending["kind"] == "confirm_create":
+            answers["create_confirmed"] = True
         else:
             field, pk = choice.split(":")
             answers[f"{field}_id"] = int(pk)

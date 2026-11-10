@@ -233,6 +233,24 @@ def confirm_amount(amount: Decimal) -> str:
     return say("confirm_amount", amount=format_inr(amount))
 
 
+def ask_detail(intent: str, missing: str, name: str) -> str:
+    return say(f"ask.name.{intent}") if missing == "name" else say(f"ask.{missing}", name=name)
+
+
+def confirm_new(intent: str, new: dict) -> str:
+    if intent == "ADD_PRODUCT":
+        units = say(f"unit.{new['unit']}")
+        return say("confirm.ADD_PRODUCT", name=new["name"], unit=units, qty=qty(new["quantity"]), alert=qty(new["alert"]))
+    if intent == "ADD_STAFF":
+        return say("confirm.ADD_STAFF", name=new["name"], amount=format_inr(new["amount"]))
+    key = "confirm.ADD_CUSTOMER.owing" if new["amount"] else "confirm.ADD_CUSTOMER"
+    return say(key, name=new["name"], amount=format_inr(new["amount"]))
+
+
+def product_added(product: Product, quantity: Decimal) -> str:
+    return say("added.ADD_PRODUCT", name=product.name, qty=qty(Decimal(quantity)), unit=unit(product))
+
+
 def for_speech(text: str) -> str:
     "₹1,250.50 -> '1250.50 rupaye' (in the reply's language): plain digits and the word read more naturally."
     return re.sub(r"₹([\d,]+(?:\.\d+)?)", lambda m: say("rupees", amount=m.group(1).replace(",", "")), text)

@@ -81,5 +81,19 @@
   "stock_list.none": "Stock mein abhi kuch nahi hai.",
   "stock_list.some": "Stock mein {count} cheezein hain: {items}.",
   "debtors.some": "{count} logon par udhaar baaki hai: {items}.",
-  "more": "Aur {count} bhi hain."
+  "more": "Aur {count} bhi hain.",
+  "cancel": "Rehne do",
+  "exists": "{name} pehle se hai. Doosra naam boliye.",
+  "ask.name.ADD_CUSTOMER": "Naye customer ka naam kya hai?",
+  "ask.name.ADD_STAFF": "Naye staff ka naam kya hai?",
+  "ask.name.ADD_PRODUCT": "Naye saamaan ka naam kya hai?",
+  "ask.salary": "{name} ki mahine ki salary kitni hai?",
+  "ask.unit": "{name} kis mein ginte hain: packet, kilo, litre ya piece?",
+  "confirm.ADD_CUSTOMER": "Naya customer {name} jod doon?",
+  "confirm.ADD_CUSTOMER.owing": "Naya customer {name}, pichhla udhaar {amount}. Jod doon?",
+  "confirm.ADD_STAFF": "Naya staff {name}, salary {amount} mahina. Jod doon?",
+  "confirm.ADD_PRODUCT": "Naya saamaan {name}, {unit} mein, abhi {qty} {unit} stock, {alert} {unit} se kam hone par yaad dilaunga. Jod doon?",
+  "added.ADD_CUSTOMER": "{name} ka khata khul gaya. {balance}",
+  "added.ADD_STAFF": "{name} staff mein jud gaye. Salary {amount} mahina.",
+  "added.ADD_PRODUCT": "{name} stock mein jud gaya. Abhi {qty} {unit} hai."
 }
