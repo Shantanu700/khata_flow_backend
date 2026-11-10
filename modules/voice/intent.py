@@ -116,7 +116,7 @@ Verma jodo", "नया ग्राहक मोहन, पुराना उ�
 "मोहन को काम पर रखा, तनख्वाह नौ हज़ार महीना", "Naya ladka rakha hai Sonu"
 - ADD_PRODUCT: a new item the shop will keep in stock; unit is how it is counted, quantity the stock there is \
 now, if said. "Naya saamaan Tata Salt jodo, packet mein", "नया सामान चीनी, किलो में, 50 किलो है", "Surf Excel add karo"
-- UNDO_LAST: any request to undo, delete, cancel, reverse or fix an entry, named or not. Voice never changes past entries; KhaataFlow only explains how to undo on screen. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो", "Gupta aunty ke 750 wapas karo"
+- UNDO_LAST: any request to undo, delete, cancel, reverse or fix an entry, named or not. Voice never changes past entries; KhataFlow only explains how to undo on screen. "Pichhli entry hata do", "गलती हो गई, आखिरी वाला कैंसल करो", "Gupta aunty ke 750 wapas karo"
 - UNKNOWN: greetings, or a request none of the intents above can serve even loosely.
 
 Choose the intent by what the shopkeeper wants to record or find out, not by matching words: people ask the \
