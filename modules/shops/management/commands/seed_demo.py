@@ -95,7 +95,8 @@ class Command(BaseCommand):
     def _merchant(self, merchant: dict) -> None:
         user, _ = get_user_model().objects.get_or_create(username=merchant["username"])
         password = None
-        if not user.has_usable_password():
+        # A new account's password is "", which Django counts as usable, so check for it too.
+        if not user.password or not user.has_usable_password():
             # DEMO_PASSWORD for a known password on every demo account; otherwise a random one, shown once.
             password = os.environ.get("DEMO_PASSWORD") or secrets.token_urlsafe(9)
             user.set_password(password)
