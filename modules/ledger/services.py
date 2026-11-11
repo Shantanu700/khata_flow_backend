@@ -1,11 +1,11 @@
 import calendar
 import re
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
-from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum, Value
+from django.db.models import DecimalField, F, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -23,9 +23,13 @@ class LedgerError(DomainError):
     pass
 
 
+FULL_DAY, HALF_DAY = Decimal("1"), Decimal("0.5")
+
+
 @dataclass(frozen=True)
 class StaffDue:
-    days_present: int
+    # Half days count 0.5.
+    days_present: Decimal
     days_in_month: int
     earned: Decimal
     advances: Decimal
@@ -90,14 +94,16 @@ def staff_due(party: Party, month: date) -> StaffDue:
         occurred_on__lte=month.replace(day=days_in_month),
     )
     totals = entries.aggregate(
-        days_present=Count("occurred_on", filter=Q(kind=EntryKind.ATTENDANCE), distinct=True),
+        days_present=Coalesce(
+            Sum(Coalesce("quantity", Value(FULL_DAY)), filter=Q(kind=EntryKind.ATTENDANCE)), Value(ZERO), output_field=MONEY
+        ),
         advances=Coalesce(Sum("amount", filter=Q(kind=EntryKind.STAFF_ADVANCE)), Value(ZERO), output_field=MONEY),
         salary_paid=Coalesce(Sum("amount", filter=Q(kind=EntryKind.SALARY_PAID)), Value(ZERO), output_field=MONEY),
     )
     salary = party.monthly_salary or ZERO
     earned = (salary * totals["days_present"] / days_in_month).quantize(Decimal("1"), ROUND_HALF_UP)
     return StaffDue(
-        days_present=totals["days_present"],
+        days_present=totals["days_present"].quantize(Decimal("0.1")),
         days_in_month=days_in_month,
         earned=earned,
         advances=totals["advances"],
@@ -146,8 +152,42 @@ def attendance_entry_id(party: Party, on: date) -> int | None:
 
 
 def present_days(party: Party, start: date, end: date) -> list[date]:
+    "Days with attendance, full or half."
     days = live_entries().filter(kind=EntryKind.ATTENDANCE, party=party, occurred_on__range=(start, end))
     return sorted(set(days.values_list("occurred_on", flat=True)))
+
+
+def half_days(party: Party, start: date, end: date) -> list[date]:
+    days = live_entries().filter(kind=EntryKind.ATTENDANCE, party=party, occurred_on__range=(start, end), quantity=HALF_DAY)
+    return sorted(set(days.values_list("occurred_on", flat=True)))
+
+
+def attendance_window(today: date) -> tuple[date, date]:
+    "Attendance can be set for any day of this month and last month, up to today."
+    return (today.replace(day=1) - timedelta(days=1)).replace(day=1), today
+
+
+def set_attendance(party: Party, on: date, mark: str, voice_command=None) -> Entry | None:
+    """Make `on` a full day ("present"), a half day ("half") or no attendance ("absent"). A change reverses the
+    day's entry and writes the new one, append-only like any correction. Returns the day's entry, or None."""
+    _validate(party.shop, EntryKind.ATTENDANCE, party, None, None, None)
+    start, end = attendance_window(timezone.localdate())
+    if not start <= on <= end:
+        raise LedgerError("ATTENDANCE_WINDOW", "Attendance can be changed only for this month and last month, up to today.")
+    worth = {"present": FULL_DAY, "half": HALF_DAY, "absent": None}[mark]
+    with transaction.atomic():
+        Party.objects.select_for_update().get(pk=party.pk)
+        existing = live_entries().filter(kind=EntryKind.ATTENDANCE, party=party, occurred_on=on).first()
+        if existing and (existing.quantity or FULL_DAY) == worth:
+            return existing
+        if existing:
+            reverse_entry(existing, voice_command=voice_command)
+        if worth is None:
+            return None
+        return Entry.objects.create(
+            shop_id=party.shop_id, kind=EntryKind.ATTENDANCE, party=party, quantity=worth, occurred_on=on,
+            voice_command=voice_command,
+        )
 
 
 def with_month_advances(parties: QuerySet[Party], month: date) -> QuerySet[Party]:
@@ -178,6 +218,8 @@ def _validate(
         raise LedgerError("WRONG_SHOP", "That party or product belongs to another shop.")
     if kind in CUSTOMER_MONEY_KINDS + STAFF_MONEY_KINDS and (amount is None or amount <= 0):
         raise LedgerError("INVALID_AMOUNT", "Amount must be more than zero.")
+    if kind == EntryKind.ATTENDANCE and quantity not in (None, FULL_DAY, HALF_DAY):
+        raise LedgerError("INVALID_QUANTITY", "Attendance is a full day (1) or a half day (0.5).")
     if kind in STOCK_KINDS and (product is None or quantity is None or quantity <= 0):
         raise LedgerError("INVALID_QUANTITY", "Stock entries need a product and a quantity above zero.")
     expected = {

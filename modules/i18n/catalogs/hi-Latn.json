@@ -265,9 +265,11 @@
   "staff.leftAfter": "Baaki tankhwah",
   "staff.mark": "Haazri lagao",
   "staff.mark.absent": "Nahi aaye",
+  "staff.mark.half": "Aadha din",
   "staff.mark.none": "Record nahi",
   "staff.mark.present": "Aaye",
   "staff.markTitle": "Aaj ki haazri lagao",
+  "staff.changeDay": "{date} badlein",
   "staff.marked": "Aaj aaye ✓",
   "staff.monthAccount": "Is mahine ka hisaab",
   "staff.monthNone": "Is mahine koi advance ya tankhwah nahi.",
@@ -343,6 +345,7 @@
   "toast.removed": "{name} hata diya.",
   "toast.undone": "Entry palat di.",
   "toast.unmarked": "{name} ki haaziri hata di.",
+  "toast.attendanceSet": "{name}, {date}: {mark}",
   "toast.entry.CREDIT_GIVEN": "{name} ka {amount} udhaar likh diya.",
   "toast.entry.PAYMENT_RECEIVED": "{name} se {amount} mile, likh diya.",
   "toast.entry.ATTENDANCE": "{name} ki haaziri lag gayi.",
@@ -373,5 +376,6 @@
   "dash.age.90": "1–3 mahine",
   "dash.age.old": "Purana",
   "dash.agePeople": "{count} log",
-  "staff.deleteBody": "Staff ki list se hat jayenge. Unki purani haazri aur payments Entries mein rahengi, kuch mitega nahi."
+  "staff.deleteBody": "Staff ki list se hat jayenge. Unki purani haazri aur payments Entries mein rahengi, kuch mitega nahi.",
+  "error.ATTENDANCE_WINDOW": "Haaziri sirf is mahine aur pichhle mahine ki badal sakti hai."
 }

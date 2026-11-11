@@ -237,9 +237,11 @@
   "staff.leftAfter": "बाकी पगार",
   "staff.mark": "हजेरी लावा",
   "staff.mark.absent": "आले नाहीत",
+  "staff.mark.half": "अर्धा दिवस",
   "staff.mark.none": "नोंद नाही",
   "staff.mark.present": "आले",
   "staff.markTitle": "आजची हजेरी लावा",
+  "staff.changeDay": "{date} बदला",
   "staff.marked": "आज आले ✓",
   "staff.monthAccount": "या महिन्याचा हिशोब",
   "staff.monthNone": "या महिन्यात ॲडव्हान्स किंवा पगार नाही.",
@@ -343,6 +345,7 @@
   "toast.removed": "{name} काढले.",
   "toast.undone": "नोंद रद्द केली.",
   "toast.unmarked": "{name}: हजेरी काढली.",
+  "toast.attendanceSet": "{name}, {date}: {mark}",
   "toast.entry.CREDIT_GIVEN": "{name}: {amount} उधारी लिहिली.",
   "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} मिळाले, लिहिले.",
   "toast.entry.ATTENDANCE": "{name}: हजेरी लावली.",
@@ -373,5 +376,6 @@
   "dash.age.90": "1–3 महिने",
   "dash.age.old": "जुने",
   "dash.agePeople": "{count} जण",
-  "staff.deleteBody": "कामगारांच्या यादीतून काढले जातील. जुनी हजेरी आणि पेमेंट एंट्रीजमध्ये राहतील, काहीही पुसले जाणार नाही."
+  "staff.deleteBody": "कामगारांच्या यादीतून काढले जातील. जुनी हजेरी आणि पेमेंट एंट्रीजमध्ये राहतील, काहीही पुसले जाणार नाही.",
+  "error.ATTENDANCE_WINDOW": "हजेरी फक्त या महिन्याची आणि मागच्या महिन्याची बदलता येते."
 }

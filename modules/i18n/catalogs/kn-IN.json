@@ -237,9 +237,11 @@
   "staff.leftAfter": "ಬಾಕಿ ಸಂಬಳ",
   "staff.mark": "ಹಾಜರಿ ಹಾಕಿ",
   "staff.mark.absent": "ಬಂದಿಲ್ಲ",
+  "staff.mark.half": "ಅರ್ಧ ದಿನ",
   "staff.mark.none": "ದಾಖಲೆ ಇಲ್ಲ",
   "staff.mark.present": "ಬಂದಿದ್ದಾರೆ",
   "staff.markTitle": "ಇವತ್ತಿನ ಹಾಜರಿ ಹಾಕಿ",
+  "staff.changeDay": "{date} ಬದಲಿಸಿ",
   "staff.marked": "ಇವತ್ತು ಬಂದಿದ್ದಾರೆ ✓",
   "staff.monthAccount": "ಈ ತಿಂಗಳ ಲೆಕ್ಕ",
   "staff.monthNone": "ಈ ತಿಂಗಳು ಅಡ್ವಾನ್ಸ್ ಅಥವಾ ಸಂಬಳ ಇಲ್ಲ.",
@@ -343,6 +345,7 @@
   "toast.removed": "{name} ತೆಗೆದುಹಾಕಲಾಗಿದೆ.",
   "toast.undone": "ಎಂಟ್ರಿ ರದ್ದಾಯಿತು.",
   "toast.unmarked": "{name}: ಹಾಜರಿ ತೆಗೆಯಲಾಗಿದೆ.",
+  "toast.attendanceSet": "{name}, {date}: {mark}",
   "toast.entry.CREDIT_GIVEN": "{name}: {amount} ಸಾಲ ಬರೆಯಲಾಗಿದೆ.",
   "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} ಬಂದಿದೆ, ಬರೆಯಲಾಗಿದೆ.",
   "toast.entry.ATTENDANCE": "{name}: ಹಾಜರಿ ಹಾಕಲಾಗಿದೆ.",
@@ -373,5 +376,6 @@
   "dash.age.90": "1–3 ತಿಂಗಳು",
   "dash.age.old": "ಹಳೆಯದು",
   "dash.agePeople": "{count} ಜನ",
-  "staff.deleteBody": "ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿಯಿಂದ ತೆಗೆಯಲಾಗುತ್ತದೆ. ಹಳೆಯ ಹಾಜರಿ ಮತ್ತು ಪಾವತಿಗಳು ಎಂಟ್ರಿಗಳಲ್ಲಿ ಉಳಿಯುತ್ತವೆ, ಏನೂ ಅಳಿಸುವುದಿಲ್ಲ."
+  "staff.deleteBody": "ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿಯಿಂದ ತೆಗೆಯಲಾಗುತ್ತದೆ. ಹಳೆಯ ಹಾಜರಿ ಮತ್ತು ಪಾವತಿಗಳು ಎಂಟ್ರಿಗಳಲ್ಲಿ ಉಳಿಯುತ್ತವೆ, ಏನೂ ಅಳಿಸುವುದಿಲ್ಲ.",
+  "error.ATTENDANCE_WINDOW": "ಹಾಜರಿಯನ್ನು ಈ ತಿಂಗಳು ಮತ್ತು ಕಳೆದ ತಿಂಗಳದ್ದು ಮಾತ್ರ ಬದಲಿಸಬಹುದು."
 }

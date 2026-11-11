@@ -237,9 +237,11 @@
   "staff.leftAfter": "మిగతా జీతం",
   "staff.mark": "హాజరు వేయండి",
   "staff.mark.absent": "రాలేదు",
+  "staff.mark.half": "సగం రోజు",
   "staff.mark.none": "రికార్డ్ లేదు",
   "staff.mark.present": "వచ్చారు",
   "staff.markTitle": "ఈరోజు హాజరు వేయండి",
+  "staff.changeDay": "{date} మార్చు",
   "staff.marked": "ఈరోజు వచ్చారు ✓",
   "staff.monthAccount": "ఈ నెల లెక్క",
   "staff.monthNone": "ఈ నెల అడ్వాన్స్ గానీ జీతం గానీ లేదు.",
@@ -343,6 +345,7 @@
   "toast.removed": "{name} తీసేశాం.",
   "toast.undone": "ఎంట్రీ రద్దు చేశాం.",
   "toast.unmarked": "{name}: హాజరు తీసేశాం.",
+  "toast.attendanceSet": "{name}, {date}: {mark}",
   "toast.entry.CREDIT_GIVEN": "{name}: {amount} అప్పు రాశాం.",
   "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} వచ్చింది, రాశాం.",
   "toast.entry.ATTENDANCE": "{name}: హాజరు వేశాం.",
@@ -373,5 +376,6 @@
   "dash.age.90": "1–3 నెలలు",
   "dash.age.old": "పాతది",
   "dash.agePeople": "{count} మంది",
-  "staff.deleteBody": "సిబ్బంది జాబితా నుండి తీసేస్తాం. పాత హాజరు, చెల్లింపులు ఎంట్రీలలో ఉంటాయి, ఏదీ చెరిగిపోదు."
+  "staff.deleteBody": "సిబ్బంది జాబితా నుండి తీసేస్తాం. పాత హాజరు, చెల్లింపులు ఎంట్రీలలో ఉంటాయి, ఏదీ చెరిగిపోదు.",
+  "error.ATTENDANCE_WINDOW": "ఈ నెల మరియు గత నెల హాజరు మాత్రమే మార్చవచ్చు."
 }

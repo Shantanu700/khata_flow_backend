@@ -237,9 +237,11 @@
   "staff.leftAfter": "બાકી પગાર",
   "staff.mark": "હાજરી પૂરો",
   "staff.mark.absent": "ન આવ્યા",
+  "staff.mark.half": "અડધો દિવસ",
   "staff.mark.none": "રેકોર્ડ નથી",
   "staff.mark.present": "આવ્યા",
   "staff.markTitle": "આજની હાજરી પૂરો",
+  "staff.changeDay": "{date} બદલો",
   "staff.marked": "આજે આવ્યા ✓",
   "staff.monthAccount": "આ મહિનાનો હિસાબ",
   "staff.monthNone": "આ મહિને કોઈ એડવાન્સ કે પગાર નથી.",
@@ -343,6 +345,7 @@
   "toast.removed": "{name} કાઢી નાખ્યું.",
   "toast.undone": "એન્ટ્રી રદ કરી.",
   "toast.unmarked": "{name}: હાજરી કાઢી.",
+  "toast.attendanceSet": "{name}, {date}: {mark}",
   "toast.entry.CREDIT_GIVEN": "{name}: {amount} ઉધાર લખ્યું.",
   "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} મળ્યા, લખ્યું.",
   "toast.entry.ATTENDANCE": "{name}: હાજરી પૂરી.",
@@ -373,5 +376,6 @@
   "dash.age.90": "1–3 મહિના",
   "dash.age.old": "જૂનું",
   "dash.agePeople": "{count} લોકો",
-  "staff.deleteBody": "સ્ટાફની યાદીમાંથી હટી જશે. જૂની હાજરી અને ચુકવણી એન્ટ્રીઝમાં રહેશે, કંઈ ભૂંસાશે નહીં."
+  "staff.deleteBody": "સ્ટાફની યાદીમાંથી હટી જશે. જૂની હાજરી અને ચુકવણી એન્ટ્રીઝમાં રહેશે, કંઈ ભૂંસાશે નહીં.",
+  "error.ATTENDANCE_WINDOW": "હાજરી ફક્ત આ મહિના અને ગયા મહિનાની બદલી શકાય."
 }

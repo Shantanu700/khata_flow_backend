@@ -22,6 +22,7 @@ from modules.ledger import services as ledger
 from modules.ledger.choices import CUSTOMER_MONEY_KINDS
 from modules.shops import photos
 from modules.shops.api.v1.serializers import (
+    AttendanceSerializer,
     LoginSerializer,
     MeSerializer,
     PartyFilterSerializer,
@@ -138,6 +139,16 @@ class PartyViewSet(ShopScopedViewSet):
             photos.remove(party)
         return Response(self.get_serializer(party).data)
 
+    @extend_schema(request=AttendanceSerializer, responses={200: PartySerializer})
+    @action(detail=True, methods=["put"])
+    def attendance(self, request, pk=None):
+        "Set one day: present, half day or absent (this month and last month). Changes are written as corrections."
+        party = self.get_object()
+        data = AttendanceSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        ledger.set_attendance(party, data.validated_data["on"], data.validated_data["mark"])
+        return Response(self.get_serializer(self.get_object()).data)
+
     @extend_schema(parameters=[OpenApiParameter("month", str, description="YYYY-MM; default this month")], responses={200: StaffMonthSerializer})
     @action(detail=True, methods=["get"])
     def month(self, request, pk=None):
@@ -153,6 +164,7 @@ class PartyViewSet(ShopScopedViewSet):
                     **due.__dict__,
                     "monthly_salary": party.monthly_salary,
                     "present_days": ledger.present_days(party, start, end),
+                    "half_days": ledger.half_days(party, start, end),
                 }
             ).data
         )

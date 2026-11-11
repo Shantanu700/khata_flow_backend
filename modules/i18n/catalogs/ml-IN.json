@@ -237,9 +237,11 @@
   "staff.leftAfter": "ബാക്കി ശമ്പളം",
   "staff.mark": "ഹാജർ ഇടൂ",
   "staff.mark.absent": "വന്നില്ല",
+  "staff.mark.half": "അര ദിവസം",
   "staff.mark.none": "രേഖയില്ല",
   "staff.mark.present": "വന്നു",
   "staff.markTitle": "ഇന്നത്തെ ഹാജർ ഇടൂ",
+  "staff.changeDay": "{date} മാറ്റുക",
   "staff.marked": "ഇന്ന് വന്നു ✓",
   "staff.monthAccount": "ഈ മാസത്തെ കണക്ക്",
   "staff.monthNone": "ഈ മാസം അഡ്വാൻസോ ശമ്പളമോ ഇല്ല.",
@@ -343,6 +345,7 @@
   "toast.removed": "{name} നീക്കി.",
   "toast.undone": "എൻട്രി റദ്ദാക്കി.",
   "toast.unmarked": "{name}: ഹാജർ നീക്കി.",
+  "toast.attendanceSet": "{name}, {date}: {mark}",
   "toast.entry.CREDIT_GIVEN": "{name}: {amount} കടം എഴുതി.",
   "toast.entry.PAYMENT_RECEIVED": "{name}: {amount} കിട്ടി, എഴുതി.",
   "toast.entry.ATTENDANCE": "{name}: ഹാജർ രേഖപ്പെടുത്തി.",
@@ -373,5 +376,6 @@
   "dash.age.90": "1–3 മാസം",
   "dash.age.old": "പഴയത്",
   "dash.agePeople": "{count} പേർ",
-  "staff.deleteBody": "ജീവനക്കാരുടെ പട്ടികയിൽ നിന്ന് മാറ്റും. പഴയ ഹാജരും പേയ്മെന്റുകളും എൻട്രികളിൽ ഉണ്ടാകും, ഒന്നും മായ്ക്കില്ല."
+  "staff.deleteBody": "ജീവനക്കാരുടെ പട്ടികയിൽ നിന്ന് മാറ്റും. പഴയ ഹാജരും പേയ്മെന്റുകളും എൻട്രികളിൽ ഉണ്ടാകും, ഒന്നും മായ്ക്കില്ല.",
+  "error.ATTENDANCE_WINDOW": "ഈ മാസത്തെയും കഴിഞ്ഞ മാസത്തെയും ഹാജർ മാത്രമേ മാറ്റാനാകൂ."
 }

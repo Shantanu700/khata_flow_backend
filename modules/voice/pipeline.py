@@ -259,6 +259,13 @@ def _create(command: VoiceCommand, intent: Intent, new: dict) -> str:
 def _write(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, product: Product | None) -> str:
     kind = WRITE_KINDS[parsed.intent]
     on = _occurred_on(parsed)
+    if kind == EntryKind.ATTENDANCE:
+        half = parsed.quantity is not None and parsed.quantity < 1
+        entry = ledger.set_attendance(party, on, "half" if half else "present", voice_command=command)
+        command.stage = CommandStatus.COMMITTED
+        if half:
+            return responses.say("attendance_half", name=party.name)
+        return responses.attendance_marked(party, already=entry.voice_command_id != command.pk)
     try:
         entry = ledger.record_entry(
             command.shop,
@@ -281,8 +288,6 @@ def _write(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, pr
         return responses.payment_received(party, entry.amount, ledger.customer_balance(party))
     if kind in (EntryKind.STOCK_IN, EntryKind.STOCK_OUT):
         return responses.stock_changed(entry, ledger.stock_level(product))
-    if kind == EntryKind.ATTENDANCE:
-        return responses.attendance_marked(party, already=entry.voice_command_id != command.pk)
     return responses.staff_paid(entry, ledger.staff_due(party, entry.occurred_on))
 
 

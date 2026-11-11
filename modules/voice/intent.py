@@ -88,7 +88,9 @@ Intents:
 - RECORD_PAYMENT: customer paid back. "Sharma ji ne 200 de diye", "मिश्रा जी से 500 मिल गए", "arre wo Verma ji ne kal ke 200 jama kiye"
 - STOCK_IN: stock arrived. "Aata ke 20 packet aaye", "मैगी के 5 डिब्बे स्टॉक में जोड़ो", "Tata namak 10 packet add karo"
 - STOCK_OUT: stock went out or was sold. "Maggi ke 3 packet nikle", "दो फॉर्च्यून तेल बिक गए", "Parle-G 12 bech diye"
-- MARK_ATTENDANCE: staff came to work. "Ramu aaj aaya hai", "श्याम की हाज़िरी लगा दो", "Ramu present"
+- MARK_ATTENDANCE: staff came to work. "Ramu aaj aaya hai", "श्याम की हाज़िरी लगा दो", "Ramu present". \
+For a half day ("Ramu aaj half day aaya", "Shyam kal aadha din aaya", "आधे दिन की हाज़िरी") set quantity 0.5; \
+for a full day leave quantity null
 - STAFF_ADVANCE: advance money given to staff. "Ramu ko 500 advance diya", "श्याम को एक हज़ार एडवांस दे दिया"
 - SALARY_PAID: salary paid to staff. "Shyam ko 4000 salary de di", "रामू की तनख्वाह 5000 दे दी"
 - QUERY_CUSTOMER_BALANCE: how much one customer owes. "Sharma ji ka kitna baaki hai?", "वर्मा जी का हिसाब बताओ"

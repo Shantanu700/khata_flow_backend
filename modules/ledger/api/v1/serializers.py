@@ -74,7 +74,7 @@ class LowStockSerializer(serializers.Serializer):
 class StaffDueSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
-    days_present = serializers.IntegerField()
+    days_present = serializers.DecimalField(max_digits=5, decimal_places=1, help_text="Half days count 0.5.")
     days_in_month = serializers.IntegerField()
     earned = serializers.DecimalField(max_digits=14, decimal_places=2)
     advances = serializers.DecimalField(max_digits=14, decimal_places=2)

@@ -34,7 +34,7 @@ def _aliases(value: list) -> list[str]:
 
 
 class StaffDueFieldsSerializer(serializers.Serializer):
-    days_present = serializers.IntegerField()
+    days_present = serializers.DecimalField(max_digits=5, decimal_places=1, help_text="Half days count 0.5.")
     days_in_month = serializers.IntegerField()
     earned = serializers.DecimalField(max_digits=14, decimal_places=2)
     advances = serializers.DecimalField(max_digits=14, decimal_places=2)
@@ -48,6 +48,7 @@ class PartySerializer(ShopScopedNameMixin, BaseSerializer):
     staff_due = serializers.SerializerMethodField()
     present_today = serializers.SerializerMethodField()
     attendance_14d = serializers.SerializerMethodField()
+    half_days_14d = serializers.SerializerMethodField()
     last_entry_on = serializers.DateField(read_only=True, allow_null=True, default=None)
     first_entry_on = serializers.DateField(read_only=True, allow_null=True, default=None)
     photo_key = serializers.SerializerMethodField(help_text="Fetch the photo at photo/?v=<photo_key>; null when none.")
@@ -56,7 +57,7 @@ class PartySerializer(ShopScopedNameMixin, BaseSerializer):
         model = Party
         fields = ModelBase.BASE_MODEL_FIELDS + (
             "name", "aliases", "kind", "monthly_salary", "is_active", "balance", "staff_due", "present_today",
-            "attendance_14d", "last_entry_on", "first_entry_on", "photo_key",
+            "attendance_14d", "half_days_14d", "last_entry_on", "first_entry_on", "photo_key",
         )
         read_only_fields = ModelBase.BASE_MODEL_FIELDS
 
@@ -85,10 +86,18 @@ class PartySerializer(ShopScopedNameMixin, BaseSerializer):
         return ledger.attendance_entry_id(party, timezone.localdate())
 
     def get_attendance_14d(self, party: Party) -> list[str] | None:
+        "Days with attendance (full or half) in the last 14 days."
         if party.kind != PartyKind.STAFF:
             return None
         today = timezone.localdate()
         return [d.isoformat() for d in ledger.present_days(party, today - timedelta(13), today)]
+
+    def get_half_days_14d(self, party: Party) -> list[str] | None:
+        "Which of those were half days."
+        if party.kind != PartyKind.STAFF:
+            return None
+        today = timezone.localdate()
+        return [d.isoformat() for d in ledger.half_days(party, today - timedelta(13), today)]
 
 
 class ProductSerializer(ShopScopedNameMixin, BaseSerializer):
@@ -132,9 +141,14 @@ class ProductFilterSerializer(serializers.Serializer):
     ordering = serializers.ChoiceField(choices=["name", "-name", "stock_level", "-stock_level"], required=False)
 
 
+class AttendanceSerializer(serializers.Serializer):
+    on = serializers.DateField(help_text="This month or last month, up to today.")
+    mark = serializers.ChoiceField(choices=["present", "half", "absent"])
+
+
 class StaffMonthSerializer(serializers.Serializer):
     month = serializers.CharField()
-    days_present = serializers.IntegerField()
+    days_present = serializers.DecimalField(max_digits=5, decimal_places=1, help_text="Half days count 0.5.")
     days_in_month = serializers.IntegerField()
     earned = serializers.DecimalField(max_digits=14, decimal_places=2)
     advances = serializers.DecimalField(max_digits=14, decimal_places=2)
@@ -142,6 +156,7 @@ class StaffMonthSerializer(serializers.Serializer):
     due = serializers.DecimalField(max_digits=14, decimal_places=2)
     monthly_salary = serializers.DecimalField(max_digits=14, decimal_places=2, allow_null=True)
     present_days = serializers.ListField(child=serializers.DateField())
+    half_days = serializers.ListField(child=serializers.DateField(), help_text="Which present days were half days.")
 
 
 class LoginSerializer(serializers.Serializer):

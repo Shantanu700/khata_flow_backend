@@ -237,9 +237,11 @@
   "staff.leftAfter": "Salary left",
   "staff.mark": "Mark attendance",
   "staff.mark.absent": "Absent",
+  "staff.mark.half": "Half day",
   "staff.mark.none": "No record",
   "staff.mark.present": "Present",
   "staff.markTitle": "Mark today's attendance",
+  "staff.changeDay": "Change {date}",
   "staff.marked": "Present today ✓",
   "staff.monthAccount": "This month's account",
   "staff.monthNone": "No advance or salary this month.",
@@ -343,6 +345,7 @@
   "toast.removed": "{name} removed.",
   "toast.undone": "Entry undone.",
   "toast.unmarked": "{name}'s attendance removed.",
+  "toast.attendanceSet": "{name}, {date}: {mark}",
   "toast.entry.CREDIT_GIVEN": "{amount} credit written for {name}.",
   "toast.entry.PAYMENT_RECEIVED": "{amount} received from {name}.",
   "toast.entry.ATTENDANCE": "{name} marked present.",
@@ -373,5 +376,6 @@
   "dash.age.90": "1–3 months",
   "dash.age.old": "Older",
   "dash.agePeople": "{count} people",
-  "staff.deleteBody": "They'll be removed from the staff list. Their past attendance and payments stay in Entries, nothing is erased."
+  "staff.deleteBody": "They'll be removed from the staff list. Their past attendance and payments stay in Entries, nothing is erased.",
+  "error.ATTENDANCE_WINDOW": "Attendance can be changed only for this month and last month."
 }

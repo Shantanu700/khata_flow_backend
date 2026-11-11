@@ -485,3 +485,19 @@ def test_yes_no_needs_a_reply_of_only_yes_or_no_words():
     assert [_yes_no(t) for t in ["haan jod do", "Yes, please.", "हाँ", "nahi ji", "no thanks"]] == [YES, YES, YES, NO, NO]
     assert [_yes_no(t) for t in ["nahi, salary 3000", "haan naam Bebo Sharma", "Sharma ji ka hisaab", ""]] == [None] * 4
     assert [_yes_no(t) for t in ["रहने दो", "Rehne do", "Cancel", "ರಹನೆ"]] == [NO, NO, NO, None]
+
+
+def test_a_half_day_by_voice_and_then_a_full_day(api, llm, ramu):
+    llm(Intent.MARK_ATTENDANCE, party_name="Ramu", quantity=D("0.5"))
+    body = text(api, "Ramu aaj half day aaya")
+    assert body["response_text"] == "Ramu ki aadhe din ki haaziri lag gayi."
+    assert ledger_due(ramu).days_present == D("0.5")
+    llm(Intent.MARK_ATTENDANCE, party_name="Ramu")
+    assert text(api, "Ramu aaj poore din raha")["response_text"] == "Ramu ki haaziri lag gayi."
+    assert ledger_due(ramu).days_present == 1
+
+
+def ledger_due(party):
+    from modules.ledger.services import staff_due
+
+    return staff_due(party, timezone.localdate())

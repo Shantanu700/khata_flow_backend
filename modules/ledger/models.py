@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -42,7 +44,9 @@ class Entry(ModelBase):
                     & (
                         Q(kind__in=CUSTOMER_MONEY_KINDS + STAFF_MONEY_KINDS, party__isnull=False, amount__gt=0)
                         | Q(kind__in=STOCK_KINDS, product__isnull=False, quantity__gt=0)
+                        # quantity: null or 1 for a full day, 0.5 for a half day
                         | Q(kind=EntryKind.ATTENDANCE, party__isnull=False)
+                        & (Q(quantity__isnull=True) | Q(quantity__in=[Decimal("0.5"), Decimal("1")]))
                     )
                 ),
             ),
