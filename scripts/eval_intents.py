@@ -3,6 +3,7 @@
     docker compose exec web python scripts/eval_intents.py
 
 A case passes only if intent, names, amount, quantity, date_hint and period all match (unit is ignored).
+Cases with `history` are a message in a chat: the earlier (shopkeeper, Khata) exchanges go in too.
 Calls are spaced PACE_SECONDS apart to stay under Groq's free-tier 8,000 tokens/minute (~1,230 per call),
 so the latencies printed are not inflated by rate-limit waits.
 """
@@ -26,6 +27,7 @@ django.setup()
 import yaml  # noqa: E402
 
 from modules.voice.intent import GroqIntentParser, ParsedCommand, ShopContext  # noqa: E402
+from modules.voice.providers.base import ProviderError  # noqa: E402
 
 GOLDEN = ROOT / "modules/voice/tests/golden_commands.yaml"
 PACE_SECONDS = float(os.environ.get("PACE_SECONDS", "9"))
@@ -44,16 +46,24 @@ def main() -> None:
     context = ShopContext(**golden["context"], today=date.fromisoformat(golden["today"]))
     parser = GroqIntentParser()
     totals, passed, latencies = defaultdict(int), defaultdict(int), []
+    chat_total = chat_passed = 0
     for index, case in enumerate(golden["cases"]):
         if index:
             time.sleep(PACE_SECONDS)
         expected = ParsedCommand(**case["expect"])
         start = time.perf_counter()
-        actual = parser.parse(case["text"], context)
+        history = [tuple(turn) for turn in case.get("history", [])]
+        try:
+            actual = parser.parse(case["text"], context, history)
+        except ProviderError as exc:
+            print(f"ERROR {case['text']!r}: {exc.code}")
+            actual = ParsedCommand(intent="UNKNOWN")
         latencies.append((time.perf_counter() - start) * 1000)
         totals[expected.intent] += 1
+        chat_total += bool(history)
         if same(expected, actual):
             passed[expected.intent] += 1
+            chat_passed += bool(history)
         else:
             got = actual.model_dump(include=set(COMPARED), exclude_none=True, mode="json")
             print(f"MISS {case['text']!r}\n     got {got}")
@@ -62,6 +72,7 @@ def main() -> None:
         print(f"{intent:26} {passed[intent]}/{totals[intent]}")
     overall = sum(passed.values()) / sum(totals.values())
     print(f"\nOverall: {sum(passed.values())}/{sum(totals.values())} = {overall:.1%}")
+    print(f"In a chat (with history): {chat_passed}/{chat_total}")
     print(f"Median intent latency: {median(latencies):.0f} ms over {len(latencies)} calls")
 
 

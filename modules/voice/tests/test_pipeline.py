@@ -39,7 +39,15 @@ def llm(monkeypatch):
 
 
 def text(api, words: str = "kuch bhi") -> dict:
+    "A message in a new chat."
     response = api.post("/api/v1/voice/text-commands/", {"text": words}, format="json")
+    assert response.status_code == 201, response.content
+    return response.json()
+
+
+def reply(api, body: dict, words: str) -> dict:
+    "The next message in the chat `body` is in."
+    response = api.post("/api/v1/voice/text-commands/", {"text": words, "chat": body["chat"]}, format="json")
     assert response.status_code == 201, response.content
     return response.json()
 
@@ -381,7 +389,7 @@ def test_missing_details_are_asked_for_then_added(api, llm, shop):
     assert body["response_text"] == "Raju ki mahine ki salary kitni hai?"
     assert [o["id"] for o in body["clarification"]["options"]] == ["no"]
     llm(Intent.ADD_STAFF, party_name="Raju", amount=D("8000"))
-    answer = api.post("/api/v1/voice/text-commands/", {"text": "aath hazaar", "reply_to": body["id"]}, format="json").json()
+    answer = reply(api, body, "aath hazaar")
     assert answer["parsed"]["amount"] == "8000" and answer["clarification"]["kind"] == "confirm_create"
     assert VoiceCommand.objects.get(pk=body["id"]).stage == CommandStatus.ANSWERED
     done = clarify(api, answer, confirm=True)
@@ -389,16 +397,13 @@ def test_missing_details_are_asked_for_then_added(api, llm, shop):
     assert Party.objects.get(name="Raju").monthly_salary == D("8000")
 
 
-def test_answer_parses_with_the_earlier_words(api, llm, shop, monkeypatch):
+def test_answer_is_parsed_with_the_chat_so_far(api, llm, shop):
     llm(Intent.ADD_PRODUCT, product_name="Maggi Masala")
     body = text(api, "Naya saamaan Maggi Masala")
     assert body["response_text"] == "Maggi Masala kis mein ginte hain: packet, kilo, litre ya piece?"
-    heard = []
-    monkeypatch.setattr(
-        FakeIntentParser, "parse", lambda self, said, context: heard.append(said) or ParsedCommand(intent=Intent.ADD_PRODUCT, product_name="Maggi Masala", unit="packets", quantity=D("12"))
-    )
-    answer = api.post("/api/v1/voice/text-commands/", {"text": "packet, 12 hain", "reply_to": body["id"]}, format="json").json()
-    assert heard == ["Naya saamaan Maggi Masala. packet, 12 hain"]
+    llm(Intent.ADD_PRODUCT, product_name="Maggi Masala", unit="packets", quantity=D("12"))
+    answer = reply(api, body, "packet, 12 hain")
+    assert FakeIntentParser.seen == ("packet, 12 hain", [("Naya saamaan Maggi Masala", body["response_text"])])
     assert answer["response_text"].startswith("Naya saamaan Maggi Masala, packet mein, abhi 12 packet stock")
     clarify(api, answer, confirm=True)
     assert stock_level(shop.products.get(name="Maggi Masala")) == D("12")
@@ -410,7 +415,7 @@ def test_an_answer_to_a_closed_question_is_a_fresh_command(api, llm, shop, sharm
     assert body["response_text"] == "Naye customer ka naam kya hai?"
     clarify(api, body, confirm=False)
     llm(Intent.QUERY_CUSTOMER_BALANCE, party_name="Sharma ji")
-    answer = api.post("/api/v1/voice/text-commands/", {"text": "Sharma ji ka hisaab", "reply_to": body["id"]}, format="json").json()
+    answer = reply(api, body, "Sharma ji ka hisaab")
     assert answer["stage"] == CommandStatus.ANSWERED and answer["transcript"] == "Sharma ji ka hisaab"
 
 
@@ -418,10 +423,6 @@ def test_an_existing_name_is_not_added_twice(api, llm, sharma):
     llm(Intent.ADD_CUSTOMER, party_name="sharma ji")
     body = text(api)
     assert (body["error_code"], body["response_text"]) == ("ALREADY_EXISTS", "sharma ji pehle se hai. Doosra naam boliye.")
-
-
-def reply(api, body: dict, words: str) -> dict:
-    return api.post("/api/v1/voice/text-commands/", {"text": words, "reply_to": body["id"]}, format="json").json()
 
 
 def test_product_without_opening_stock_is_confirmed_with_zero(api, llm, shop):
@@ -434,7 +435,7 @@ def test_product_without_opening_stock_is_confirmed_with_zero(api, llm, shop):
 def test_typed_yes_or_no_answers_the_question(api, llm, shop, monkeypatch):
     llm(Intent.ADD_STAFF, party_name="Bebo", amount=D("2000"))
     body = text(api, "Naya staff Bebo, salary 2000")
-    parse = lambda self, said, context: pytest.fail("a yes/no answer is not parsed")  # noqa: E731
+    parse = lambda self, said, context, history=(): pytest.fail("a yes/no answer is not parsed")  # noqa: E731
     monkeypatch.setattr(FakeIntentParser, "parse", parse)
     done = reply(api, body, "Haan, jod do")
     assert done["stage"] == CommandStatus.COMMITTED and Party.objects.get(name="Bebo").monthly_salary == D("2000")
@@ -457,15 +458,12 @@ def test_yes_without_a_question_is_a_fresh_command(api, llm, shop):
     assert text(api, "yes")["error_code"] == "UNKNOWN_INTENT"
 
 
-def test_a_change_at_the_read_back_is_applied_and_read_back_again(api, llm, shop, monkeypatch):
+def test_a_change_at_the_read_back_is_applied_and_read_back_again(api, llm, shop):
     llm(Intent.ADD_STAFF, party_name="Bebo", amount=D("2000"))
     body = text(api, "Naya staff Bebo, salary 2000")
-    heard = []
-    monkeypatch.setattr(
-        FakeIntentParser, "parse", lambda self, said, context: heard.append(said) or ParsedCommand(intent=Intent.ADD_STAFF, party_name="Bebo", amount=D("3000"))
-    )
+    llm(Intent.ADD_STAFF, party_name="Bebo", amount=D("3000"))
     changed = reply(api, body, "nahi, salary 3000 kar do")
-    assert heard == ["Naya staff Bebo, salary 2000. nahi, salary 3000 kar do"]
+    assert FakeIntentParser.seen == ("nahi, salary 3000 kar do", [("Naya staff Bebo, salary 2000", body["response_text"])])
     assert changed["clarification"]["kind"] == "confirm_create"
     assert changed["response_text"] == "Naya staff Bebo, salary ₹3,000 mahina. Jod doon?"
     assert not Party.objects.filter(name="Bebo").exists()
@@ -486,3 +484,20 @@ def test_yes_no_needs_a_reply_of_only_yes_or_no_words():
 
     assert [_yes_no(t) for t in ["haan jod do", "Yes, please.", "हाँ", "nahi ji", "no thanks"]] == [YES, YES, YES, NO, NO]
     assert [_yes_no(t) for t in ["nahi, salary 3000", "haan naam Bebo Sharma", "Sharma ji ka hisaab", ""]] == [None] * 4
+    assert [_yes_no(t) for t in ["रहने दो", "Rehne do", "Cancel", "ರಹನೆ"]] == [NO, NO, NO, None]
+
+
+def test_a_half_day_by_voice_and_then_a_full_day(api, llm, ramu):
+    llm(Intent.MARK_ATTENDANCE, party_name="Ramu", quantity=D("0.5"))
+    body = text(api, "Ramu aaj half day aaya")
+    assert body["response_text"] == "Ramu ki aadhe din ki haaziri lag gayi."
+    assert ledger_due(ramu).days_present == D("0.5")
+    llm(Intent.MARK_ATTENDANCE, party_name="Ramu")
+    assert text(api, "Ramu aaj poore din raha")["response_text"] == "Ramu ki haaziri lag gayi."
+    assert ledger_due(ramu).days_present == 1
+
+
+def ledger_due(party):
+    from modules.ledger.services import staff_due
+
+    return staff_due(party, timezone.localdate())
