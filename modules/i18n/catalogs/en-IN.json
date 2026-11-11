@@ -386,5 +386,6 @@
   "dash.age.old": "Older",
   "dash.agePeople": "{count} people",
   "staff.deleteBody": "They'll be removed from the staff list. Their past attendance and payments stay in Entries, nothing is erased.",
-  "error.ATTENDANCE_WINDOW": "Attendance can be changed only for this month and last month."
+  "error.ATTENDANCE_WINDOW": "Attendance can be changed only for this month and last month.",
+  "search.clear": "Clear search"
 }

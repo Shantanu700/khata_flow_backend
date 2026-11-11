@@ -386,5 +386,6 @@
   "dash.age.old": "Purana",
   "dash.agePeople": "{count} log",
   "staff.deleteBody": "Staff ki list se hat jayenge. Unki purani haazri aur payments Entries mein rahengi, kuch mitega nahi.",
-  "error.ATTENDANCE_WINDOW": "Haaziri sirf is mahine aur pichhle mahine ki badal sakti hai."
+  "error.ATTENDANCE_WINDOW": "Haaziri sirf is mahine aur pichhle mahine ki badal sakti hai.",
+  "search.clear": "Search saaf karo"
 }
