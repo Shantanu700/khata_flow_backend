@@ -6,7 +6,7 @@ from base.model import ModelBase
 from base.serializers import BaseSerializer
 from modules.ledger.api.v1.serializers import EntrySerializer
 from modules.shops.choices import SHOP_LANGUAGES
-from modules.voice.models import VoiceCommand
+from modules.voice.models import Chat, VoiceCommand
 
 # Prisma and Timbre's language codes (docs.gnani.ai/api/STT/languages), plus hi-Latn: Hindi voice, Hinglish replies.
 LANGUAGES = SHOP_LANGUAGES
@@ -15,8 +15,10 @@ LANGUAGES = SHOP_LANGUAGES
 class AudioCommandSerializer(serializers.Serializer):
     audio = serializers.FileField()
     language = serializers.ChoiceField(choices=LANGUAGES, required=False)
-    reply_to = serializers.IntegerField(
-        required=False, help_text="The command asking for a missing detail (clarification kind \"fill\") that this answers."
+    chat = serializers.IntegerField(
+        required=False,
+        help_text="The chat this message belongs to; left out, a new chat is started. A message may answer the "
+        "question the chat's previous message asked (a missing detail, yes/no, a change, or which one).",
     )
 
     def validate_audio(self, audio):
@@ -33,8 +35,10 @@ class StreamTicketSerializer(serializers.Serializer):
 class TextCommandSerializer(serializers.Serializer):
     text = serializers.CharField(max_length=500)
     language = serializers.ChoiceField(choices=LANGUAGES, required=False)
-    reply_to = serializers.IntegerField(
-        required=False, help_text="The command asking for a missing detail (clarification kind \"fill\") that this answers."
+    chat = serializers.IntegerField(
+        required=False,
+        help_text="The chat this message belongs to; left out, a new chat is started. A message may answer the "
+        "question the chat's previous message asked (a missing detail, yes/no, a change, or which one).",
     )
 
 
@@ -48,6 +52,17 @@ class ClarifySerializer(serializers.Serializer):
         return data
 
 
+class ChatSerializer(BaseSerializer):
+    message_count = serializers.IntegerField(read_only=True)
+    last_stage = serializers.CharField(read_only=True, allow_null=True, help_text="The newest message's stage.")
+    last_reply = serializers.CharField(read_only=True, allow_null=True, help_text="Khata's reply to the newest message.")
+
+    class Meta:
+        model = Chat
+        fields = ModelBase.BASE_MODEL_FIELDS + ("title", "last_message_at", "message_count", "last_stage", "last_reply")
+        read_only_fields = fields
+
+
 class VoiceCommandSerializer(BaseSerializer):
     response_audio_url = serializers.SerializerMethodField()
     entry = serializers.SerializerMethodField()
@@ -55,7 +70,7 @@ class VoiceCommandSerializer(BaseSerializer):
     class Meta:
         model = VoiceCommand
         fields = ModelBase.BASE_MODEL_FIELDS + (
-            "stage", "input_mode", "language", "transcript", "parsed", "response_text",
+            "chat", "stage", "input_mode", "language", "transcript", "parsed", "response_text",
             "response_audio_url", "entry", "clarification", "error_code", "timings_ms",
         )
         read_only_fields = fields

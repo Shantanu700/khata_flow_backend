@@ -41,7 +41,7 @@ services:
   # Migrations are generated, not committed (same convention as the owner's other repos).
   init:
     <<: *app
-    command: sh -c "python manage.py makemigrations shops ledger voice && python manage.py migrate"
+    command: sh -c "python manage.py makemigrations shops ledger voice && python manage.py migrate && python manage.py group_old_commands"
     depends_on:
       db:
         condition: service_healthy
