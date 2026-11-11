@@ -104,24 +104,115 @@ Only numbers from real runs, measured on 9 November 2026 on a laptop running the
 
 - Groq's free tier allows 8,000 tokens a minute and each command uses about 1,450, so roughly 5 commands a minute. On a rate limit the parser waits up to 10 seconds and retries once. If Groq's strict JSON mode fails on a reply, the parser retries once without it and validates the result itself.
 
-## Setup, step by step
+## Run it yourself, without the script
 
-`./scripts/up.sh` does all of this. Needs Docker. Python 3.13 and `uv` only if you want to run things outside Docker.
+`./scripts/up.sh` runs exactly these steps. Do them by hand to see each part, or to run the API without Docker.
+Commands start in `backend/` unless a step says otherwise.
+
+### 1. Settings and the local HTTPS certificate (both ways)
+
+Everything runs on HTTPS, including localhost, with a certificate that only your machine trusts.
 
 ```bash
-cp .env.example .env          # then set SECRET_KEY, GNANI_API_KEY and LLM_API_KEY
-export COMPOSE_FILE=docker/nonprod/docker-compose.yml   # or pass -f with every compose command
-mkcert -install && mkcert -cert-file docker/nonprod/certs/localhost.pem \
-       -key-file docker/nonprod/certs/localhost-key.pem localhost 127.0.0.1 ::1   # once; certs stay out of git
-docker compose up -d          # Postgres (latest), Redis, migrations, HTTPS API on :8000, Celery worker
-DEMO_PASSWORD=<pick one> docker compose exec -e DEMO_PASSWORD web python manage.py seed_demo
-                              # two demo merchants; prints each API token once (and a random password if DEMO_PASSWORD is unset)
-docker compose exec web python manage.py drf_create_token gupta_store   # show a merchant's token again
-docker compose exec web python manage.py createsuperuser     # for /admin/
-docker compose exec web python manage.py gnani_smoke_test    # one real Prisma + Timbre call each
+cp .env.example .env
 ```
 
-Edits to `.env` apply without restarting anything: Django reads the file itself, the dev server reloads when it changes, and the Celery worker runs under `watchfiles`. Leave `DATABASE_URL` and `REDIS_URL` unset when using Docker.
+Then fill in `.env`:
+
+| Key | What to put |
+| - | - |
+| `SECRET_KEY` | any long random string: `python3 -c "import secrets; print(secrets.token_urlsafe(50))"` |
+| `DEMO_PASSWORD` | the password the two demo shops will get |
+| `GNANI_API_KEY` | from https://app.gnani.ai; needed for speech-to-text and voice replies |
+| `LLM_API_KEY` | from https://console.groq.com/keys; needed for voice and typed commands |
+
+Without the two API keys everything except voice and typed commands still works.
+
+```bash
+mkdir -p docker/nonprod/certs                      # git-ignored, so a fresh clone doesn't have it
+mkcert -install                                    # once per machine: trust mkcert's local CA
+mkcert -cert-file docker/nonprod/certs/localhost.pem -key-file docker/nonprod/certs/localhost-key.pem \
+       localhost 127.0.0.1 ::1
+```
+
+### 2a. The API in Docker (recommended)
+
+Needs Docker.
+
+```bash
+export COMPOSE_FILE=docker/nonprod/docker-compose.yml   # or pass -f with every compose command
+docker compose up -d                                   # Postgres, Redis, migrations, API, live transcript, worker
+docker compose ps                                      # wait until web and stream are running
+docker compose exec web python manage.py seed_demo     # the two demo shops (safe to rerun)
+```
+
+- The API is on https://localhost:8000 and the live transcript on wss://localhost:8001.
+- Leave `DATABASE_URL` and `REDIS_URL` unset in `.env`; the defaults point at the compose services.
+- Stop it with `docker compose down`, which keeps the data. `docker compose down -v` also deletes the database.
+
+### 2b. The API on your machine, without Docker
+
+Needs Python 3.13, [uv](https://docs.astral.sh/uv/), ffmpeg, and Postgres 16 or newer.
+
+- **ffmpeg** is for spoken commands only. Browsers record WebM/Opus (Safari: MP4) and Gnani's speech-to-text takes
+  16 kHz mono WAV, so the API converts each recording. Without it, spoken commands fail with `FFMPEG_MISSING`;
+  everything else works. `brew install ffmpeg`, or `apt install ffmpeg`. The Docker image already has it.
+- **Postgres:** an empty database and a user that owns it.
+- **Redis is not needed.** It only feeds the Celery worker, which has no jobs yet.
+
+Add the database to `.env`, for example:
+
+```bash
+DATABASE_URL=postgres://khaataflow:khaataflow@localhost:5432/khaataflow
+```
+
+```bash
+uv sync                                                # creates .venv with the API and dev tools
+uv run python manage.py makemigrations shops ledger voice   # migrations are generated, not committed
+uv run python manage.py migrate
+uv run python manage.py seed_demo
+```
+
+Then start two processes, each in its own terminal:
+
+```bash
+# The API on https://localhost:8000
+uv run python manage.py runsslserver 0.0.0.0:8000 \
+  --certificate docker/nonprod/certs/localhost.pem --key docker/nonprod/certs/localhost-key.pem
+```
+
+```bash
+# The live transcript on wss://localhost:8001; without it, speaking still works but no words show while you talk
+uv run uvicorn config.asgi:application --host 0.0.0.0 --port 8001 --lifespan off --no-access-log \
+  --ssl-certfile docker/nonprod/certs/localhost.pem --ssl-keyfile docker/nonprod/certs/localhost-key.pem
+```
+
+### 3. The web app
+
+Needs [Bun](https://bun.sh). In a new terminal:
+
+```bash
+cd ../frontend
+cp .env.example .env.local      # KHATAFLOW_API_URL=https://localhost:8000
+bun install
+bun run dev:api                 # http://localhost:3100
+```
+
+`dev:api` hands mkcert's CA to Node so the web app's server can call the API over HTTPS.
+
+Open http://localhost:3100 and sign in as `gupta_store` or `patel_store` with your `DEMO_PASSWORD`.
+
+### Useful extras
+
+```bash
+docker compose exec web python manage.py drf_create_token gupta_store   # show a merchant's API token
+docker compose exec web python manage.py createsuperuser                # for /admin/
+docker compose exec web python manage.py gnani_smoke_test               # one real Prisma + Timbre call each
+```
+
+Without Docker, use `uv run python manage.py …` in place of `docker compose exec web python manage.py …`.
+
+Edits to `.env` apply without restarting anything: Django reads the file itself, the dev server reloads when it changes, and the Celery worker runs under `watchfiles`.
 
 Migrations are generated by the `init` service on start-up and are not committed, the same as the owner's other projects.
 
