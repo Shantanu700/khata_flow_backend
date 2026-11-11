@@ -64,6 +64,8 @@ flowchart LR
     G --> H[Gnani Timbre<br/>text-to-speech]
 ```
 
+Speak is a chat. Each message (a `VoiceCommand`) belongs to a `Chat`, and the server, not the screen, decides whether it answers the question the chat's previous message asked: a yes or no, a missing detail, a change at the read-back, or which of two names. The intent model reads the latest message with the chat's last 6 exchanges, so "8000" after "What is Raju's salary?" adds Raju with that salary. A question stays open for 10 minutes. Commands made before chats are filed into one chat per day by `group_old_commands`, which runs at start-up.
+
 Every stage records its time in `VoiceCommand.timings_ms` and moves `stage` forward (`RECEIVED` → `TRANSCRIBED` → `PARSED` → `COMMITTED` / `ANSWERED` / `NEEDS_CLARIFICATION` / `FAILED`), so a failed command shows exactly where it stopped. Any provider or business-rule error becomes a polite spoken reply ("Maaf kijiye, samajh nahi aaya. Dobara boliye."), never a 500.
 
 ## Design decisions
@@ -87,7 +89,8 @@ Same `base/` layer as the owner's certifier project:
 
 Only numbers from real runs, measured on 9 November 2026 on a laptop running the Docker stack, with Groq `openai/gpt-oss-120b` at `reasoning_effort=medium`.
 
-- **Intent accuracy: 35/36 (97.2%)** on the golden set (`modules/voice/tests/golden_commands.yaml`, run with `scripts/eval_intents.py`), in each of the last two runs. These are 36 synthetic transcripts covering every intent, in Devanagari and romanised Hinglish, with Hindi number words and messy phrasing. The one miss differed between runs and was harmless both times: an extra `date_hint` of today, then an extra `product_name` on an udhaar command (neither changes what gets written). The set is small and written by us, so treat it as a regression check, not a benchmark.
+- **Since chats (11 November 2026): 59/61 (96.7%)** on the golden set, now 61 cases, and **7/7 on the cases inside a chat**: a reply such as "aath hazaar" or "nahi, 3000 kar do" after Khata's question, "uska 200 aur likh do" after a balance, and a new instruction mid-question that must ignore it. Both misses are harmless: "Fortune Oil" without its "1L" (the resolver still finds the product) and an extra `period` of this month on a salary question. Median intent latency was 1,710 ms over the 61 calls, paced 13 seconds apart for Groq's free tier.
+- **Before chats: 35/36 (97.2%)** on the golden set (`modules/voice/tests/golden_commands.yaml`, run with `scripts/eval_intents.py`), in each of the last two runs. These are 36 synthetic transcripts covering every intent, in Devanagari and romanised Hinglish, with Hindi number words and messy phrasing. The one miss differed between runs and was harmless both times: an extra `date_hint` of today, then an extra `product_name` on an udhaar command (neither changes what gets written). The set is small and written by us, so treat it as a regression check, not a benchmark.
 - With `reasoning_effort=low` the golden set scored 36/36 and was about 250 ms faster, but in real spoken commands the model garbled some names ("Rathore ji" became "Rathoth ji"), so `medium` is the default (`LLM_REASONING_EFFORT`).
 - **Median latency per stage**, from 7 spoken commands across both demo shops (synthetic Timbre audio sent through `POST /voice/commands/`; all 7 answered correctly):
 
@@ -170,6 +173,7 @@ DATABASE_URL=postgres://khaataflow:khaataflow@localhost:5432/khaataflow
 uv sync                                                # creates .venv with the API and dev tools
 uv run python manage.py makemigrations shops ledger voice   # migrations are generated, not committed
 uv run python manage.py migrate
+uv run python manage.py group_old_commands             # files commands made before chats into chats (once)
 uv run python manage.py seed_demo
 ```
 
@@ -240,20 +244,23 @@ curl -H "Authorization: Token $TOKEN" -X POST $API/auth/logout/
 curl -H "Authorization: Token $TOKEN" -X PUT -H "Content-Type: application/json" \
      -d '{"preferred_language": "bn-IN"}' $API/me/                        # also GET
 
-# Voice command (multipart audio, any format the browser records); the language defaults to the shop's
-curl -H "Authorization: Token $TOKEN" -F audio=@command.webm -F language=hi-IN $API/voice/commands/
+# A spoken message (multipart audio, any format the browser records); the language defaults to the shop's.
+# Without "chat" a new chat starts; the reply carries its id.
+curl -H "Authorization: Token $TOKEN" -F audio=@command.webm -F language=hi-IN -F chat=7 $API/voice/commands/
 
-# Text command: same pipeline without speech-to-text (the demo backup)
+# A typed message: the same pipeline without speech-to-text
 curl -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" \
-     -d '{"text": "Sharma ji ka 500 udhaar likh do"}' $API/voice/text-commands/
+     -d '{"text": "Naya staff Raju jodo", "chat": 7}' $API/voice/text-commands/
+# The next message in the same chat answers Khata's question: "aath hazaar", "haan", "nahi, 9000", "Verma ji wale"
+curl -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" \
+     -d '{"text": "aath hazaar", "chat": 7}' $API/voice/text-commands/
 
-# Answer a clarifying question
+# A question can also be answered by its option id, or yes/no
 curl -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" \
      -d '{"option_id": "party:2"}' $API/voice/commands/42/clarify/
-curl -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" \
-     -d '{"confirm": true}' $API/voice/commands/42/clarify/
 
-curl -H "Authorization: Token $TOKEN" "$API/voice/commands/?page=1"      # history, newest first
+curl -H "Authorization: Token $TOKEN" "$API/voice/chats/?page=1"              # chats, most recently active first
+curl -H "Authorization: Token $TOKEN" "$API/voice/chats/7/messages/?page=1"   # a chat's messages, newest first
 curl -H "Authorization: Token $TOKEN" $API/voice/commands/42/audio/     # reply audio, owner only
 curl -H "Authorization: Token $TOKEN" -X POST $API/voice/stream-ticket/  # 30-second ticket for the live transcript
 # then wss://localhost:8001/api/v1/voice/stream/?ticket=…&language=hi-IN : send 1,024-byte frames of 16 kHz 16-bit

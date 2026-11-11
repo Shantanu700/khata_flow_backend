@@ -115,3 +115,25 @@ cases:
     expect: {intent: UNKNOWN}
   - text: "kal baarish hogi kya"
     expect: {intent: UNKNOWN}
+  # In a chat: earlier exchanges (shopkeeper, Khata) come first; only the latest message is parsed.
+  - history: [["Naya grahak jodna hai", "Naye customer ka naam kya hai?"]]
+    text: "Ramesh Yadav"
+    expect: {intent: ADD_CUSTOMER, party_name: Ramesh Yadav}
+  - history: [["Naya saamaan Kurkure", "Kurkure kis mein ginte hain: packet, kilo, litre ya piece?"]]
+    text: "packet, 12 hain"
+    expect: {intent: ADD_PRODUCT, product_name: Kurkure, unit: packet, quantity: 12}
+  - history: [["Naya staff Sonu jodo", "Sonu ki mahine ki salary kitni hai?"]]
+    text: "aath hazaar"
+    expect: {intent: ADD_STAFF, party_name: Sonu, amount: 8000}
+  - history: [["Naya staff Bebo, salary 2000", "Naya staff Bebo, salary ₹2,000 mahina. Jod doon?"]]
+    text: "nahi, 3000 kar do"
+    expect: {intent: ADD_STAFF, party_name: Bebo, amount: 3000}
+  - history: [["Naya saamaan Kurkure, packet", "Naya saamaan Kurkure, packet mein, abhi 0 packet stock. Jod doon?"]]
+    text: "abhi 20 packet hain"
+    expect: {intent: ADD_PRODUCT, product_name: Kurkure, unit: packet, quantity: 20}
+  - history: [["Sharma ji ka kitna baaki hai?", "Sharma ji ka ₹2,500 baaki hai."]]
+    text: "uska 200 aur likh do"
+    expect: {intent: ADD_CREDIT, party_name: Sharma ji, amount: 200}
+  - history: [["Naya staff Sonu jodo", "Sonu ki mahine ki salary kitni hai?"]]
+    text: "Verma ji ne 700 de diye"
+    expect: {intent: RECORD_PAYMENT, party_name: Verma ji, amount: 700}

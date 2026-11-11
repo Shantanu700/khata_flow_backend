@@ -11,6 +11,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils import timezone
+from rapidfuzz import fuzz
 
 from base.exceptions import DomainError
 from modules.ledger import services as ledger
@@ -34,9 +35,10 @@ from modules.voice.choices import (
     Period,
 )
 from modules.voice.intent import ParsedCommand, ShopContext, get_intent_parser
-from modules.voice.models import VoiceCommand
+from modules.voice.models import Chat, VoiceCommand
 from modules.voice.providers import ProviderError, get_stt, get_tts
 from modules.voice.resolver import Outcome, resolve_party, resolve_product
+from modules.voice.resolver import normalise as normalise_name
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +60,8 @@ YES, NO = "yes", "no"
 UNITS = {"packet": Unit.PACKET, "kg": Unit.KG, "kilo": Unit.KG, "litre": Unit.LITRE, "liter": Unit.LITRE, "piece": Unit.PIECE}
 # The add form's default too; the shopkeeper changes it on the Stock screen.
 NEW_PRODUCT_ALERT = Decimal(5)
+# Earlier exchanges of the chat the intent model sees: enough for a create with a change or two, at ~30 tokens each.
+HISTORY_TURNS = 6
 
 
 class Stop(Exception):
@@ -446,9 +450,12 @@ def _yes_no(text: str) -> str | None:
     Anything more ('nahi, salary 3000') is None: a detail to change, not an answer."""
     # Only punctuation goes: \W would also strip Devanagari vowel signs (हाँ).
     words = re.sub(r"[.,!?;:'\"।|]", " ", text.lower()).split()
-    labels = [(responses.catalog(code)["yes"].lower(), responses.catalog(code)["no"].lower()) for code in SHOP_LANGUAGES]
-    yes = YES_WORDS | {label for label, _ in labels}
-    no = NO_WORDS | {label for _, label in labels}
+    catalogs = [responses.catalog(code) for code in SHOP_LANGUAGES]
+    yes = YES_WORDS | {c["yes"].lower() for c in catalogs}
+    no = NO_WORDS | {c["no"].lower() for c in catalogs}
+    # A tapped button sends its label: "रहने दो" (Cancel) is a no as a whole, though "दो" alone is not.
+    if " ".join(words) in {" ".join(c["cancel"].lower().split()) for c in catalogs}:
+        return NO
     if words and set(words) <= yes | FILLER_WORDS and set(words) & yes:
         return YES
     if words and set(words) <= no | FILLER_WORDS and set(words) & no:
@@ -456,14 +463,29 @@ def _yes_no(text: str) -> str | None:
     return None
 
 
-def _take_question(command: VoiceCommand, reply_to: int | None) -> tuple[dict, dict, str | None] | None:
-    """The question `reply_to` still waits on, when this command answers it: (clarification, its parsed command,
-    YES/NO, or None for a missing detail or a change to the details). That question is closed; this command
-    carries on from it."""
-    if not reply_to:
+def _pick(text: str, options: list[dict]) -> str | None:
+    "The option a reply names ('Gali wale Sharma ji', or a tapped button's label), when one clearly beats the rest."
+    exact = [o["id"] for o in options if o["label"].casefold().split() == text.casefold().split()]
+    if len(exact) == 1:
+        return exact[0]
+    said = normalise_name(text)
+    ranked = sorted(((fuzz.WRatio(said, normalise_name(o["label"])), o["id"]) for o in options), reverse=True)
+    if not ranked or ranked[0][0] < settings.RESOLVER_AUTO_SCORE:
+        return None
+    if len(ranked) > 1 and ranked[0][0] - ranked[1][0] <= settings.RESOLVER_MARGIN:
+        return None
+    return ranked[0][1]
+
+
+def _take_question(command: VoiceCommand) -> tuple[dict, dict, str | None] | None:
+    """The question the chat's previous message still waits on, when this message answers it: (clarification,
+    its parsed command, the choice: YES/NO or an option id, or None for a missing detail or a change to the
+    details). That question is closed; this message carries on from it."""
+    if not command.chat_id:
         return None
     with transaction.atomic():
-        pending = VoiceCommand.objects.select_for_update().filter(pk=reply_to, shop=command.shop).first()
+        earlier = command.chat.messages.select_for_update().filter(pk__lt=command.pk).order_by("-id")
+        pending = earlier.first()
         asked = pending and pending.stage == CommandStatus.NEEDS_CLARIFICATION and pending.clarification
         if not asked or timezone.now() > datetime.fromisoformat(asked["expires_at"]):
             return None
@@ -471,7 +493,11 @@ def _take_question(command: VoiceCommand, reply_to: int | None) -> tuple[dict, d
         if asked["kind"] == "fill":
             answer = NO if answer == NO else None
         elif asked["kind"] == "confirm_create":
-            pass  # neither yes nor no: a change to the details read back, parsed with the earlier words
+            pass  # neither yes nor no: a change to the details read back, parsed with the chat so far
+        elif asked["kind"] == "choose":
+            answer = answer if answer == NO else _pick(command.transcript, asked["options"])
+            if answer is None:
+                return None
         elif answer is None or {option["id"] for option in asked["options"]} != {YES, NO}:
             return None
         pending.stage = CommandStatus.ANSWERED
@@ -500,8 +526,27 @@ def _resume(command: VoiceCommand, pending: dict, choice: str, timings: Timings)
     _resolve_and_act(command, ParsedCommand.model_validate(command.parsed), answers, timings)
 
 
-def handle_command(command: VoiceCommand, reply_to: int | None = None) -> VoiceCommand:
-    "`reply_to`: a command waiting on a question (a missing detail, or yes/no), which this one may answer."
+def _history(command: VoiceCommand) -> list[tuple[str, str]]:
+    if not command.chat_id:
+        return []
+    rows = command.chat.messages.filter(pk__lt=command.pk).exclude(transcript="").order_by("-id")[:HISTORY_TURNS]
+    return [(row.transcript, row.response_text) for row in reversed(rows)]
+
+
+def _file_in_chat(command: VoiceCommand) -> None:
+    "The chat moves to the top of the list; its first words become its title."
+    if not command.chat_id:
+        return
+    fields = {"last_message_at": timezone.now()}
+    if not command.chat.title and command.transcript.strip():
+        fields["title"] = " ".join(command.transcript.split())[:120]
+    Chat.objects.filter(pk=command.chat_id).update(**fields)
+    for name, value in fields.items():
+        setattr(command.chat, name, value)
+
+
+def handle_command(command: VoiceCommand) -> VoiceCommand:
+    "One message in its chat; it may answer the question the chat's previous message asked."
     timings = Timings(command)
 
     def stages() -> None:
@@ -516,23 +561,22 @@ def handle_command(command: VoiceCommand, reply_to: int | None = None) -> VoiceC
             command.transcript = transcript.text
             command.stt_confidence = transcript.confidence
             _set_stage(command, CommandStatus.TRANSCRIBED)
+        _file_in_chat(command)
         if not command.transcript.strip():
             raise Stop(responses.spoken_error("EMPTY_TRANSCRIPT"), "EMPTY_TRANSCRIPT")
-        question = _take_question(command, reply_to)
+        question = _take_question(command)
         if question and question[2]:
             command.parsed = question[1]
             _resume(command, question[0], question[2], timings)
             return
-        # The answer to "what is the salary?" is parsed together with what came before it, so it has a meaning.
-        earlier = question[0]["answers"].get("said", "") if question else ""
-        said = ". ".join(filter(None, [earlier, command.transcript.strip()]))
+        # "8000" means something only after "What is Raju's salary?": the model reads the chat so far.
         with timings("intent"):
-            parsed = get_intent_parser().parse(said, context)
+            parsed = get_intent_parser().parse(command.transcript.strip(), context, _history(command))
         command.parsed = parsed.model_dump(mode="json")
         _set_stage(command, CommandStatus.PARSED)
         if parsed.intent == Intent.UNKNOWN:
             raise Stop(responses.fallback(), "UNKNOWN_INTENT")
-        _resolve_and_act(command, parsed, {"said": said}, timings)
+        _resolve_and_act(command, parsed, {}, timings)
 
     _run(command, timings, stages)
     return command

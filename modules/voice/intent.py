@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
@@ -44,8 +45,12 @@ class ShopContext:
     today: date = field(default_factory=date.today)
 
 
+# Earlier exchanges in the chat, oldest first: (what the shopkeeper said, what Khata replied).
+History = Sequence[tuple[str, str]]
+
+
 class IntentParser(Protocol):
-    def parse(self, transcript: str, context: ShopContext) -> ParsedCommand: ...
+    def parse(self, transcript: str, context: ShopContext, history: History = ()) -> ParsedCommand: ...
 
 
 def _nullable(kind: str) -> dict:
@@ -133,13 +138,16 @@ The same intents in other languages, for example: "শর্মা জির ৫
 QUERY_TOTAL_OUTSTANDING is what is still owed now; QUERY_CREDIT_GIVEN is what was given in a period.
 
 Rules:
-- A command can be several sentences: Khata asked for a missing detail and the last sentence answers it \
-("Naya staff Raju jodo. 8000" is ADD_STAFF, Raju, amount 8000; "Naya saamaan Maggi. Packet" is ADD_PRODUCT, unit packet).
+- The message may come after a conversation with Khata. Turn only the latest message into one command, and use \
+the conversation only to fill in what the latest message leaves out or points back to: the name or item being \
+added, "uska", "wahi", or the answer to Khata's last question. After Khata asked "What is Raju's salary?", \
+"8000" is ADD_STAFF, Raju, amount 8000; after "Which unit is Maggi sold in?", "packet" is ADD_PRODUCT, Maggi, \
+unit packet; after "How much does Sharma ji owe?" was answered, "uska 200 aur likho" is ADD_CREDIT, Sharma ji, 200.
 - After Khata reads back a new customer, staff member or product, the shopkeeper may change a detail instead \
-of saying yes ("Naya staff Bebo, salary 2000. Nahi, salary 3000 kar do" is ADD_STAFF, Bebo, amount 3000; \
-"Naya saamaan Kurkure, packet. Low stock alert 6 packet pe" adds low_stock_alert 6; "...Naam Bebo Sharma hai" \
-renames). A later sentence that changes a detail wins; keep every detail it does not change, and the intent \
-unless it is changed too ("ye staff hai, customer nahi").
+of saying yes (read back "Bebo, salary 2000", then "Nahi, salary 3000 kar do" is ADD_STAFF, Bebo, amount 3000; \
+"Low stock alert 6 packet pe" adds low_stock_alert 6; "Naam Bebo Sharma hai" renames). The change wins; keep \
+every detail it does not change, and the intent unless it is changed too ("ye staff hai, customer nahi").
+- A latest message that is a new instruction on its own is parsed on its own, whatever came before.
 - ADD_CUSTOMER, ADD_STAFF, ADD_PRODUCT: the name is new, so write it as said, in Latin script and Title Case; \
 never swap in a known name.
 - party_name / product_name: always Latin script. If it matches a known name below (even loosely, \
@@ -160,6 +168,14 @@ kul milake, total). Those intents use period, never date_hint.
 """
 
 
+def conversation(transcript: str, history: History) -> str:
+    "The user message: just the latest words, or the chat so far and then them."
+    if not history:
+        return transcript
+    lines = [f"Shopkeeper: {said}\nKhata: {reply}" for said, reply in history]
+    return "Conversation so far:\n" + "\n".join(lines) + f"\n\nLatest message: {transcript}"
+
+
 def build_prompt(context: ShopContext) -> str:
     known = {
         "today": context.today.isoformat(),
@@ -173,10 +189,10 @@ def build_prompt(context: ShopContext) -> str:
 class GroqIntentParser:
     "Any OpenAI-compatible chat endpoint; Groq by default."
 
-    def parse(self, transcript: str, context: ShopContext) -> ParsedCommand:
+    def parse(self, transcript: str, context: ShopContext, history: History = ()) -> ParsedCommand:
         messages = [
             {"role": "system", "content": build_prompt(context)},
-            {"role": "user", "content": transcript},
+            {"role": "user", "content": conversation(transcript, history)},
         ]
         strict = True
         for attempt in (1, 2):
@@ -254,8 +270,11 @@ class FakeIntentParser:
     "Returns `result` (set by tests) for any transcript."
 
     result = ParsedCommand(intent=Intent.UNKNOWN)
+    # What the last parse was given, for tests to check.
+    seen: tuple[str, list[tuple[str, str]]] = ("", [])
 
-    def parse(self, transcript: str, context: ShopContext) -> ParsedCommand:
+    def parse(self, transcript: str, context: ShopContext, history: History = ()) -> ParsedCommand:
+        FakeIntentParser.seen = (transcript, list(history))
         return self.result
 
 

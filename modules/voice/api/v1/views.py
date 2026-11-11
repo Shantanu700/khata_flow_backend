@@ -6,7 +6,9 @@ from collections.abc import Callable
 
 from django.conf import settings
 from django.db import connection
+from django.db.models import Count, OuterRef, Subquery
 from django.http import FileResponse, Http404, StreamingHttpResponse
+from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework.generics import get_object_or_404
@@ -22,13 +24,14 @@ from modules.shops.services import shop_for
 from modules.voice import pipeline, stream
 from modules.voice.api.v1.serializers import (
     AudioCommandSerializer,
+    ChatSerializer,
     ClarifySerializer,
     StreamTicketSerializer,
     TextCommandSerializer,
     VoiceCommandSerializer,
 )
 from modules.voice.choices import InputMode
-from modules.voice.models import VoiceCommand
+from modules.voice.models import Chat, VoiceCommand
 from modules.voice.pipeline import cancel, clarify, handle_command
 
 log = logging.getLogger(__name__)
@@ -36,6 +39,13 @@ log = logging.getLogger(__name__)
 
 def _body(request, command: VoiceCommand) -> dict:
     return VoiceCommandSerializer(command, context={"request": request}).data
+
+
+def _chat(shop, chat_id: int | None) -> Chat:
+    "The chat a message goes into; a new one when the screen has none open."
+    if chat_id:
+        return get_object_or_404(Chat, pk=chat_id, shop=shop)
+    return Chat.objects.create(shop=shop, last_message_at=timezone.now())
 
 
 def _respond(request, command: VoiceCommand, run: Callable[[], VoiceCommand]):
@@ -86,12 +96,12 @@ class AudioCommandAV(BaseAV):
         data.is_valid(raise_exception=True)
         command = VoiceCommand.objects.create(
             shop=shop,
+            chat=_chat(shop, data.validated_data.get("chat")),
             input_mode=InputMode.AUDIO,
             audio=data.validated_data["audio"],
             language=data.validated_data.get("language", shop.preferred_language),
         )
-        reply_to = data.validated_data.get("reply_to")
-        return _respond(request, command, lambda: handle_command(command, reply_to))
+        return _respond(request, command, lambda: handle_command(command))
 
 
 class TextCommandAV(BaseAV):
@@ -105,12 +115,43 @@ class TextCommandAV(BaseAV):
         data.is_valid(raise_exception=True)
         command = VoiceCommand.objects.create(
             shop=shop,
+            chat=_chat(shop, data.validated_data.get("chat")),
             input_mode=InputMode.TEXT,
             transcript=data.validated_data["text"].strip(),
             language=data.validated_data.get("language", shop.preferred_language),
         )
-        reply_to = data.validated_data.get("reply_to")
-        return _respond(request, command, lambda: handle_command(command, reply_to))
+        return _respond(request, command, lambda: handle_command(command))
+
+
+class ChatListAV(BaseAV):
+    "The shop's chats, most recently active first."
+
+    @extend_response(ChatSerializer(), paginated=True)
+    def get(self, request):
+        last = VoiceCommand.objects.filter(chat=OuterRef("pk")).order_by("-id")
+        chats = (
+            Chat.objects.filter(shop=shop_for(request.user))
+            .annotate(
+                message_count=Count("messages"),
+                last_stage=Subquery(last.values("stage")[:1]),
+                last_reply=Subquery(last.values("response_text")[:1]),
+            )
+            .order_by("-last_message_at", "-id")
+        )
+        pages = DefaultPagination()
+        page = pages.paginate_queryset(chats, request, view=self)
+        return pages.get_paginated_response(ChatSerializer(page, many=True).data)
+
+
+class ChatMessagesAV(BaseAV):
+    "One chat's messages, newest first (each is the shopkeeper's words and Khata's reply)."
+
+    @extend_response(VoiceCommandSerializer(), paginated=True)
+    def get(self, request, pk: int):
+        chat = get_object_or_404(Chat, pk=pk, shop=shop_for(request.user))
+        pages = DefaultPagination()
+        page = pages.paginate_queryset(chat.messages.order_by("-id"), request, view=self)
+        return pages.get_paginated_response([_body(request, c) for c in page])
 
 
 class CommandDetailAV(BaseAV):
