@@ -218,6 +218,7 @@
   "staff.attendance": "Attendance",
   "staff.col.advance": "Advance",
   "staff.col.left": "Salary left",
+  "staff.col.paid": "Salary paid",
   "staff.col.present": "Attendance",
   "staff.days": "{count} days",
   "staff.days14": "days present · 14 days",
