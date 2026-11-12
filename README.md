@@ -23,7 +23,8 @@ cd backend && ./scripts/up.sh
 
 It creates `.env` from `.env.example` (with a fresh `SECRET_KEY` and demo password), makes the local HTTPS
 certificate, starts Postgres, Redis, the API and the live-transcript service in Docker, loads the two demo
-shops, then installs and starts the web app on http://localhost:3100. Rerunning it keeps your settings and data.
+shops, then installs the web app, generates its typed API client from the running API's schema (and type-checks
+the app against it), and starts it on http://localhost:3100. Rerunning it keeps your settings and data.
 `NO_FRONTEND=1` starts the API only; `FRONTEND_DIR=<path>` points at the web app elsewhere.
 
 Set `GNANI_API_KEY` and `LLM_API_KEY` in `.env` for voice and typed commands (everything else works without them).
@@ -199,10 +200,12 @@ Needs [Bun](https://bun.sh). In a new terminal:
 cd ../frontend
 cp .env.example .env.local      # KHATAFLOW_API_URL=https://localhost:8000
 bun install
+bun run gen:api                 # typed API client in lib/client, from https://localhost:8000/api/schema/
 bun run dev:api                 # http://localhost:3100
 ```
 
-`dev:api` hands mkcert's CA to Node so the web app's server can call the API over HTTPS.
+`dev:api` and `gen:api` hand mkcert's CA to Node so they can reach the API over HTTPS. Rerun `gen:api` whenever the
+API changes, then `bun run typecheck` to see every call that needs updating.
 
 Open http://localhost:3100 and sign in as `gupta_store` or `patel_store` with your `DEMO_PASSWORD`.
 
