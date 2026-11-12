@@ -39,6 +39,7 @@ from modules.voice.models import Chat, VoiceCommand
 from modules.voice.providers import ProviderError, get_stt, get_tts
 from modules.voice.resolver import Outcome, resolve_party, resolve_product
 from modules.voice.resolver import normalise as normalise_name
+from modules.voice.scripts import script_language
 
 log = logging.getLogger(__name__)
 
@@ -565,7 +566,10 @@ def handle_command(command: VoiceCommand) -> VoiceCommand:
                 transcript = get_stt().transcribe(wav, "audio/wav", voice_language(command.language), keyterms=shop_keyterms(command.shop))
             command.transcript = transcript.text
             command.stt_confidence = transcript.confidence
+            command.detected_language = transcript.language
             _set_stage(command, CommandStatus.TRANSCRIBED)
+        elif command.input_mode == InputMode.TEXT:
+            command.detected_language = script_language(command.transcript)
         _file_in_chat(command)
         if not command.transcript.strip():
             raise Stop(responses.spoken_error("EMPTY_TRANSCRIPT"), "EMPTY_TRANSCRIPT")

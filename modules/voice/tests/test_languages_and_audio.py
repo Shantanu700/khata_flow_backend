@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -12,7 +13,8 @@ from modules.shops.models import Shop
 from modules.voice import responses
 from modules.voice.choices import Intent
 from modules.voice.intent import FakeIntentParser, ParsedCommand
-from modules.voice.providers.fake import FakeTTS
+from modules.voice.providers.base import Transcript
+from modules.voice.providers.fake import FakeSTT, FakeTTS, silent_wav
 
 
 def client_for(shop) -> APIClient:
@@ -73,3 +75,26 @@ def test_every_catalog_has_exactly_the_base_keys(code):
         # Same {placeholders} in every translation, so formatting never fails or drops a value.
         holes = {key: sorted(re.findall(r"\{(\w+)\}", text)) for key, text in ours.items()}
         assert {key: sorted(re.findall(r"\{(\w+)\}", text)) for key, text in theirs.items()} == holes, path
+
+
+def test_a_typed_command_keeps_the_script_it_came_in(api, sharma, credit):
+    body = api.post(
+        "/api/v1/voice/text-commands/", {"text": "ஷர்மா ஜி 500 உதார்", "language": "en-IN"}, format="json"
+    ).json()
+    assert body["language"] == "en-IN" and body["detected_language"] == "ta-IN"
+
+
+def test_latin_text_is_not_judged(api, sharma, credit):
+    body = api.post(
+        "/api/v1/voice/text-commands/", {"text": "Sharma ji ka 500 udhaar", "language": "hi-IN"}, format="json"
+    ).json()
+    assert body["detected_language"] == ""
+
+
+def test_speech_keeps_the_language_prisma_heard(api, sharma, credit, monkeypatch):
+    monkeypatch.setattr(
+        FakeSTT, "transcribe", lambda *args, **kwargs: Transcript(text="ஷர்மா ஜி 500 உதார்", language="ta-IN")
+    )
+    clip = SimpleUploadedFile("clip.webm", silent_wav(seconds=1.0), content_type="audio/webm")
+    body = api.post("/api/v1/voice/commands/", {"audio": clip, "language": "en-IN"}, format="multipart").json()
+    assert body["language"] == "en-IN" and body["detected_language"] == "ta-IN"
