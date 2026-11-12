@@ -43,7 +43,7 @@ your machine, so it is never in the repo.
 
 | Model | What it does here | Where in the pipeline |
 | - | - | - |
-| **Prisma v3.0** (speech-to-text) | Turns the shopkeeper's recorded command into text. Called with the command's language plus English as the languages to expect (`ta-IN,en-IN`; an English shop sends `en-IN,hi-IN`; Hinglish uses `hi-IN`), so speech in the other language is written and tagged as what it is; `format=transcribe` (digits and ₹ for numbers), and the shop's party and product names as `keyterms`. | Stage 2, `modules/voice/providers/gnani.py` → `GnaniPrismaSTT` |
+| **Prisma v3.0** (speech-to-text) | Turns the shopkeeper's recorded command into text. Called with the command's language plus English as the languages to expect (`ta-IN,en-IN`; an English shop sends `en-IN,hi-IN`; Hinglish uses `hi-IN`), so speech in the other language is written and tagged as what it is (the live transcript stream takes only one); `format=transcribe` (digits and ₹ for numbers), and the shop's party and product names as `keyterms`. | Stage 2, `modules/voice/providers/gnani.py` → `GnaniPrismaSTT` |
 | **Timbre v3.0** (text-to-speech) | Speaks every reply, including errors and clarification questions, in the voice `Shivani` (each Timbre model has its own voices) and the command's language, so a Tamil command is answered in Tamil. Hinglish replies use `hi-IN`, so amounts are read in Hindi ("ek hazaar do sau pachaas rupaye"); with `hi-en` Timbre read them in English. | Stage 8, `modules/voice/providers/gnani.py` → `GnaniTimbreTTS` |
 
 Both use Gnani's non-streaming REST endpoints (`POST /stt/v3`, `POST /api/v1/tts/inference`). Intent extraction uses `openai/gpt-oss-120b` on Groq, because Gnani's own LLM is not on the Gnani API platform.

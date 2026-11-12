@@ -16,7 +16,6 @@ from django.core import signing
 from django.db import connection
 
 from modules.shops.choices import SHOP_LANGUAGES, voice_language
-from modules.voice.providers.gnani import language_hints
 from modules.shops.models import Shop
 
 SALT = "voice-stream"
@@ -53,7 +52,8 @@ async def stream(scope, receive, send) -> None:
     terms = await sync_to_async(_keyterms)(shop_id)
     headers = {
         "x-api-key-id": settings.GNANI_API_KEY,
-        "language_code": language_hints(voice_language(language if language in SHOP_LANGUAGES else settings.DEFAULT_LANGUAGE)),
+        # One language: the stream closes with 1008 on a list like "hi-IN,en-IN", which the recorded command takes.
+        "language_code": voice_language(language if language in SHOP_LANGUAGES else settings.DEFAULT_LANGUAGE),
         "model": settings.GNANI_STT_MODEL,
         "format": settings.GNANI_STT_FORMAT,
         "x-sample-rate": "16000",

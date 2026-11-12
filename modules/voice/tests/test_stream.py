@@ -80,5 +80,5 @@ def test_relays_frames_and_sends_back_phrases(shop, sharma, monkeypatch):
     assert {"type": "websocket.send", "text": json.dumps({"text": "Sharma ji ka 500 udhaar"})} in sent
     assert sent[-1]["type"] == "websocket.close"
     assert gnani.sent[0] == b"\x00" * stream.FRAME_BYTES and len(gnani.sent) == 2
-    assert gnani.headers["language_code"] == "hi-IN,en-IN" and "Sharma ji" in json.loads(gnani.headers["keyterms"])
+    assert gnani.headers["language_code"] == "hi-IN" and "Sharma ji" in json.loads(gnani.headers["keyterms"])
     assert gnani.closed
