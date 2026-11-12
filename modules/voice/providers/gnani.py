@@ -60,11 +60,19 @@ def _send(service: str, request: Callable[[httpx.Client], httpx.Response]) -> ht
     return response
 
 
+def language_hints(language: str) -> str:
+    """The languages Prisma should expect. Told only the shop's language, Prisma writes other speech in it and tags
+    it so (Hindi on an English shop came back romanised, tagged en-IN); a short list keeps Hindi and Marathi apart."""
+    if settings.GNANI_STT_MODEL != "prisma-v3.0":
+        return language
+    return f"{language},hi-IN" if language == "en-IN" else f"{language},en-IN"
+
+
 class GnaniPrismaSTT:
     def transcribe(
         self, audio: bytes, mime_type: str, language: str, keyterms: list[str] | None = None
     ) -> Transcript:
-        data = {"model": settings.GNANI_STT_MODEL, "language_code": language, "format": settings.GNANI_STT_FORMAT}
+        data = {"model": settings.GNANI_STT_MODEL, "language_code": language_hints(language), "format": settings.GNANI_STT_FORMAT}
         if keyterms:
             data["keyterms"] = json.dumps(keyterms[:MAX_KEYTERMS], ensure_ascii=False)
         # Prisma detects the audio format from the file-name extension.
@@ -84,7 +92,7 @@ class GnaniPrismaSTT:
             raise ProviderError("GNANI_STT_BAD_RESPONSE", str(exc.errors()[0]["loc"])) from exc
         if not body.success:
             raise ProviderError("GNANI_STT_FAILED")
-        return Transcript(text=body.transcript.strip(), language=body.detected_language_code or language)
+        return Transcript(text=body.transcript.strip(), language=body.detected_language_code or "")
 
 
 class GnaniTimbreTTS:

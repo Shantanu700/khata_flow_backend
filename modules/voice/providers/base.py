@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class Transcript(BaseModel):
     text: str
-    language: str
+    language: str  # the language Prisma heard; "" when it gave none
     confidence: float | None = None
 
 
