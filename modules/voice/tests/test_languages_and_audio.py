@@ -73,3 +73,36 @@ def test_every_catalog_has_exactly_the_base_keys(code):
         # Same {placeholders} in every translation, so formatting never fails or drops a value.
         holes = {key: sorted(re.findall(r"\{(\w+)\}", text)) for key, text in ours.items()}
         assert {key: sorted(re.findall(r"\{(\w+)\}", text)) for key, text in theirs.items()} == holes, path
+
+
+@pytest.mark.parametrize(
+    "language,hints", [("en-IN", "en-IN,hi-IN"), ("hi-IN", "hi-IN,en-IN"), ("ta-IN", "ta-IN,en-IN")]
+)
+def test_prisma_is_told_to_expect_english_beside_the_shop_language(language, hints):
+    from modules.voice.providers.gnani import language_hints
+
+    assert language_hints(language) == hints
+
+
+def test_prisma_v25_gets_one_language(settings):
+    from modules.voice.providers.gnani import language_hints
+
+    settings.GNANI_STT_MODEL = "prisma-v2.5"
+    assert language_hints("en-IN") == "en-IN"
+
+
+@pytest.mark.parametrize("tag,language", [("hi-IN", "hi-IN"), (None, "")])
+def test_an_untagged_transcript_has_no_language(tag, language, settings, monkeypatch):
+    import httpx
+
+    from modules.voice.providers import gnani
+
+    settings.GNANI_API_KEY = "test-key"
+    sent = {}
+
+    def reply(client):
+        return httpx.Response(200, json={"success": True, "transcript": "हाँ", "detected_language_code": tag})
+
+    monkeypatch.setattr(gnani, "_send", lambda service, request: reply(None) if sent.setdefault("ok", True) else None)
+    transcript = gnani.GnaniPrismaSTT().transcribe(b"RIFF", "audio/wav", "en-IN")
+    assert transcript.language == language

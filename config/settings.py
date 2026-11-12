@@ -177,8 +177,9 @@ GNANI_STREAM_URL = os.environ.get("GNANI_STREAM_URL", "wss://api.vachana.ai/stt/
 VOICE_STREAM_URL = os.environ.get("VOICE_STREAM_URL", "wss://localhost:8001/api/v1/voice/stream/")
 # transcribe: digits and ₹ for numbers, English words in Latin, Hindi in Devanagari.
 GNANI_STT_FORMAT = os.environ.get("GNANI_STT_FORMAT", "transcribe")
-GNANI_TTS_MODEL = os.environ.get("GNANI_TTS_MODEL", "timbre-v2.5")
-GNANI_TTS_VOICE = os.environ.get("GNANI_TTS_VOICE", "Poorvi")
+GNANI_TTS_MODEL = os.environ.get("GNANI_TTS_MODEL", "timbre-v3.0")
+# Each Timbre model has its own voices: Poorvi is v2.5 only, Shivani v3.0 only.
+GNANI_TTS_VOICE = os.environ.get("GNANI_TTS_VOICE", "Shivani")
 # hi-IN, not hi-en: our replies are Latin-script Hinglish, and only an explicit Hindi language makes
 # Timbre read their numbers in Hindi ("ek hazaar do sau pachaas") instead of English.
 GNANI_TTS_LANGUAGE = os.environ.get("GNANI_TTS_LANGUAGE", "hi-IN")
