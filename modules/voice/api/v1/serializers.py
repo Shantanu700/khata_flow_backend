@@ -70,7 +70,7 @@ class VoiceCommandSerializer(BaseSerializer):
     class Meta:
         model = VoiceCommand
         fields = ModelBase.BASE_MODEL_FIELDS + (
-            "chat", "stage", "input_mode", "language", "transcript", "parsed", "response_text",
+            "chat", "stage", "input_mode", "language", "detected_language", "transcript", "parsed", "response_text",
             "response_audio_url", "entry", "clarification", "error_code", "timings_ms",
         )
         read_only_fields = fields

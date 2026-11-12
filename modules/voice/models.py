@@ -29,6 +29,9 @@ class VoiceCommand(ModelBase):
     transcript = models.TextField(blank=True, default="")
     # Prisma's REST response carries no confidence score, so this stays null for Gnani.
     stt_confidence = models.FloatField(null=True, blank=True)
+    # What the words actually came in: Prisma's tag for speech, the transcript's script for typed text.
+    # Empty when it cannot be told (Latin script: English and Hinglish look alike).
+    detected_language = models.CharField(max_length=16, blank=True, default="")
     parsed = models.JSONField(null=True, blank=True)
     # Pipeline progress; `status` (from ModelBase) is the row's lifecycle like every other model.
     stage = models.CharField(max_length=24, choices=CommandStatus.choices, default=CommandStatus.RECEIVED)
