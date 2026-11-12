@@ -10,7 +10,7 @@ from django.db.models import Count, OuterRef, Subquery
 from django.http import FileResponse, Http404, StreamingHttpResponse
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
@@ -35,6 +35,10 @@ from modules.voice.models import Chat, VoiceCommand
 from modules.voice.pipeline import cancel, clarify, handle_command
 
 log = logging.getLogger(__name__)
+
+
+# ?progress=1 streams NDJSON instead of one JSON body (see _respond).
+PROGRESS = OpenApiParameter("progress", bool)
 
 
 def _body(request, command: VoiceCommand) -> dict:
@@ -88,7 +92,7 @@ class AudioCommandAV(BaseAV):
         page = pages.paginate_queryset(commands, request, view=self)
         return pages.get_paginated_response([_body(request, c) for c in page])
 
-    @extend_schema(request=AudioCommandSerializer)
+    @extend_schema(request=AudioCommandSerializer, parameters=[PROGRESS])
     @extend_response(VoiceCommandSerializer())
     def post(self, request):
         shop = shop_for(request.user)
@@ -107,7 +111,7 @@ class AudioCommandAV(BaseAV):
 class TextCommandAV(BaseAV):
     "Type a command: the same pipeline without speech-to-text. The demo backup."
 
-    @extend_schema(request=TextCommandSerializer)
+    @extend_schema(request=TextCommandSerializer, parameters=[PROGRESS])
     @extend_response(VoiceCommandSerializer())
     def post(self, request):
         shop = shop_for(request.user)

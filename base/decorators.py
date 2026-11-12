@@ -1,7 +1,7 @@
 import functools
 from typing import Any
 
-from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, inline_serializer
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse, extend_schema, inline_serializer
 from rest_framework import serializers as drf_serializers
 from rest_framework import status
 from rest_framework.settings import api_settings
@@ -24,6 +24,10 @@ def _paginated_type(type: Any):
     )
 
 
+# Handlers that page by hand (not through a DRF list view) would otherwise leave these out of the schema.
+PAGE_PARAMETERS = [OpenApiParameter("page", int), OpenApiParameter("page_size", int)]
+
+
 def extend_response(type: Any | None = None, paginated: bool = False):
     "Document a handler's success body with the default status code for its method (base.constants)."
 
@@ -33,7 +37,8 @@ def extend_response(type: Any | None = None, paginated: bool = False):
             return f
         body = _paginated_type(type) if paginated else type
         return extend_schema(
-            responses={code: OpenApiResponse(body, description="Indicates that operation was successful.")}
+            responses={code: OpenApiResponse(body, description="Indicates that operation was successful.")},
+            parameters=PAGE_PARAMETERS if paginated else None,
         )(f)
 
     return decorator
