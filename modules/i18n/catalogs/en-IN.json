@@ -4,7 +4,7 @@
   "bolo.answerIn": "Answer within {time}",
   "bolo.expired": "Time's up",
   "bolo.languageMismatch": "Change language to {language}?",
-  "bolo.languageMismatchBody": "You spoke in {language}. Switch the screens and replies to {language}?",
+  "bolo.languageMismatchBody": "Your message was in {language}. Switch the screens and replies to {language}?",
   "bolo.languageMismatchAction": "Switch",
   "bolo.chatsNone": "No chats yet.",
   "bolo.newChat": "New chat",

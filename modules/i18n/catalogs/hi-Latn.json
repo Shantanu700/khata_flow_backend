@@ -32,7 +32,7 @@
   "bolo.answerIn": "{time} mein jawab dijiye",
   "bolo.expired": "Samay khatam",
   "bolo.languageMismatch": "Bhasha badal dein: {language}?",
-  "bolo.languageMismatchBody": "Aapne {language} mein bola. Screens aur jawab {language} mein karein?",
+  "bolo.languageMismatchBody": "Aapka message {language} mein tha. Screens aur jawab {language} mein karein?",
   "bolo.languageMismatchAction": "Badal dein",
   "bolo.chatsNone": "Abhi koi chat nahi.",
   "bolo.newChat": "Nayi chat",

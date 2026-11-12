@@ -4,7 +4,7 @@
   "bolo.answerIn": "{time}-നുള്ളിൽ മറുപടി പറയൂ",
   "bolo.expired": "സമയം കഴിഞ്ഞു",
   "bolo.languageMismatch": "ഭാഷ മാറ്റണോ: {language}?",
-  "bolo.languageMismatchBody": "നിങ്ങൾ {language}-ൽ സംസാരിച്ചു. സ്ക്രീനുകളും മറുപടികളും {language}-ലേക്ക് മാറ്റണോ?",
+  "bolo.languageMismatchBody": "നിങ്ങളുടെ സന്ദേശം {language}-ൽ ആയിരുന്നു. സ്ക്രീനുകളും മറുപടികളും {language}-ലേക്ക് മാറ്റണോ?",
   "bolo.languageMismatchAction": "മാറ്റുക",
   "bolo.chatsNone": "ഇതുവരെ ചാറ്റ് ഒന്നുമില്ല.",
   "bolo.newChat": "പുതിയ ചാറ്റ്",

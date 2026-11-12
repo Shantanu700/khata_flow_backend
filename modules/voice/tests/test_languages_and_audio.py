@@ -98,3 +98,16 @@ def test_speech_keeps_the_language_prisma_heard(api, sharma, credit, monkeypatch
     clip = SimpleUploadedFile("clip.webm", silent_wav(seconds=1.0), content_type="audio/webm")
     body = api.post("/api/v1/voice/commands/", {"audio": clip, "language": "en-IN"}, format="multipart").json()
     assert body["language"] == "en-IN" and body["detected_language"] == "ta-IN"
+
+
+@pytest.mark.parametrize("text", ["हाँ", "ஆம்", "500", "OK ji"])
+def test_a_word_or_a_number_is_not_judged(text):
+    from modules.voice.scripts import script_language
+
+    assert script_language(text) == ""
+
+
+def test_a_hindi_sentence_is_judged_hindi():
+    from modules.voice.scripts import script_language
+
+    assert script_language("शर्मा जी का कितना बाकी है") == "hi-IN"

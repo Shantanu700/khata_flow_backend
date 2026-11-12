@@ -4,7 +4,7 @@
   "bolo.answerIn": "{time}-এর মধ্যে উত্তর দিন",
   "bolo.expired": "সময় শেষ",
   "bolo.languageMismatch": "ভাষা বদলাবেন: {language}?",
-  "bolo.languageMismatchBody": "আপনি {language}-এ বলেছেন। স্ক্রিন ও উত্তর {language}-এ করবেন?",
+  "bolo.languageMismatchBody": "আপনার বার্তা {language}-এ ছিল। স্ক্রিন ও উত্তর {language}-এ করবেন?",
   "bolo.languageMismatchAction": "বদলান",
   "bolo.chatsNone": "এখনও কোনো চ্যাট নেই।",
   "bolo.newChat": "নতুন চ্যাট",
