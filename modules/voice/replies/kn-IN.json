@@ -9,6 +9,8 @@
   "error.CLARIFICATION_EXPIRED": "ಸಮಯ ಮುಗಿಯಿತು. ಪೂರ್ತಿ ಮಾತು ಮತ್ತೆ ಹೇಳಿ.",
   "error.CANCELLED": "ಸರಿ, ಏನೂ ಬರೆಯಲಿಲ್ಲ.",
   "error.ATTENDANCE_WINDOW": "ಹಾಜರಿಯನ್ನು ಈ ತಿಂಗಳು ಮತ್ತು ಕಳೆದ ತಿಂಗಳದ್ದು ಮಾತ್ರ ಬದಲಿಸಬಹುದು.",
+  "error.EXCEEDS_EARNED": "ಈ ತಿಂಗಳ ಸಂಪಾದನೆಯಲ್ಲಿ {amount} ಮಾತ್ರ ಕೊಡಲು ಬಾಕಿ ಇದೆ.",
+  "error.EXCEEDS_SALARY": "ಈ ತಿಂಗಳ ಸಂಬಳದಲ್ಲಿ {amount} ಮಾತ್ರ ಉಳಿದಿದೆ.",
   "and": "ಮತ್ತು",
   "or": "ಅಥವಾ",
   "yes": "ಹೌದು",

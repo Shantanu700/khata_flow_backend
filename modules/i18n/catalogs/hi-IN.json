@@ -95,6 +95,7 @@
   "entry.undone": "पलट दिया",
   "error.ALREADY_REVERSED": "यह एंट्री पहले ही पलट दी गई है।",
   "error.CANNOT_REVERSE_REVERSAL": "पलटी हुई एंट्री फिर से नहीं पलट सकते।",
+  "error.EXCEEDS_EARNED": "इस महीने की कमाई में से सिर्फ़ {amount} देना बाकी है।",
   "error.EXCEEDS_SALARY": "इस महीने की तनख्वाह में सिर्फ़ {amount} बचा है।",
   "error.NEGATIVE_STOCK": "इतना स्टॉक है ही नहीं।",
   "error.NOT_FOUND": "यह अब मिला नहीं। शायद हट गया।",

@@ -9,6 +9,8 @@
   "error.CLARIFICATION_EXPIRED": "Samay khatam ho gaya. Poori baat dobara boliye.",
   "error.CANCELLED": "Theek hai, kuch nahi likha.",
   "error.ATTENDANCE_WINDOW": "Haaziri sirf is mahine aur pichhle mahine ki badal sakti hai.",
+  "error.EXCEEDS_EARNED": "Is mahine ki kamaai mein se sirf {amount} dena baaki hai.",
+  "error.EXCEEDS_SALARY": "Is mahine ki tankhwah mein sirf {amount} bacha hai.",
   "and": "aur",
   "or": "ya",
   "yes": "Haan",

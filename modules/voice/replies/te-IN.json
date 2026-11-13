@@ -9,6 +9,8 @@
   "error.CLARIFICATION_EXPIRED": "సమయం అయిపోయింది. పూర్తిగా మళ్ళీ చెప్పండి.",
   "error.CANCELLED": "సరే, ఏమీ రాయలేదు.",
   "error.ATTENDANCE_WINDOW": "ఈ నెల మరియు గత నెల హాజరు మాత్రమే మార్చవచ్చు.",
+  "error.EXCEEDS_EARNED": "ఈ నెల సంపాదనలో {amount} మాత్రమే ఇవ్వాల్సి ఉంది.",
+  "error.EXCEEDS_SALARY": "ఈ నెల జీతంలో {amount} మాత్రమే మిగిలింది.",
   "and": "మరియు",
   "or": "లేదా",
   "yes": "అవును",

@@ -9,6 +9,8 @@
   "error.CLARIFICATION_EXPIRED": "ਸਮਾਂ ਖਤਮ ਹੋ ਗਿਆ। ਪੂਰੀ ਗੱਲ ਫਿਰ ਬੋਲੋ।",
   "error.CANCELLED": "ਠੀਕ ਹੈ, ਕੁਝ ਨਹੀਂ ਲਿਖਿਆ।",
   "error.ATTENDANCE_WINDOW": "ਹਾਜ਼ਰੀ ਸਿਰਫ਼ ਇਸ ਮਹੀਨੇ ਅਤੇ ਪਿਛਲੇ ਮਹੀਨੇ ਦੀ ਬਦਲੀ ਜਾ ਸਕਦੀ ਹੈ।",
+  "error.EXCEEDS_EARNED": "ਇਸ ਮਹੀਨੇ ਦੀ ਕਮਾਈ ਵਿੱਚੋਂ ਸਿਰਫ਼ {amount} ਦੇਣਾ ਬਾਕੀ ਹੈ।",
+  "error.EXCEEDS_SALARY": "ਇਸ ਮਹੀਨੇ ਦੀ ਤਨਖਾਹ ਵਿੱਚ ਸਿਰਫ਼ {amount} ਬਚਿਆ ਹੈ।",
   "and": "ਤੇ",
   "or": "ਜਾਂ",
   "yes": "ਹਾਂ",

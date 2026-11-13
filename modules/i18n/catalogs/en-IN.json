@@ -95,6 +95,7 @@
   "entry.undone": "undone",
   "error.ALREADY_REVERSED": "This entry is already undone.",
   "error.CANNOT_REVERSE_REVERSAL": "An undo can't be undone again.",
+  "error.EXCEEDS_EARNED": "Only {amount} of this month's earned salary is still unpaid.",
   "error.EXCEEDS_SALARY": "Only {amount} of this month's salary is left.",
   "error.NEGATIVE_STOCK": "There isn't that much stock.",
   "error.NOT_FOUND": "Couldn't find it. It may have been removed.",

@@ -95,6 +95,7 @@
   "entry.undone": "ರದ್ದಾಗಿದೆ",
   "error.ALREADY_REVERSED": "ಈ ಎಂಟ್ರಿ ಈಗಾಗಲೇ ರದ್ದಾಗಿದೆ.",
   "error.CANNOT_REVERSE_REVERSAL": "ರದ್ದು ಎಂಟ್ರಿಯನ್ನು ಮತ್ತೆ ರದ್ದು ಮಾಡಲು ಆಗಲ್ಲ.",
+  "error.EXCEEDS_EARNED": "ಈ ತಿಂಗಳ ಸಂಪಾದನೆಯಲ್ಲಿ {amount} ಮಾತ್ರ ಕೊಡಲು ಬಾಕಿ ಇದೆ.",
   "error.EXCEEDS_SALARY": "ಈ ತಿಂಗಳ ಸಂಬಳದಲ್ಲಿ {amount} ಮಾತ್ರ ಉಳಿದಿದೆ.",
   "error.NEGATIVE_STOCK": "ಅಷ್ಟು ಸ್ಟಾಕ್ ಇಲ್ಲವೇ ಇಲ್ಲ.",
   "error.NOT_FOUND": "ಇದು ಈಗ ಸಿಗಲಿಲ್ಲ. ತೆಗೆದಿರಬಹುದು.",

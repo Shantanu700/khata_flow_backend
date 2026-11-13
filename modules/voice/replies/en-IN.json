@@ -9,6 +9,8 @@
   "error.CLARIFICATION_EXPIRED": "Time ran out. Please say the whole thing again.",
   "error.CANCELLED": "Okay, nothing was written.",
   "error.ATTENDANCE_WINDOW": "Attendance can be changed only for this month and last month.",
+  "error.EXCEEDS_EARNED": "Only {amount} of this month's earned salary is still unpaid.",
+  "error.EXCEEDS_SALARY": "Only {amount} of this month's salary is left.",
   "and": "and",
   "or": "or",
   "yes": "Yes",

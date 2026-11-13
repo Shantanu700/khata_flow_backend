@@ -95,6 +95,7 @@
   "entry.undone": "रद्द केली",
   "error.ALREADY_REVERSED": "ही नोंद आधीच रद्द केली आहे.",
   "error.CANNOT_REVERSE_REVERSAL": "रद्द करण्याची नोंद पुन्हा रद्द करता येत नाही.",
+  "error.EXCEEDS_EARNED": "या महिन्याच्या कमाईतून फक्त {amount} देणे बाकी आहे.",
   "error.EXCEEDS_SALARY": "या महिन्याच्या पगारात फक्त {amount} उरले आहेत.",
   "error.NEGATIVE_STOCK": "एवढा स्टॉक नाहीच.",
   "error.NOT_FOUND": "हे आता सापडलं नाही. कदाचित काढलं गेलं.",

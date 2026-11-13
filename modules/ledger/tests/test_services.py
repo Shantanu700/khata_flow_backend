@@ -92,6 +92,21 @@ def test_wrong_party_kind_is_rejected(shop, sharma, ramu):
         record_entry(shop, EntryKind.CREDIT_GIVEN, party=ramu, amount=D("100"))
 
 
+def test_salary_is_paid_only_up_to_what_the_month_earned(shop, ramu):
+    on = date(2026, 11, 3)
+    with pytest.raises(LedgerError) as err:
+        record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("1"), occurred_on=on)
+    assert err.value.code == "EXCEEDS_EARNED"
+    for day in (1, 2, 3):
+        record_entry(shop, EntryKind.ATTENDANCE, party=ramu, occurred_on=date(2026, 11, day))
+    record_entry(shop, EntryKind.STAFF_ADVANCE, party=ramu, amount=D("200"), occurred_on=on)
+    with pytest.raises(LedgerError):
+        record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("701"), occurred_on=on)  # earned 900 less the 200 advance
+    paid = record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("700"), occurred_on=on)
+    reverse_entry(paid)
+    record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("700"), occurred_on=on)
+
+
 def test_staff_due_counts_only_the_requested_month(shop, ramu):
     for day in (date(2026, 10, 30), date(2026, 10, 31), date(2026, 11, 1), date(2026, 11, 2), date(2026, 11, 3)):
         record_entry(shop, EntryKind.ATTENDANCE, party=ramu, occurred_on=day)

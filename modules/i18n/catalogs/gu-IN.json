@@ -95,6 +95,7 @@
   "entry.undone": "રદ કર્યું",
   "error.ALREADY_REVERSED": "આ એન્ટ્રી પહેલેથી રદ થઈ ગઈ છે.",
   "error.CANNOT_REVERSE_REVERSAL": "રદ કરેલી એન્ટ્રી ફરી રદ ન થાય.",
+  "error.EXCEEDS_EARNED": "આ મહિનાની કમાણીમાંથી ફક્ત {amount} આપવાના બાકી છે.",
   "error.EXCEEDS_SALARY": "આ મહિનાના પગારમાં ફક્ત {amount} બાકી છે.",
   "error.NEGATIVE_STOCK": "એટલો સ્ટોક છે જ નહીં.",
   "error.NOT_FOUND": "આ હવે મળ્યું નહીં. કદાચ હટી ગયું.",

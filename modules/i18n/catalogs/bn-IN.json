@@ -95,6 +95,7 @@
   "entry.undone": "ফেরানো হয়েছে",
   "error.ALREADY_REVERSED": "এই এন্ট্রি আগেই ফেরানো হয়েছে।",
   "error.CANNOT_REVERSE_REVERSAL": "ফেরানো এন্ট্রি আবার ফেরানো যায় না।",
+  "error.EXCEEDS_EARNED": "এই মাসের রোজগার থেকে আর মাত্র {amount} দেওয়া বাকি।",
   "error.EXCEEDS_SALARY": "এই মাসের বেতনে আর মাত্র {amount} বাকি।",
   "error.NEGATIVE_STOCK": "এত স্টক তো নেই।",
   "error.NOT_FOUND": "এটা আর পাওয়া যাচ্ছে না। হয়তো সরানো হয়েছে।",

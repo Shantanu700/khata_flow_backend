@@ -19,7 +19,7 @@ from modules.ledger.api.v1.serializers import (
     EntrySerializer,
     SummarySerializer,
 )
-from modules.ledger.choices import CUSTOMER_MONEY_KINDS, STAFF_MONEY_KINDS, STOCK_KINDS, EntryKind
+from modules.ledger.choices import CUSTOMER_MONEY_KINDS, STOCK_KINDS, EntryKind
 from modules.ledger.models import Entry
 from modules.shops import photos
 from modules.shops.choices import PartyKind
@@ -97,13 +97,9 @@ class EntryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, BaseViewSet
         party = get_object_or_404(Party, pk=party_id, shop=shop) if party_id else None
         product = get_object_or_404(Product, pk=product_id, shop=shop) if product_id else None
         kind, amount = data["kind"], data.get("amount")
-        month = data.get("occurred_on") or timezone.localdate()
         if kind == EntryKind.PAYMENT_RECEIVED and party and amount and amount > ledger.customer_balance(party):
             balance = ledger.customer_balance(party)
             raise ledger.LedgerError("OVERPAYMENT", f"Only {ledger.format_inr(max(balance, 0))} is owed.")
-        if kind in STAFF_MONEY_KINDS and party and amount and amount > ledger.salary_left(party, month):
-            left = ledger.salary_left(party, month)
-            raise ledger.LedgerError("EXCEEDS_SALARY", f"Only {ledger.format_inr(max(left, 0))} of this month's salary is left.")
         entry = ledger.record_entry(
             shop,
             kind,

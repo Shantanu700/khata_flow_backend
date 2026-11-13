@@ -95,6 +95,7 @@
   "entry.undone": "ਪਲਟ ਦਿੱਤੀ",
   "error.ALREADY_REVERSED": "ਇਹ ਐਂਟਰੀ ਪਹਿਲਾਂ ਹੀ ਪਲਟ ਦਿੱਤੀ ਗਈ ਹੈ।",
   "error.CANNOT_REVERSE_REVERSAL": "ਪਲਟੀ ਹੋਈ ਐਂਟਰੀ ਫਿਰ ਨਹੀਂ ਪਲਟ ਸਕਦੇ।",
+  "error.EXCEEDS_EARNED": "ਇਸ ਮਹੀਨੇ ਦੀ ਕਮਾਈ ਵਿੱਚੋਂ ਸਿਰਫ਼ {amount} ਦੇਣਾ ਬਾਕੀ ਹੈ।",
   "error.EXCEEDS_SALARY": "ਇਸ ਮਹੀਨੇ ਦੀ ਤਨਖਾਹ ਵਿੱਚ ਸਿਰਫ਼ {amount} ਬਚਿਆ ਹੈ।",
   "error.NEGATIVE_STOCK": "ਇੰਨਾ ਸਟਾਕ ਹੈ ਹੀ ਨਹੀਂ।",
   "error.NOT_FOUND": "ਇਹ ਹੁਣ ਨਹੀਂ ਮਿਲਿਆ। ਸ਼ਾਇਦ ਹਟ ਗਿਆ।",

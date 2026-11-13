@@ -232,6 +232,17 @@ def _validate(
         raise LedgerError("INVALID_ENTRY", "Use reverse_entry() to undo an entry.")
 
 
+def _ensure_salary_covers(party: Party, kind: EntryKind, amount: Decimal, on: date) -> None:
+    "Salary only up to what the month's attendance has earned; an advance only up to the month's salary."
+    Party.objects.select_for_update().get(pk=party.pk)
+    if kind == EntryKind.SALARY_PAID:
+        unpaid = staff_due(party, on).due
+        if amount > unpaid:
+            raise LedgerError("EXCEEDS_EARNED", f"Only {format_inr(max(unpaid, ZERO))} of this month's earned salary is unpaid.")
+    elif amount > (left := salary_left(party, on)):
+        raise LedgerError("EXCEEDS_SALARY", f"Only {format_inr(max(left, ZERO))} of this month's salary is left.")
+
+
 def _ensure_stock_covers(product: Product, quantity: Decimal) -> None:
     Product.objects.select_for_update().get(pk=product.pk)
     available = stock_level(product)
@@ -259,6 +270,8 @@ def record_entry(
             existing = live_entries().filter(kind=kind, party=party, occurred_on=occurred_on).first()
             if existing:
                 return existing
+        if kind in STAFF_MONEY_KINDS:
+            _ensure_salary_covers(party, kind, amount, occurred_on)
         if kind == EntryKind.STOCK_OUT:
             _ensure_stock_covers(product, quantity)
         return Entry.objects.create(

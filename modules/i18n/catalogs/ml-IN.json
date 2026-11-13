@@ -95,6 +95,7 @@
   "entry.undone": "റദ്ദാക്കി",
   "error.ALREADY_REVERSED": "ഈ എൻട്രി നേരത്തെ റദ്ദാക്കിയതാണ്.",
   "error.CANNOT_REVERSE_REVERSAL": "റദ്ദാക്കിയ എൻട്രി വീണ്ടും റദ്ദാക്കാൻ പറ്റില്ല.",
+  "error.EXCEEDS_EARNED": "ഈ മാസത്തെ സമ്പാദ്യത്തിൽ {amount} മാത്രമേ കൊടുക്കാൻ ബാക്കിയുള്ളൂ.",
   "error.EXCEEDS_SALARY": "ഈ മാസത്തെ ശമ്പളത്തിൽ {amount} മാത്രമേ ബാക്കിയുള്ളൂ.",
   "error.NEGATIVE_STOCK": "അത്രയും സ്റ്റോക്ക് ഇല്ല.",
   "error.NOT_FOUND": "ഇത് ഇപ്പോൾ കാണുന്നില്ല. ഒഴിവാക്കിയിരിക്കാം.",

@@ -9,6 +9,8 @@
   "error.CLARIFICATION_EXPIRED": "वेळ संपली. पूर्ण वाक्य पुन्हा सांगा.",
   "error.CANCELLED": "ठीक आहे, काहीच लिहिलं नाही.",
   "error.ATTENDANCE_WINDOW": "हजेरी फक्त या महिन्याची आणि मागच्या महिन्याची बदलता येते.",
+  "error.EXCEEDS_EARNED": "या महिन्याच्या कमाईतून फक्त {amount} देणे बाकी आहे.",
+  "error.EXCEEDS_SALARY": "या महिन्याच्या पगारात फक्त {amount} उरले आहेत.",
   "and": "आणि",
   "or": "किंवा",
   "yes": "हो",

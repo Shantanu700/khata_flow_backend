@@ -95,6 +95,7 @@
   "entry.undone": "ரத்தானது",
   "error.ALREADY_REVERSED": "இந்த பதிவு ஏற்கனவே ரத்து செய்யப்பட்டது.",
   "error.CANNOT_REVERSE_REVERSAL": "ரத்தான பதிவை மீண்டும் ரத்து செய்ய முடியாது.",
+  "error.EXCEEDS_EARNED": "இந்த மாத சம்பாத்தியத்தில் {amount} மட்டுமே கொடுக்க மீதி இருக்கு.",
   "error.EXCEEDS_SALARY": "இந்த மாத சம்பளத்தில் {amount} மட்டுமே மீதி இருக்கு.",
   "error.NEGATIVE_STOCK": "அவ்வளவு ஸ்டாக் இல்லை.",
   "error.NOT_FOUND": "இது இப்போ கிடைக்கல. நீக்கப்பட்டிருக்கலாம்.",

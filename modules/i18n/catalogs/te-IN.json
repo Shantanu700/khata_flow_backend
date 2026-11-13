@@ -95,6 +95,7 @@
   "entry.undone": "రద్దైంది",
   "error.ALREADY_REVERSED": "ఈ ఎంట్రీ ఇప్పటికే రద్దైంది.",
   "error.CANNOT_REVERSE_REVERSAL": "రద్దు ఎంట్రీని మళ్ళీ రద్దు చేయలేం.",
+  "error.EXCEEDS_EARNED": "ఈ నెల సంపాదనలో {amount} మాత్రమే ఇవ్వాల్సి ఉంది.",
   "error.EXCEEDS_SALARY": "ఈ నెల జీతంలో {amount} మాత్రమే మిగిలింది.",
   "error.NEGATIVE_STOCK": "అంత స్టాక్ లేనే లేదు.",
   "error.NOT_FOUND": "ఇది ఇప్పుడు దొరకలేదు. తీసేశారేమో.",
