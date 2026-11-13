@@ -281,6 +281,9 @@ def _write(command: VoiceCommand, parsed: ParsedCommand, party: Party | None, pr
     except ledger.LedgerError as exc:
         if exc.code == "NEGATIVE_STOCK":
             raise Stop(responses.negative_stock(product, ledger.stock_level(product)), exc.code) from exc
+        if exc.code in ("EXCEEDS_EARNED", "EXCEEDS_SALARY"):
+            left = ledger.staff_due(party, on).due if exc.code == "EXCEEDS_EARNED" else ledger.salary_left(party, on)
+            raise Stop(responses.say(f"error.{exc.code}", amount=ledger.format_inr(max(left, 0))), exc.code) from exc
         raise
     command.stage = CommandStatus.COMMITTED
     if kind == EntryKind.CREDIT_GIVEN:

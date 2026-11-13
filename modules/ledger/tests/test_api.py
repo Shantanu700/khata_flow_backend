@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -26,8 +27,12 @@ def test_manual_entries_and_their_refusals(api, sharma, ramu, maggi):
 
     too_much = api.post("/api/v1/entries/", {"kind": "STAFF_ADVANCE", "party": ramu.pk, "amount": "9001"}, format="json")
     assert too_much.json()["error"]["code"] == "EXCEEDS_SALARY"
-    paid = api.post("/api/v1/entries/", {"kind": "SALARY_PAID", "party": ramu.pk, "amount": "4000"}, format="json")
-    assert paid.status_code == 201
+    salary = {"kind": "SALARY_PAID", "party": ramu.pk, "occurred_on": "2026-11-03"}
+    unearned = api.post("/api/v1/entries/", {**salary, "amount": "1"}, format="json")
+    assert unearned.json()["error"]["code"] == "EXCEEDS_EARNED"
+    record_entry(ramu.shop, EntryKind.ATTENDANCE, party=ramu, occurred_on=date(2026, 11, 3))  # 9000 / 30 days
+    assert api.post("/api/v1/entries/", {**salary, "amount": "301"}, format="json").status_code == 409
+    assert api.post("/api/v1/entries/", {**salary, "amount": "300"}, format="json").status_code == 201
 
     short = api.post("/api/v1/entries/", {"kind": "STOCK_OUT", "product": maggi.pk, "quantity": "1"}, format="json")
     assert short.json()["error"]["code"] == "NEGATIVE_STOCK"

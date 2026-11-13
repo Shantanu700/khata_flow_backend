@@ -6,7 +6,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
 from django.db.models import DecimalField, F, Q, QuerySet, Sum, Value
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, TruncMonth
 from django.utils import timezone
 
 from base.exceptions import DomainError
@@ -34,6 +34,8 @@ class StaffDue:
     earned: Decimal
     advances: Decimal
     salary_paid: Decimal
+    # Advance from earlier months that their earnings did not cover; it comes out of this month.
+    carried: Decimal
     due: Decimal
 
 
@@ -86,13 +88,33 @@ def low_stock_products(shop: Shop) -> list[Product]:
     return list(products.filter(stock_level__lte=F("low_stock_threshold")).order_by("name"))
 
 
-def staff_due(party: Party, month: date) -> StaffDue:
-    days_in_month = calendar.monthrange(month.year, month.month)[1]
-    entries = live_entries().filter(
-        party=party,
-        occurred_on__gte=month.replace(day=1),
-        occurred_on__lte=month.replace(day=days_in_month),
+def _earned(salary: Decimal, days_present: Decimal, days_in_month: int) -> Decimal:
+    return (salary * days_present / days_in_month).quantize(Decimal("1"), ROUND_HALF_UP)
+
+
+def _carried_advance(party: Party, before: date) -> Decimal:
+    "Money given beyond what each earlier month earned, rolled forward; unpaid earnings do not roll forward."
+    months = (
+        live_entries()
+        .filter(party=party, occurred_on__lt=before, kind__in=(EntryKind.ATTENDANCE, *STAFF_MONEY_KINDS))
+        .annotate(month=TruncMonth("occurred_on"))
+        .values("month")
+        .annotate(
+            days=Coalesce(Sum(Coalesce("quantity", Value(FULL_DAY)), filter=Q(kind=EntryKind.ATTENDANCE)), Value(ZERO), output_field=MONEY),
+            given=Coalesce(Sum("amount", filter=Q(kind__in=STAFF_MONEY_KINDS)), Value(ZERO), output_field=MONEY),
+        )
+        .order_by("month")
     )
+    salary, carried = party.monthly_salary or ZERO, ZERO
+    for m in months:
+        earned = _earned(salary, m["days"], calendar.monthrange(m["month"].year, m["month"].month)[1])
+        carried = max(ZERO, carried + m["given"] - earned)
+    return carried
+
+
+def staff_due(party: Party, month: date) -> StaffDue:
+    start, end = month_bounds(month)
+    entries = live_entries().filter(party=party, occurred_on__range=(start, end))
     totals = entries.aggregate(
         days_present=Coalesce(
             Sum(Coalesce("quantity", Value(FULL_DAY)), filter=Q(kind=EntryKind.ATTENDANCE)), Value(ZERO), output_field=MONEY
@@ -100,15 +122,16 @@ def staff_due(party: Party, month: date) -> StaffDue:
         advances=Coalesce(Sum("amount", filter=Q(kind=EntryKind.STAFF_ADVANCE)), Value(ZERO), output_field=MONEY),
         salary_paid=Coalesce(Sum("amount", filter=Q(kind=EntryKind.SALARY_PAID)), Value(ZERO), output_field=MONEY),
     )
-    salary = party.monthly_salary or ZERO
-    earned = (salary * totals["days_present"] / days_in_month).quantize(Decimal("1"), ROUND_HALF_UP)
+    earned = _earned(party.monthly_salary or ZERO, totals["days_present"], end.day)
+    carried = _carried_advance(party, start)
     return StaffDue(
         days_present=totals["days_present"].quantize(Decimal("0.1")),
-        days_in_month=days_in_month,
+        days_in_month=end.day,
         earned=earned,
         advances=totals["advances"],
         salary_paid=totals["salary_paid"],
-        due=earned - totals["advances"] - totals["salary_paid"],
+        carried=carried,
+        due=earned - totals["advances"] - totals["salary_paid"] - carried,
     )
 
 
@@ -201,9 +224,9 @@ def with_month_advances(parties: QuerySet[Party], month: date) -> QuerySet[Party
 
 
 def salary_left(party: Party, month: date) -> Decimal:
-    "What can still be handed over this month as advance or salary: the monthly salary less both."
+    "What can still be handed over this month as advance or salary: the monthly salary less both and any carried advance."
     due = staff_due(party, month)
-    return (party.monthly_salary or ZERO) - due.advances - due.salary_paid
+    return (party.monthly_salary or ZERO) - due.advances - due.salary_paid - due.carried
 
 
 def _validate(
@@ -230,6 +253,17 @@ def _validate(
         raise LedgerError("WRONG_PARTY_KIND", f"{EntryKind(kind).label} needs a {expected.label.lower()}.")
     if kind == EntryKind.REVERSAL:
         raise LedgerError("INVALID_ENTRY", "Use reverse_entry() to undo an entry.")
+
+
+def _ensure_salary_covers(party: Party, kind: EntryKind, amount: Decimal, on: date) -> None:
+    "Salary only up to what the month's attendance has earned; an advance only up to the month's salary."
+    Party.objects.select_for_update().get(pk=party.pk)
+    if kind == EntryKind.SALARY_PAID:
+        unpaid = staff_due(party, on).due
+        if amount > unpaid:
+            raise LedgerError("EXCEEDS_EARNED", f"Only {format_inr(max(unpaid, ZERO))} of this month's earned salary is unpaid.")
+    elif amount > (left := salary_left(party, on)):
+        raise LedgerError("EXCEEDS_SALARY", f"Only {format_inr(max(left, ZERO))} of this month's salary is left.")
 
 
 def _ensure_stock_covers(product: Product, quantity: Decimal) -> None:
@@ -259,6 +293,8 @@ def record_entry(
             existing = live_entries().filter(kind=kind, party=party, occurred_on=occurred_on).first()
             if existing:
                 return existing
+        if kind in STAFF_MONEY_KINDS:
+            _ensure_salary_covers(party, kind, amount, occurred_on)
         if kind == EntryKind.STOCK_OUT:
             _ensure_stock_covers(product, quantity)
         return Entry.objects.create(

@@ -96,9 +96,18 @@ def test_attendance_then_again(api, llm, ramu):
     assert Entry.objects.filter(kind=EntryKind.ATTENDANCE).count() == 1
 
 
-def test_staff_advance_and_salary(api, llm, ramu):
+def _present(shop, ramu, days: int) -> None:
+    for day in range(1, days + 1):
+        record_entry(shop, EntryKind.ATTENDANCE, party=ramu, occurred_on=timezone.localdate().replace(day=day))
+
+
+def test_staff_advance_and_salary(api, llm, shop, ramu):
     llm(Intent.STAFF_ADVANCE, party_name="Ramu", amount=D("500"))
     assert text(api)["response_text"].startswith("Ramu ko ₹500 advance likh diya.")
+    llm(Intent.SALARY_PAID, party_name="Ramu", amount=D("1000"))
+    refused = text(api)
+    assert (refused["stage"], refused["response_text"]) == (CommandStatus.FAILED, "Is mahine ki kamaai mein se sirf ₹0 dena baaki hai.")
+    _present(shop, ramu, 6)
     llm(Intent.SALARY_PAID, party_name="Ramu", amount=D("1000"))
     assert text(api)["response_text"].startswith("Ramu ko ₹1,000 tankhwah likh diya.")
 
@@ -273,6 +282,7 @@ def test_aggregate_questions(api, llm, shop, sharma, verma, ramu, aata, maggi):
     record_entry(shop, EntryKind.CREDIT_GIVEN, party=sharma, amount=D("500"))
     record_entry(shop, EntryKind.CREDIT_GIVEN, party=verma, amount=D("200"))
     record_entry(shop, EntryKind.PAYMENT_RECEIVED, party=sharma, amount=D("100"))
+    _present(shop, ramu, 5)
     record_entry(shop, EntryKind.STAFF_ADVANCE, party=ramu, amount=D("300"))
     record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("1000"))
     record_entry(shop, EntryKind.STOCK_IN, product=maggi, quantity=D("10"))
