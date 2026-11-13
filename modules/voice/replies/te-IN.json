@@ -45,6 +45,7 @@
   "staff.earned": "{amount} సంపాదించారు",
   "staff.advances": "{amount} అడ్వాన్స్ తీసుకున్నారు",
   "staff.paid": "{amount} జీతం ఇచ్చారు",
+  "staff.carried": "గత నెలల {amount} అడ్వాన్స్ తగ్గించారు",
   "staff.left": "{amount} ఇంకా ఇవ్వాలి",
   "staff.over": "{amount} ఎక్కువ ఇచ్చారు",
   "undo.by_hand": "మాటతో ఎంట్రీ రద్దు చేయలేను. ఎంట్రీలు తెరిచి సరైన ఎంట్రీపై రద్దు నొక్కండి.",

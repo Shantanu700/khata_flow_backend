@@ -45,6 +45,7 @@
   "staff.earned": "{amount} बने",
   "staff.advances": "{amount} एडवांस गया",
   "staff.paid": "{amount} तनख्वाह दी",
+  "staff.carried": "पिछले महीनों का {amount} एडवांस कटा",
   "staff.left": "{amount} देना बाकी है",
   "staff.over": "{amount} ज़्यादा दे दिए",
   "undo.by_hand": "आवाज़ से एंट्री नहीं पलट सकता। एंट्री में जाकर सही एंट्री पर पलटो दबाइए।",

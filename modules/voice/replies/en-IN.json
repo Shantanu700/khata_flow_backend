@@ -45,6 +45,7 @@
   "staff.earned": "{amount} earned",
   "staff.advances": "{amount} taken as advance",
   "staff.paid": "{amount} paid as salary",
+  "staff.carried": "{amount} advance from earlier months taken off",
   "staff.left": "{amount} still to pay",
   "staff.over": "{amount} paid extra",
   "undo.by_hand": "I can't undo entries by voice. Open Entries and tap Undo on the right entry.",

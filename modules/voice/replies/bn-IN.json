@@ -45,6 +45,7 @@
   "staff.earned": "{amount} রোজগার হয়েছে",
   "staff.advances": "{amount} অ্যাডভান্স নিয়েছে",
   "staff.paid": "{amount} বেতন দেওয়া হয়েছে",
+  "staff.carried": "আগের মাসের {amount} অ্যাডভান্স কাটা হয়েছে",
   "staff.left": "{amount} দেওয়া বাকি",
   "staff.over": "{amount} বেশি দেওয়া হয়েছে",
   "undo.by_hand": "কথায় এন্ট্রি ফেরাতে পারি না। এন্ট্রি-তে গিয়ে ঠিক এন্ট্রিতে ফেরাও চাপুন।",

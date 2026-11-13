@@ -45,6 +45,7 @@
   "staff.earned": "{amount} झाले",
   "staff.advances": "{amount} ॲडव्हान्स गेला",
   "staff.paid": "{amount} पगार दिला",
+  "staff.carried": "मागच्या महिन्यांचा {amount} ॲडव्हान्स कापला",
   "staff.left": "{amount} द्यायचे बाकी आहेत",
   "staff.over": "{amount} जास्त दिले",
   "undo.by_hand": "आवाजाने नोंद रद्द करता येत नाही. नोंदी उघडून योग्य नोंदीवर रद्द करा दाबा.",

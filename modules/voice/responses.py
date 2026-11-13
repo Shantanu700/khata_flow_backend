@@ -136,7 +136,9 @@ def staff_due(party: Party, due: StaffDue, month: date) -> str:
         parts.append(say("staff.advances", amount=format_inr(due.advances)))
     if due.salary_paid:
         parts.append(say("staff.paid", amount=format_inr(due.salary_paid)))
-    if not due.advances and not due.salary_paid:
+    if due.carried:
+        parts.append(say("staff.carried", amount=format_inr(due.carried)))
+    if not due.advances and not due.salary_paid and not due.carried:
         parts.append(say("staff.none_paid"))
     owed = say("staff.left", amount=format_inr(due.due)) if due.due >= 0 else say("staff.over", amount=format_inr(-due.due))
     return f"{say('staff.head', name=party.name, days=f'{float(due.days_present):g}', when=month_label(month))} {', '.join(parts)}, {owed}."

@@ -45,6 +45,7 @@
   "staff.earned": "{amount} ਬਣੇ",
   "staff.advances": "{amount} ਐਡਵਾਂਸ ਗਿਆ",
   "staff.paid": "{amount} ਤਨਖਾਹ ਦਿੱਤੀ",
+  "staff.carried": "ਪਿਛਲੇ ਮਹੀਨਿਆਂ ਦਾ {amount} ਐਡਵਾਂਸ ਕੱਟਿਆ",
   "staff.left": "{amount} ਦੇਣਾ ਬਾਕੀ ਹੈ",
   "staff.over": "{amount} ਵੱਧ ਦੇ ਦਿੱਤੇ",
   "undo.by_hand": "ਆਵਾਜ਼ ਨਾਲ ਐਂਟਰੀ ਨਹੀਂ ਪਲਟ ਸਕਦਾ। ਐਂਟਰੀਆਂ ਵਿੱਚ ਜਾ ਕੇ ਸਹੀ ਐਂਟਰੀ 'ਤੇ ਪਲਟੋ ਦਬਾਓ।",

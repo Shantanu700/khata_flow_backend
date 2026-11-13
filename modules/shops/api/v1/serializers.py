@@ -39,6 +39,9 @@ class StaffDueFieldsSerializer(serializers.Serializer):
     earned = serializers.DecimalField(max_digits=14, decimal_places=2)
     advances = serializers.DecimalField(max_digits=14, decimal_places=2)
     salary_paid = serializers.DecimalField(max_digits=14, decimal_places=2)
+    carried = serializers.DecimalField(
+        max_digits=14, decimal_places=2, help_text="Advance from earlier months not yet covered by earnings."
+    )
     due = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
@@ -153,6 +156,9 @@ class StaffMonthSerializer(serializers.Serializer):
     earned = serializers.DecimalField(max_digits=14, decimal_places=2)
     advances = serializers.DecimalField(max_digits=14, decimal_places=2)
     salary_paid = serializers.DecimalField(max_digits=14, decimal_places=2)
+    carried = serializers.DecimalField(
+        max_digits=14, decimal_places=2, help_text="Advance from earlier months not yet covered by earnings."
+    )
     due = serializers.DecimalField(max_digits=14, decimal_places=2)
     monthly_salary = serializers.DecimalField(max_digits=14, decimal_places=2, allow_null=True)
     present_days = serializers.ListField(child=serializers.DateField())

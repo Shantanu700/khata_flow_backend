@@ -45,6 +45,7 @@
   "staff.earned": "{amount} bane",
   "staff.advances": "{amount} advance gaya",
   "staff.paid": "{amount} tankhwah di",
+  "staff.carried": "pichhle mahinon ka {amount} advance kata",
   "staff.left": "{amount} dena baaki hai",
   "staff.over": "{amount} zyada de diye",
   "undo.by_hand": "Awaaz se entry nahi palat sakta. Entries mein jaakar sahi entry par Palto dabaiye.",

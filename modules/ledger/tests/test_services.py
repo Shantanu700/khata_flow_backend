@@ -107,6 +107,29 @@ def test_salary_is_paid_only_up_to_what_the_month_earned(shop, ramu):
     record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("700"), occurred_on=on)
 
 
+def test_advance_beyond_a_months_earnings_carries_into_the_next(shop, ramu):
+    for day in (30, 31):
+        record_entry(shop, EntryKind.ATTENDANCE, party=ramu, occurred_on=date(2026, 10, day))  # earned 581
+    record_entry(shop, EntryKind.STAFF_ADVANCE, party=ramu, amount=D("1000"), occurred_on=date(2026, 10, 30))
+    assert staff_due(ramu, date(2026, 10, 1)).due == D("-419")
+
+    november = staff_due(ramu, date(2026, 11, 1))
+    assert (november.carried, november.earned, november.due) == (D("419"), D("0"), D("-419"))
+    for day in (1, 2, 3):
+        record_entry(shop, EntryKind.ATTENDANCE, party=ramu, occurred_on=date(2026, 11, day))  # earned 900
+    with pytest.raises(LedgerError):
+        record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("482"), occurred_on=date(2026, 11, 3))
+    record_entry(shop, EntryKind.SALARY_PAID, party=ramu, amount=D("481"), occurred_on=date(2026, 11, 3))
+    assert staff_due(ramu, date(2026, 11, 1)).due == 0
+    assert staff_due(ramu, date(2026, 12, 1)).carried == 0  # unpaid earnings never roll forward, only advance
+
+
+def test_an_absent_month_keeps_the_advance_owed(shop, ramu):
+    record_entry(shop, EntryKind.STAFF_ADVANCE, party=ramu, amount=D("2000"), occurred_on=date(2026, 9, 10))
+    december = staff_due(ramu, date(2026, 12, 1))
+    assert (december.carried, december.due) == (D("2000"), D("-2000"))
+
+
 def test_staff_due_counts_only_the_requested_month(shop, ramu):
     for day in (date(2026, 10, 30), date(2026, 10, 31), date(2026, 11, 1), date(2026, 11, 2), date(2026, 11, 3)):
         record_entry(shop, EntryKind.ATTENDANCE, party=ramu, occurred_on=day)
