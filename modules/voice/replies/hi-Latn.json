@@ -101,5 +101,7 @@
   "added.ADD_CUSTOMER": "{name} ka khata khul gaya. {balance}",
   "added.ADD_STAFF": "{name} staff mein jud gaye. Salary {amount} mahina.",
   "added.ADD_PRODUCT": "{name} stock mein jud gaya. Abhi {qty} {unit} hai.",
-  "error.LLM_HTTP_429": "Khata abhi bahut vyast hai. Thodi der baad boliye."
+  "error.LLM_HTTP_429": "Khata abhi bahut vyast hai. Thodi der baad boliye.",
+  "advance_paid_over": "{name} ko {amount} advance likh diya. Is mahine {over} zyada de diye, agle mahine ki tankhwah se katega.",
+  "salary_paid_over": "{name} ko {amount} tankhwah likh diya. Is mahine {over} zyada de diye, agle mahine ki tankhwah se katega."
 }

@@ -105,7 +105,10 @@ def _present(shop, ramu, days: int) -> None:
 
 def test_staff_advance_and_salary(api, llm, shop, ramu):
     llm(Intent.STAFF_ADVANCE, party_name="Ramu", amount=D("500"))
-    assert text(api)["response_text"].startswith("Ramu ko ₹500 advance likh diya.")
+    # Nothing earned yet, so the advance is ₹500 more than earned: no "-₹500 dena baaki hai".
+    assert text(api)["response_text"] == (
+        "Ramu ko ₹500 advance likh diya. Is mahine ₹500 zyada de diye, agle mahine ki tankhwah se katega."
+    )
     llm(Intent.SALARY_PAID, party_name="Ramu", amount=D("1000"))
     refused = text(api)
     assert (refused["stage"], refused["response_text"]) == (CommandStatus.FAILED, "Is mahine ki kamaai mein se sirf ₹0 dena baaki hai.")
