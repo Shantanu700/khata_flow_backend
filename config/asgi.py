@@ -1,10 +1,12 @@
 import os
 
+from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler
 from django.core.asgi import get_asgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
-django_app = get_asgi_application()
+# ponytail: Django serves /static/ itself (only the admin uses it); put WhiteNoise or Caddy in front if traffic grows.
+django_app = ASGIStaticFilesHandler(get_asgi_application())
 
 from modules.voice.stream import stream  # noqa: E402  (needs the app registry loaded above)
 

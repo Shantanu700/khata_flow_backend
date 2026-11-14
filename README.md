@@ -291,6 +291,10 @@ A voice or text command returns `id`, `stage` (where the pipeline got to), `stat
 
 All demo data is synthetic: the two shops (`gupta_store` → Gupta General Store, `patel_store` → Patel Provision Store), customers, staff, products and entries are made up, and no party has a phone number or any other contact detail. No real recordings are used; the smoke test transcribes Timbre's own synthetic speech unless you pass your own recording with `--audio`.
 
+## Production
+
+Render's free plan (Docker, `render.yaml`), Supabase for the database and Cloudflare R2 for files. Step by step in [docker/prod/README.md](docker/prod/README.md).
+
 ## Languages
 
 The web app and voice replies come in Hinglish (`hi-Latn`, the original wording) and the 10 Gnani languages. Interface text is in `modules/i18n/catalogs/<code>.json` and spoken replies in `modules/voice/replies/<code>.json`; a test checks every file has the same keys and placeholders as the Hinglish one. **The translations other than Hinglish and English are machine-drafted and need review by native speakers before real shopkeepers use them.**
