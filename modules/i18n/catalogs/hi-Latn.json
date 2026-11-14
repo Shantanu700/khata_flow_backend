@@ -410,5 +410,6 @@
   "palette.hintOpen": "kholo",
   "palette.hintCopy": "jawab copy",
   "palette.hintClose": "band",
-  "palette.hintAnywhere": "kahin bhi"
+  "palette.hintAnywhere": "kahin bhi",
+  "khata.advanceNow": "Abhi {amount} advance jama hai."
 }

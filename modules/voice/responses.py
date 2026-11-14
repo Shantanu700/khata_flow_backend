@@ -92,6 +92,9 @@ def attendance_marked(party: Party, already: bool) -> str:
 
 def staff_paid(entry: Entry, due: StaffDue) -> str:
     key = "advance_paid" if entry.kind == EntryKind.STAFF_ADVANCE else "salary_paid"
+    if due.due < 0:
+        # More than the month has earned: say by how much, never "-₹267 is still due" (it carries to next month).
+        return say(f"{key}_over", name=entry.party.name, amount=format_inr(entry.amount), over=format_inr(-due.due))
     return say(key, name=entry.party.name, amount=format_inr(entry.amount), due=format_inr(due.due))
 
 

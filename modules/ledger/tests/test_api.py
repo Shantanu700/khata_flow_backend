@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from modules.ledger.choices import EntryKind
-from modules.ledger.services import record_entry, reverse_entry
+from modules.ledger.services import customer_balance, record_entry, reverse_entry
 from modules.shops.models import Party, Shop
 
 
@@ -22,8 +22,9 @@ def test_manual_entries_and_their_refusals(api, sharma, ramu, maggi):
     credit = api.post("/api/v1/entries/", {"kind": "CREDIT_GIVEN", "party": sharma.pk, "amount": "500"}, format="json")
     assert credit.status_code == 201 and credit.json()["party_name"] == "Sharma ji"
 
-    over = api.post("/api/v1/entries/", {"kind": "PAYMENT_RECEIVED", "party": sharma.pk, "amount": "501"}, format="json")
-    assert (over.status_code, over.json()["error"]["code"]) == (409, "OVERPAYMENT")
+    # Paying more than is owed keeps the rest as advance, as by voice.
+    advance = api.post("/api/v1/entries/", {"kind": "PAYMENT_RECEIVED", "party": sharma.pk, "amount": "501"}, format="json")
+    assert advance.status_code == 201 and customer_balance(sharma) == Decimal("-1")
 
     too_much = api.post("/api/v1/entries/", {"kind": "STAFF_ADVANCE", "party": ramu.pk, "amount": "9001"}, format="json")
     assert too_much.json()["error"]["code"] == "EXCEEDS_SALARY"

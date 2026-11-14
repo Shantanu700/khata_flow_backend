@@ -410,5 +410,6 @@
   "palette.hintOpen": "ખોલો",
   "palette.hintCopy": "જવાબ કૉપિ",
   "palette.hintClose": "બંધ",
-  "palette.hintAnywhere": "ક્યાંય પણ"
+  "palette.hintAnywhere": "ક્યાંય પણ",
+  "khata.advanceNow": "હમણાં {amount} એડવાન્સ જમા છે."
 }

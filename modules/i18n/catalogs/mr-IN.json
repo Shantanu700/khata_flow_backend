@@ -410,5 +410,6 @@
   "palette.hintOpen": "उघडा",
   "palette.hintCopy": "उत्तर कॉपी",
   "palette.hintClose": "बंद",
-  "palette.hintAnywhere": "कुठेही"
+  "palette.hintAnywhere": "कुठेही",
+  "khata.advanceNow": "आता {amount} ॲडव्हान्स जमा आहे."
 }

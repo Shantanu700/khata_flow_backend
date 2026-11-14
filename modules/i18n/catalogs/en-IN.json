@@ -410,5 +410,6 @@
   "palette.hintOpen": "open",
   "palette.hintCopy": "copy answer",
   "palette.hintClose": "close",
-  "palette.hintAnywhere": "anywhere"
+  "palette.hintAnywhere": "anywhere",
+  "khata.advanceNow": "{amount} held in advance."
 }

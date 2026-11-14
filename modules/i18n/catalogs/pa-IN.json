@@ -410,5 +410,6 @@
   "palette.hintOpen": "ਖੋਲ੍ਹੋ",
   "palette.hintCopy": "ਜਵਾਬ ਕਾਪੀ",
   "palette.hintClose": "ਬੰਦ",
-  "palette.hintAnywhere": "ਕਿਤੇ ਵੀ"
+  "palette.hintAnywhere": "ਕਿਤੇ ਵੀ",
+  "khata.advanceNow": "ਹੁਣ {amount} ਐਡਵਾਂਸ ਜਮ੍ਹਾਂ ਹੈ।"
 }

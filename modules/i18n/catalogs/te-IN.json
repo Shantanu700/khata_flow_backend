@@ -410,5 +410,6 @@
   "palette.hintOpen": "తెరవండి",
   "palette.hintCopy": "జవాబు కాపీ",
   "palette.hintClose": "మూసివేయండి",
-  "palette.hintAnywhere": "ఎక్కడినుండైనా"
+  "palette.hintAnywhere": "ఎక్కడినుండైనా",
+  "khata.advanceNow": "ఇప్పుడు {amount} అడ్వాన్స్ జమ ఉంది."
 }
