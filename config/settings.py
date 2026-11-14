@@ -157,6 +157,29 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Photos and voice audio go to a private Cloudflare R2 bucket when R2_BUCKET is set, else to MEDIA_ROOT.
+# The API serves every file itself (owner-only), so the bucket is never public and URLs are never signed out.
+R2_BUCKET = os.environ.get("R2_BUCKET", "")
+if R2_BUCKET:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": R2_BUCKET,
+                # https://<account id>.r2.cloudflarestorage.com (the EU jurisdiction has its own)
+                "endpoint_url": os.environ["R2_ENDPOINT_URL"],
+                "access_key": os.environ["R2_ACCESS_KEY_ID"],
+                "secret_key": os.environ["R2_SECRET_ACCESS_KEY"],
+                "region_name": "auto",
+                "signature_version": "s3v4",
+                # R2 has no object ACLs.
+                "default_acl": None,
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_LANGUAGE = os.environ.get("DEFAULT_LANGUAGE", "en-IN")

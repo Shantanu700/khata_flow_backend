@@ -298,4 +298,5 @@ The web app and voice replies come in Hinglish (`hi-Latn`, the original wording)
 ## Known limits
 
 - Recordings and reply audio are never served from `/media/`. Reply audio is only available to the shop that owns it, through `/voice/commands/<id>/audio/`.
+- Photos, recordings and reply audio sit in `media/` on disk, or in a private Cloudflare R2 bucket when `R2_BUCKET` and the other `R2_*` settings in `.env.example` are set. Either way the API serves them itself, so the bucket is never public. Moving to R2 does not copy files already on disk.
 - One owner per shop; no roles.

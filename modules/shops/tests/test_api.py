@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 import pytest
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -56,10 +57,12 @@ def test_party_photo_put_get_replace_delete(api, sharma, media):
     got = api.get(url)
     assert got["Content-Type"] == "image/png" and got["X-Content-Type-Options"] == "nosniff"
     assert b"".join(got.streaming_content) == PNG
+    old = Party.objects.get(pk=sharma.pk).photo.name
     second = api.put(url, {"photo": SimpleUploadedFile("again.png", PNG)}, format="multipart").json()["photo_key"]
-    assert second != first and len(list(media.rglob("*.png"))) == 1
+    new = Party.objects.get(pk=sharma.pk).photo.name
+    assert second != first and not default_storage.exists(old) and default_storage.exists(new)
     assert api.delete(url).json()["photo_key"] is None
-    assert api.get(url).status_code == 404 and not list(media.rglob("*.png"))
+    assert api.get(url).status_code == 404 and not default_storage.exists(new)
 
 
 def test_photo_must_be_a_real_image(api, sharma, media):
