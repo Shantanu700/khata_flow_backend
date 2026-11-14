@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} మంది",
   "staff.deleteBody": "సిబ్బంది జాబితా నుండి తీసేస్తాం. పాత హాజరు, చెల్లింపులు ఎంట్రీలలో ఉంటాయి, ఏదీ చెరిగిపోదు.",
   "error.ATTENDANCE_WINDOW": "ఈ నెల మరియు గత నెల హాజరు మాత్రమే మార్చవచ్చు.",
-  "search.clear": "వెతుకుట తుడిచివేయి"
+  "search.clear": "వెతుకుట తుడిచివేయి",
+  "palette.open": "వెతకండి లేదా లెక్క చేయండి",
+  "palette.title": "KhataFlow లో వెతకండి",
+  "palette.description": "కస్టమర్, స్టాఫ్ లేదా సరుకు వెతకండి, ఒక స్క్రీన్ తెరవండి, లేదా లెక్క చేయండి.",
+  "palette.placeholder": "వెతకండి, లేదా లెక్క రాయండి ఉదా. 250*4+30",
+  "palette.empty": "“{q}” కి ఏమీ దొరకలేదు.",
+  "palette.people": "కస్టమర్లు మరియు స్టాఫ్",
+  "palette.items": "సరుకులు",
+  "palette.goto": "ఇక్కడికి వెళ్ళండి",
+  "palette.actions": "పనులు",
+  "palette.calc": "కాలిక్యులేటర్",
+  "palette.due": "{amount} బాకీ",
+  "palette.copied": "{value} కాపీ అయింది",
+  "palette.copyFailed": "కాపీ కాలేదు. జవాబు ఎంచుకుని కాపీ చేయండి.",
+  "palette.hintOpen": "తెరవండి",
+  "palette.hintCopy": "జవాబు కాపీ",
+  "palette.hintClose": "మూసివేయండి",
+  "palette.hintAnywhere": "ఎక్కడినుండైనా"
 }

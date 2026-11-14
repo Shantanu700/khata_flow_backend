@@ -11,3 +11,8 @@ GNANI_API_KEY = ""
 LLM_API_KEY = ""
 MEDIA_ROOT = BASE_DIR / ".test-media"  # noqa: F405
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+# Tests never touch R2, even when .env has its keys.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}

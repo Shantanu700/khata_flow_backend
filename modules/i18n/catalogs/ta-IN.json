@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} பேர்",
   "staff.deleteBody": "பணியாளர் பட்டியலிலிருந்து நீக்கப்படுவார். பழைய வருகையும் கொடுப்பனவுகளும் பதிவுகளில் இருக்கும், எதுவும் அழியாது.",
   "error.ATTENDANCE_WINDOW": "இந்த மாதம் மற்றும் கடந்த மாதத்தின் வருகையை மட்டுமே மாற்ற முடியும்.",
-  "search.clear": "தேடலை அழி"
+  "search.clear": "தேடலை அழி",
+  "palette.open": "தேடுங்க அல்லது கணக்கு போடுங்க",
+  "palette.title": "KhataFlow-ல தேடுங்க",
+  "palette.description": "வாடிக்கையாளர், ஊழியர் அல்லது சாமான் தேடுங்க, ஒரு ஸ்கிரீன் திறங்க, அல்லது கணக்கு போடுங்க.",
+  "palette.placeholder": "தேடுங்க, அல்லது கணக்கு எழுதுங்க உதா. 250*4+30",
+  "palette.empty": "“{q}”-க்கு எதுவும் கிடைக்கல.",
+  "palette.people": "வாடிக்கையாளர்களும் ஊழியர்களும்",
+  "palette.items": "சாமான்கள்",
+  "palette.goto": "இங்கே போங்க",
+  "palette.actions": "வேலைகள்",
+  "palette.calc": "கால்குலேட்டர்",
+  "palette.due": "{amount} பாக்கி",
+  "palette.copied": "{value} காப்பி ஆச்சு",
+  "palette.copyFailed": "காப்பி ஆகல. பதிலைத் தேர்ந்தெடுத்து காப்பி பண்ணுங்க.",
+  "palette.hintOpen": "திறங்க",
+  "palette.hintCopy": "பதில் காப்பி",
+  "palette.hintClose": "மூடுங்க",
+  "palette.hintAnywhere": "எங்கிருந்தும்"
 }

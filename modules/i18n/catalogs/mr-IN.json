@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} जण",
   "staff.deleteBody": "कामगारांच्या यादीतून काढले जातील. जुनी हजेरी आणि पेमेंट एंट्रीजमध्ये राहतील, काहीही पुसले जाणार नाही.",
   "error.ATTENDANCE_WINDOW": "हजेरी फक्त या महिन्याची आणि मागच्या महिन्याची बदलता येते.",
-  "search.clear": "शोध पुसा"
+  "search.clear": "शोध पुसा",
+  "palette.open": "शोधा किंवा हिशोब करा",
+  "palette.title": "KhataFlow मध्ये शोधा",
+  "palette.description": "ग्राहक, स्टाफ किंवा सामान शोधा, एखादी स्क्रीन उघडा, किंवा हिशोब करा.",
+  "palette.placeholder": "शोधा, किंवा हिशोब लिहा जसे 250*4+30",
+  "palette.empty": "“{q}” ने काहीच सापडले नाही.",
+  "palette.people": "ग्राहक आणि स्टाफ",
+  "palette.items": "सामान",
+  "palette.goto": "इथे जा",
+  "palette.actions": "कामे",
+  "palette.calc": "कॅल्क्युलेटर",
+  "palette.due": "{amount} बाकी",
+  "palette.copied": "{value} कॉपी झाले",
+  "palette.copyFailed": "कॉपी झाले नाही. उत्तर निवडून कॉपी करा.",
+  "palette.hintOpen": "उघडा",
+  "palette.hintCopy": "उत्तर कॉपी",
+  "palette.hintClose": "बंद",
+  "palette.hintAnywhere": "कुठेही"
 }

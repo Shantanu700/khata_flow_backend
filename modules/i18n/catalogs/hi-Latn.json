@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} log",
   "staff.deleteBody": "Staff ki list se hat jayenge. Unki purani haazri aur payments Entries mein rahengi, kuch mitega nahi.",
   "error.ATTENDANCE_WINDOW": "Haaziri sirf is mahine aur pichhle mahine ki badal sakti hai.",
-  "search.clear": "Search saaf karo"
+  "search.clear": "Search saaf karo",
+  "palette.open": "Dhoondho ya hisaab lagao",
+  "palette.title": "KhataFlow mein dhoondho",
+  "palette.description": "Grahak, staff ya saamaan dhoondho, koi screen kholo, ya hisaab lagao.",
+  "palette.placeholder": "Dhoondho, ya hisaab likho jaise 250*4+30",
+  "palette.empty": "“{q}” se kuch nahi mila.",
+  "palette.people": "Grahak aur staff",
+  "palette.items": "Saamaan",
+  "palette.goto": "Yahan jao",
+  "palette.actions": "Kaam",
+  "palette.calc": "Calculator",
+  "palette.due": "{amount} baaki",
+  "palette.copied": "{value} copy ho gaya",
+  "palette.copyFailed": "Copy nahi hua. Jawab chun ke copy kijiye.",
+  "palette.hintOpen": "kholo",
+  "palette.hintCopy": "jawab copy",
+  "palette.hintClose": "band",
+  "palette.hintAnywhere": "kahin bhi"
 }

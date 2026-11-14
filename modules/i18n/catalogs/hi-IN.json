@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} लोग",
   "staff.deleteBody": "स्टाफ़ की सूची से हट जाएँगे। उनकी पुरानी हाज़िरी और भुगतान एंट्रीज़ में रहेंगे, कुछ नहीं मिटेगा।",
   "error.ATTENDANCE_WINDOW": "हाज़िरी सिर्फ़ इस महीने और पिछले महीने की बदल सकती है।",
-  "search.clear": "खोज साफ़ करें"
+  "search.clear": "खोज साफ़ करें",
+  "palette.open": "खोजें या हिसाब लगाएँ",
+  "palette.title": "KhataFlow में खोजें",
+  "palette.description": "ग्राहक, स्टाफ़ या सामान खोजें, कोई स्क्रीन खोलें, या हिसाब लगाएँ।",
+  "palette.placeholder": "खोजें, या हिसाब लिखें जैसे 250*4+30",
+  "palette.empty": "“{q}” से कुछ नहीं मिला।",
+  "palette.people": "ग्राहक और स्टाफ़",
+  "palette.items": "सामान",
+  "palette.goto": "यहाँ जाएँ",
+  "palette.actions": "काम",
+  "palette.calc": "कैलकुलेटर",
+  "palette.due": "{amount} बाकी",
+  "palette.copied": "{value} कॉपी हो गया",
+  "palette.copyFailed": "कॉपी नहीं हुआ। जवाब चुनकर कॉपी करें।",
+  "palette.hintOpen": "खोलें",
+  "palette.hintCopy": "जवाब कॉपी",
+  "palette.hintClose": "बंद",
+  "palette.hintAnywhere": "कहीं भी"
 }

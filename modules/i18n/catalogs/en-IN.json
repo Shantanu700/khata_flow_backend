@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} people",
   "staff.deleteBody": "They'll be removed from the staff list. Their past attendance and payments stay in Entries, nothing is erased.",
   "error.ATTENDANCE_WINDOW": "Attendance can be changed only for this month and last month.",
-  "search.clear": "Clear search"
+  "search.clear": "Clear search",
+  "palette.open": "Search or calculate",
+  "palette.title": "Search KhataFlow",
+  "palette.description": "Find a customer, staff member or item, open a screen, or work out a sum.",
+  "palette.placeholder": "Search, or type a sum like 250*4+30",
+  "palette.empty": "Nothing matches “{q}”.",
+  "palette.people": "Customers and staff",
+  "palette.items": "Items",
+  "palette.goto": "Go to",
+  "palette.actions": "Actions",
+  "palette.calc": "Calculator",
+  "palette.due": "{amount} due",
+  "palette.copied": "Copied {value}",
+  "palette.copyFailed": "Couldn't copy. Select the answer and copy it.",
+  "palette.hintOpen": "open",
+  "palette.hintCopy": "copy answer",
+  "palette.hintClose": "close",
+  "palette.hintAnywhere": "anywhere"
 }

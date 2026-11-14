@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} લોકો",
   "staff.deleteBody": "સ્ટાફની યાદીમાંથી હટી જશે. જૂની હાજરી અને ચુકવણી એન્ટ્રીઝમાં રહેશે, કંઈ ભૂંસાશે નહીં.",
   "error.ATTENDANCE_WINDOW": "હાજરી ફક્ત આ મહિના અને ગયા મહિનાની બદલી શકાય.",
-  "search.clear": "શોધ સાફ કરો"
+  "search.clear": "શોધ સાફ કરો",
+  "palette.open": "શોધો અથવા હિસાબ કરો",
+  "palette.title": "KhataFlow માં શોધો",
+  "palette.description": "ગ્રાહક, સ્ટાફ કે સામાન શોધો, કોઈ સ્ક્રીન ખોલો, અથવા હિસાબ કરો.",
+  "palette.placeholder": "શોધો, અથવા હિસાબ લખો જેમ કે 250*4+30",
+  "palette.empty": "“{q}” થી કંઈ મળ્યું નહીં.",
+  "palette.people": "ગ્રાહકો અને સ્ટાફ",
+  "palette.items": "સામાન",
+  "palette.goto": "અહીં જાઓ",
+  "palette.actions": "કામ",
+  "palette.calc": "કેલ્ક્યુલેટર",
+  "palette.due": "{amount} બાકી",
+  "palette.copied": "{value} કૉપિ થયું",
+  "palette.copyFailed": "કૉપિ ન થયું. જવાબ પસંદ કરીને કૉપિ કરો.",
+  "palette.hintOpen": "ખોલો",
+  "palette.hintCopy": "જવાબ કૉપિ",
+  "palette.hintClose": "બંધ",
+  "palette.hintAnywhere": "ક્યાંય પણ"
 }
