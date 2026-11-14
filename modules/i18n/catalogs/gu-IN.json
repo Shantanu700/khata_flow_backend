@@ -411,7 +411,5 @@
   "palette.hintCopy": "જવાબ કૉપિ",
   "palette.hintClose": "બંધ",
   "palette.hintAnywhere": "ક્યાંય પણ",
-  "khata.inAdvance": "એડવાન્સ જમા",
-  "khata.advanceNow": "હમણાં {amount} એડવાન્સ જમા છે.",
-  "khata.advanceAmount": "{amount} એડવાન્સ"
+  "khata.advanceNow": "હમણાં {amount} એડવાન્સ જમા છે."
 }

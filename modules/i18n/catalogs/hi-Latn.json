@@ -411,7 +411,5 @@
   "palette.hintCopy": "jawab copy",
   "palette.hintClose": "band",
   "palette.hintAnywhere": "kahin bhi",
-  "khata.inAdvance": "advance jama hai",
-  "khata.advanceNow": "Abhi {amount} advance jama hai.",
-  "khata.advanceAmount": "{amount} advance"
+  "khata.advanceNow": "Abhi {amount} advance jama hai."
 }

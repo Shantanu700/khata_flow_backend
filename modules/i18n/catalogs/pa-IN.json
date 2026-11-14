@@ -411,7 +411,5 @@
   "palette.hintCopy": "ਜਵਾਬ ਕਾਪੀ",
   "palette.hintClose": "ਬੰਦ",
   "palette.hintAnywhere": "ਕਿਤੇ ਵੀ",
-  "khata.inAdvance": "ਐਡਵਾਂਸ ਜਮ੍ਹਾਂ",
-  "khata.advanceNow": "ਹੁਣ {amount} ਐਡਵਾਂਸ ਜਮ੍ਹਾਂ ਹੈ।",
-  "khata.advanceAmount": "{amount} ਐਡਵਾਂਸ"
+  "khata.advanceNow": "ਹੁਣ {amount} ਐਡਵਾਂਸ ਜਮ੍ਹਾਂ ਹੈ।"
 }

@@ -411,7 +411,5 @@
   "palette.hintCopy": "பதில் காப்பி",
   "palette.hintClose": "மூடுங்க",
   "palette.hintAnywhere": "எங்கிருந்தும்",
-  "khata.inAdvance": "அட்வான்ஸா இருக்கு",
-  "khata.advanceNow": "இப்போ {amount} அட்வான்ஸா இருக்கு.",
-  "khata.advanceAmount": "{amount} அட்வான்ஸ்"
+  "khata.advanceNow": "இப்போ {amount} அட்வான்ஸா இருக்கு."
 }

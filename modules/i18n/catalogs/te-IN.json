@@ -411,7 +411,5 @@
   "palette.hintCopy": "జవాబు కాపీ",
   "palette.hintClose": "మూసివేయండి",
   "palette.hintAnywhere": "ఎక్కడినుండైనా",
-  "khata.inAdvance": "అడ్వాన్స్ జమ",
-  "khata.advanceNow": "ఇప్పుడు {amount} అడ్వాన్స్ జమ ఉంది.",
-  "khata.advanceAmount": "{amount} అడ్వాన్స్"
+  "khata.advanceNow": "ఇప్పుడు {amount} అడ్వాన్స్ జమ ఉంది."
 }

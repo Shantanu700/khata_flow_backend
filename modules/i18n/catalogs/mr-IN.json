@@ -411,7 +411,5 @@
   "palette.hintCopy": "उत्तर कॉपी",
   "palette.hintClose": "बंद",
   "palette.hintAnywhere": "कुठेही",
-  "khata.inAdvance": "ॲडव्हान्स जमा",
-  "khata.advanceNow": "आता {amount} ॲडव्हान्स जमा आहे.",
-  "khata.advanceAmount": "{amount} ॲडव्हान्स"
+  "khata.advanceNow": "आता {amount} ॲडव्हान्स जमा आहे."
 }

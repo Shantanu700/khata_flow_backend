@@ -411,7 +411,5 @@
   "palette.hintCopy": "উত্তর কপি",
   "palette.hintClose": "বন্ধ",
   "palette.hintAnywhere": "যেকোনো জায়গায়",
-  "khata.inAdvance": "অ্যাডভান্স জমা",
-  "khata.advanceNow": "এখন {amount} অ্যাডভান্স জমা আছে।",
-  "khata.advanceAmount": "{amount} অ্যাডভান্স"
+  "khata.advanceNow": "এখন {amount} অ্যাডভান্স জমা আছে।"
 }
