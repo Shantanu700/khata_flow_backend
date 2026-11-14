@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} ਲੋਕ",
   "staff.deleteBody": "ਸਟਾਫ਼ ਦੀ ਸੂਚੀ ਵਿੱਚੋਂ ਹਟ ਜਾਣਗੇ। ਪੁਰਾਣੀ ਹਾਜ਼ਰੀ ਅਤੇ ਭੁਗਤਾਨ ਐਂਟਰੀਆਂ ਵਿੱਚ ਰਹਿਣਗੇ, ਕੁਝ ਨਹੀਂ ਮਿਟੇਗਾ।",
   "error.ATTENDANCE_WINDOW": "ਹਾਜ਼ਰੀ ਸਿਰਫ਼ ਇਸ ਮਹੀਨੇ ਅਤੇ ਪਿਛਲੇ ਮਹੀਨੇ ਦੀ ਬਦਲੀ ਜਾ ਸਕਦੀ ਹੈ।",
-  "search.clear": "ਖੋਜ ਸਾਫ਼ ਕਰੋ"
+  "search.clear": "ਖੋਜ ਸਾਫ਼ ਕਰੋ",
+  "palette.open": "ਲੱਭੋ ਜਾਂ ਹਿਸਾਬ ਲਗਾਓ",
+  "palette.title": "KhataFlow ਵਿੱਚ ਲੱਭੋ",
+  "palette.description": "ਗਾਹਕ, ਸਟਾਫ਼ ਜਾਂ ਸਮਾਨ ਲੱਭੋ, ਕੋਈ ਸਕ੍ਰੀਨ ਖੋਲ੍ਹੋ, ਜਾਂ ਹਿਸਾਬ ਲਗਾਓ।",
+  "palette.placeholder": "ਲੱਭੋ, ਜਾਂ ਹਿਸਾਬ ਲਿਖੋ ਜਿਵੇਂ 250*4+30",
+  "palette.empty": "“{q}” ਨਾਲ ਕੁਝ ਨਹੀਂ ਮਿਲਿਆ।",
+  "palette.people": "ਗਾਹਕ ਅਤੇ ਸਟਾਫ਼",
+  "palette.items": "ਸਮਾਨ",
+  "palette.goto": "ਇੱਥੇ ਜਾਓ",
+  "palette.actions": "ਕੰਮ",
+  "palette.calc": "ਕੈਲਕੁਲੇਟਰ",
+  "palette.due": "{amount} ਬਾਕੀ",
+  "palette.copied": "{value} ਕਾਪੀ ਹੋ ਗਿਆ",
+  "palette.copyFailed": "ਕਾਪੀ ਨਹੀਂ ਹੋਇਆ। ਜਵਾਬ ਚੁਣ ਕੇ ਕਾਪੀ ਕਰੋ।",
+  "palette.hintOpen": "ਖੋਲ੍ਹੋ",
+  "palette.hintCopy": "ਜਵਾਬ ਕਾਪੀ",
+  "palette.hintClose": "ਬੰਦ",
+  "palette.hintAnywhere": "ਕਿਤੇ ਵੀ"
 }

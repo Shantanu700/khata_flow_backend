@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} പേർ",
   "staff.deleteBody": "ജീവനക്കാരുടെ പട്ടികയിൽ നിന്ന് മാറ്റും. പഴയ ഹാജരും പേയ്മെന്റുകളും എൻട്രികളിൽ ഉണ്ടാകും, ഒന്നും മായ്ക്കില്ല.",
   "error.ATTENDANCE_WINDOW": "ഈ മാസത്തെയും കഴിഞ്ഞ മാസത്തെയും ഹാജർ മാത്രമേ മാറ്റാനാകൂ.",
-  "search.clear": "തിരയൽ മായ്ക്കുക"
+  "search.clear": "തിരയൽ മായ്ക്കുക",
+  "palette.open": "തിരയുക അല്ലെങ്കിൽ കണക്കുകൂട്ടുക",
+  "palette.title": "KhataFlow-ൽ തിരയുക",
+  "palette.description": "ഉപഭോക്താവ്, സ്റ്റാഫ് അല്ലെങ്കിൽ സാധനം തിരയുക, ഒരു സ്ക്രീൻ തുറക്കുക, അല്ലെങ്കിൽ കണക്കുകൂട്ടുക.",
+  "palette.placeholder": "തിരയുക, അല്ലെങ്കിൽ കണക്ക് എഴുതുക ഉദാ. 250*4+30",
+  "palette.empty": "“{q}” എന്നതിന് ഒന്നും കിട്ടിയില്ല.",
+  "palette.people": "ഉപഭോക്താക്കളും സ്റ്റാഫും",
+  "palette.items": "സാധനങ്ങൾ",
+  "palette.goto": "ഇവിടേക്ക് പോകുക",
+  "palette.actions": "പ്രവർത്തനങ്ങൾ",
+  "palette.calc": "കാൽക്കുലേറ്റർ",
+  "palette.due": "{amount} ബാക്കി",
+  "palette.copied": "{value} കോപ്പി ചെയ്തു",
+  "palette.copyFailed": "കോപ്പി ആയില്ല. ഉത്തരം തിരഞ്ഞെടുത്ത് കോപ്പി ചെയ്യുക.",
+  "palette.hintOpen": "തുറക്കുക",
+  "palette.hintCopy": "ഉത്തരം കോപ്പി",
+  "palette.hintClose": "അടയ്ക്കുക",
+  "palette.hintAnywhere": "എവിടെനിന്നും"
 }

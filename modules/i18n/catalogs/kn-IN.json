@@ -393,5 +393,22 @@
   "dash.agePeople": "{count} ಜನ",
   "staff.deleteBody": "ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿಯಿಂದ ತೆಗೆಯಲಾಗುತ್ತದೆ. ಹಳೆಯ ಹಾಜರಿ ಮತ್ತು ಪಾವತಿಗಳು ಎಂಟ್ರಿಗಳಲ್ಲಿ ಉಳಿಯುತ್ತವೆ, ಏನೂ ಅಳಿಸುವುದಿಲ್ಲ.",
   "error.ATTENDANCE_WINDOW": "ಹಾಜರಿಯನ್ನು ಈ ತಿಂಗಳು ಮತ್ತು ಕಳೆದ ತಿಂಗಳದ್ದು ಮಾತ್ರ ಬದಲಿಸಬಹುದು.",
-  "search.clear": "ಹುಡುಕಾಟ ಅಳಿಸಿ"
+  "search.clear": "ಹುಡುಕಾಟ ಅಳಿಸಿ",
+  "palette.open": "ಹುಡುಕಿ ಅಥವಾ ಲೆಕ್ಕ ಮಾಡಿ",
+  "palette.title": "KhataFlow ನಲ್ಲಿ ಹುಡುಕಿ",
+  "palette.description": "ಗ್ರಾಹಕ, ಸಿಬ್ಬಂದಿ ಅಥವಾ ಸಾಮಾನು ಹುಡುಕಿ, ಸ್ಕ್ರೀನ್ ತೆರೆಯಿರಿ, ಅಥವಾ ಲೆಕ್ಕ ಮಾಡಿ.",
+  "palette.placeholder": "ಹುಡುಕಿ, ಅಥವಾ ಲೆಕ್ಕ ಬರೆಯಿರಿ ಉದಾ. 250*4+30",
+  "palette.empty": "“{q}” ಗೆ ಏನೂ ಸಿಗಲಿಲ್ಲ.",
+  "palette.people": "ಗ್ರಾಹಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ",
+  "palette.items": "ಸಾಮಾನು",
+  "palette.goto": "ಇಲ್ಲಿಗೆ ಹೋಗಿ",
+  "palette.actions": "ಕೆಲಸ",
+  "palette.calc": "ಕ್ಯಾಲ್ಕುಲೇಟರ್",
+  "palette.due": "{amount} ಬಾಕಿ",
+  "palette.copied": "{value} ಕಾಪಿ ಆಯಿತು",
+  "palette.copyFailed": "ಕಾಪಿ ಆಗಲಿಲ್ಲ. ಉತ್ತರ ಆಯ್ಕೆ ಮಾಡಿ ಕಾಪಿ ಮಾಡಿ.",
+  "palette.hintOpen": "ತೆರೆಯಿರಿ",
+  "palette.hintCopy": "ಉತ್ತರ ಕಾಪಿ",
+  "palette.hintClose": "ಮುಚ್ಚಿ",
+  "palette.hintAnywhere": "ಎಲ್ಲಿಂದಲಾದರೂ"
 }
