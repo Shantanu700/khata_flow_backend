@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from urllib.parse import parse_qsl, urlparse
+from urllib.parse import parse_qsl, unquote, urlparse
 
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
@@ -99,8 +99,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": _db.path.lstrip("/"),
-        "USER": _db.username,
-        "PASSWORD": _db.password,
+        # Percent-encoded in the URL when they contain characters such as @ : / #
+        "USER": unquote(_db.username or ""),
+        "PASSWORD": unquote(_db.password or ""),
         "HOST": _db.hostname,
         "PORT": _db.port or 5432,
         # e.g. ?sslmode=require for Supabase

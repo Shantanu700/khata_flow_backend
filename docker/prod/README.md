@@ -28,7 +28,7 @@ The database is Supabase (free) and photos and voice audio are in Cloudflare R2 
    | `CSRF_TRUSTED_ORIGINS` | `https://khataflow-api.onrender.com` |
    | `VOICE_STREAM_URL` | `wss://khataflow-api.onrender.com/api/v1/voice/stream/` |
    | `CORS_ALLOWED_ORIGINS` | the web app's address once it is deployed, e.g. `https://khataflow.<you>.workers.dev` |
-   | `DATABASE_URL` | the Supabase session pooler string, ending in `?sslmode=require` |
+   | `DATABASE_URL` | the Supabase session pooler string, ending in `?sslmode=require`. If the password has symbols, URL-encode it first: `python3 -c "from urllib.parse import quote; print(quote(input(), safe=''))"` |
    | `R2_*` | the four R2 values |
    | `GNANI_API_KEY`, `LLM_API_KEY` | the voice and LLM keys |
 
