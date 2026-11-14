@@ -2,8 +2,13 @@
 .venv
 __pycache__
 *.pyc
-.env
+**/.env
 media
 .test-media
 .pytest_cache
 .ruff_cache
+.agents
+.claude
+docker/nonprod/certs
+staticfiles
+**/migrations/0*.py

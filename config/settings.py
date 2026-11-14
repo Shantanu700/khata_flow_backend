@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlparse
 
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
@@ -103,6 +103,8 @@ DATABASES = {
         "PASSWORD": _db.password,
         "HOST": _db.hostname,
         "PORT": _db.port or 5432,
+        # e.g. ?sslmode=require for Supabase
+        "OPTIONS": dict(parse_qsl(_db.query)),
     }
 }
 
