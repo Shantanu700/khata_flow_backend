@@ -3,7 +3,9 @@ from datetime import timedelta
 from decimal import Decimal
 
 import pytest
+from asgiref.sync import async_to_sync
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import AsyncClient
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -326,6 +328,27 @@ def test_progress_streams_each_stage_then_the_command(api, llm, sharma):
     assert [e["stage"] for e in events[1:-1]] == ["intent", "resolve", "commit", "tts"]
     assert all(isinstance(e["ms"], int) for e in events[1:-1])
     assert events[-1]["command"]["stage"] == CommandStatus.ANSWERED
+    assert events[-1]["command"]["response_text"] == "Sharma ji ka koi baaki nahi hai."
+
+
+@pytest.mark.django_db(transaction=True)
+def test_progress_streams_line_by_line_under_asgi(llm, shop, sharma):
+    "Production runs uvicorn: a sync iterator there is collected whole, so every stage would land at once."
+    llm(Intent.QUERY_CUSTOMER_BALANCE, party_name="Sharma ji")
+    token = Token.objects.create(user=shop.owner).key
+
+    async def stream():
+        response = await AsyncClient().post(
+            "/api/v1/voice/text-commands/?progress=1",
+            {"text": "Sharma ji ka kitna"},
+            content_type="application/json",
+            headers={"authorization": f"Token {token}"},
+        )
+        assert response.is_async and response["X-Accel-Buffering"] == "no"
+        return [json.loads(chunk) async for chunk in response.streaming_content]
+
+    events = async_to_sync(stream)()
+    assert [e.get("stage") for e in events[1:-1]] == ["intent", "resolve", "commit", "tts"]
     assert events[-1]["command"]["response_text"] == "Sharma ji ka koi baaki nahi hai."
 
 
