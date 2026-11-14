@@ -28,9 +28,15 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1" if DEBUG else "")
 
-CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
 
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "https://localhost:8000,https://127.0.0.1:8000" if DEBUG else "")
+def env_origins(name: str, default: str = "") -> list[str]:
+    "An origin has no path: a pasted URL's trailing / would stop corsheaders' start-up check (E014) and the API."
+    return [origin.rstrip("/") for origin in env_list(name, default)]
+
+
+CORS_ALLOWED_ORIGINS = env_origins("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
+
+CSRF_TRUSTED_ORIGINS = env_origins("CSRF_TRUSTED_ORIGINS", "https://localhost:8000,https://127.0.0.1:8000" if DEBUG else "")
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
