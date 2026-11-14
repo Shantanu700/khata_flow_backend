@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.http import Http404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -9,8 +8,8 @@ from base.views import BaseAV
 from modules.i18n.catalogs import catalog, languages
 from modules.shops.choices import SHOP_LANGUAGES
 
-# The catalogs only change with a deploy (and while developing, with every edit).
-CACHE = "no-cache" if settings.DEBUG else "public, max-age=3600"
+# Re-checked on every load: a catalog cached for an hour kept showing raw keys for words added by a deploy.
+CACHE = "no-cache"
 
 
 class LanguagesAV(BaseAV):
