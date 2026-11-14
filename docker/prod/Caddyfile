@@ -1,5 +1,0 @@
-# HTTPS for API_HOST with a free Let's Encrypt certificate; WebSockets pass through as they are.
-{$API_HOST} {
-	encode gzip
-	reverse_proxy api:8000
-}

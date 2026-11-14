@@ -293,7 +293,7 @@ All demo data is synthetic: the two shops (`gupta_store` → Gupta General Store
 
 ## Production
 
-One free Oracle Cloud server with Docker, Supabase for the database and Cloudflare R2 for files. Step by step in [docker/prod/README.md](docker/prod/README.md).
+Render's free plan (Docker, `render.yaml`), Supabase for the database and Cloudflare R2 for files. Step by step in [docker/prod/README.md](docker/prod/README.md).
 
 ## Languages
 

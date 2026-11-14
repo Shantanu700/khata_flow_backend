@@ -1,0 +1,64 @@
+# Render Blueprint: the API on Render's free plan. Setup steps: docker/prod/README.md.
+services:
+  - type: web
+    name: khataflow-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./docker/prod/Dockerfile
+    dockerContext: .
+    autoDeployTrigger: commit
+    envVars:
+      - key: DEBUG
+        value: "0"
+      - key: SECRET_KEY
+        generateValue: true
+      # <service>.onrender.com, as Render shows it once the service exists
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: VOICE_STREAM_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ENDPOINT_URL
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: GNANI_API_KEY
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: DEFAULT_LANGUAGE
+        value: en-IN
+      - key: STT_PROVIDER
+        value: gnani
+      - key: TTS_PROVIDER
+        value: gnani
+      - key: GNANI_BASE_URL
+        value: https://api.vachana.ai
+      - key: GNANI_STT_MODEL
+        value: prisma-v3.0
+      - key: GNANI_STT_FORMAT
+        value: transcribe
+      - key: GNANI_TTS_MODEL
+        value: timbre-v3.0
+      - key: GNANI_TTS_VOICE
+        value: Shivani
+      - key: GNANI_TTS_LANGUAGE
+        value: hi-IN
+      - key: LLM_PROVIDER
+        value: groq
+      - key: LLM_MODEL
+        value: openai/gpt-oss-120b
+      - key: LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_REASONING_EFFORT
+        value: medium
