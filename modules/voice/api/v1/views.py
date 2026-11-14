@@ -4,7 +4,9 @@ import queue
 import threading
 from collections.abc import Callable
 
+from asgiref.sync import sync_to_async
 from django.conf import settings
+from django.core.handlers.asgi import ASGIRequest
 from django.db import connection
 from django.db.models import Count, OuterRef, Subquery
 from django.http import FileResponse, Http404, StreamingHttpResponse
@@ -75,9 +77,27 @@ def _respond(request, command: VoiceCommand, run: Callable[[], VoiceCommand]):
             events.put(None)
 
     threading.Thread(target=work, daemon=True).start()
+
     # DRF's encoder, as for every other response: entries carry Decimal amounts.
-    lines = (json.dumps(event, cls=JSONEncoder, ensure_ascii=False) + "\n" for event in iter(events.get, None))
-    return StreamingHttpResponse(lines, content_type="application/x-ndjson")
+    def line(event) -> str:
+        return json.dumps(event, cls=JSONEncoder, ensure_ascii=False) + "\n"
+
+    def sync_lines():
+        for event in iter(events.get, None):
+            yield line(event)
+
+    async def async_lines():
+        get = sync_to_async(events.get, thread_sensitive=False)
+        while (event := await get()) is not None:
+            yield line(event)
+
+    # Django streams only the iterator kind its server speaks; the other it collects whole and sends at the end.
+    # ASGI: uvicorn in production. WSGI: runsslserver in development.
+    lines = async_lines() if isinstance(request._request, ASGIRequest) else sync_lines()
+    # No proxy (Render's, Cloudflare's) may hold lines back to batch them.
+    return StreamingHttpResponse(
+        lines, content_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
+    )
 
 
 class AudioCommandAV(BaseAV):
