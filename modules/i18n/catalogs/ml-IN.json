@@ -410,5 +410,8 @@
   "palette.hintOpen": "തുറക്കുക",
   "palette.hintCopy": "ഉത്തരം കോപ്പി",
   "palette.hintClose": "അടയ്ക്കുക",
-  "palette.hintAnywhere": "എവിടെനിന്നും"
+  "palette.hintAnywhere": "എവിടെനിന്നും",
+  "khata.inAdvance": "അഡ്വാൻസായി ഉണ്ട്",
+  "khata.advanceNow": "ഇപ്പോൾ {amount} അഡ്വാൻസായി ഉണ്ട്.",
+  "khata.advanceAmount": "{amount} അഡ്വാൻസ്"
 }

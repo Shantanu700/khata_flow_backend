@@ -410,5 +410,8 @@
   "palette.hintOpen": "खोलें",
   "palette.hintCopy": "जवाब कॉपी",
   "palette.hintClose": "बंद",
-  "palette.hintAnywhere": "कहीं भी"
+  "palette.hintAnywhere": "कहीं भी",
+  "khata.inAdvance": "एडवांस जमा है",
+  "khata.advanceNow": "अभी {amount} एडवांस जमा है।",
+  "khata.advanceAmount": "{amount} एडवांस"
 }

@@ -97,9 +97,6 @@ class EntryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, BaseViewSet
         party = get_object_or_404(Party, pk=party_id, shop=shop) if party_id else None
         product = get_object_or_404(Product, pk=product_id, shop=shop) if product_id else None
         kind, amount = data["kind"], data.get("amount")
-        if kind == EntryKind.PAYMENT_RECEIVED and party and amount and amount > ledger.customer_balance(party):
-            balance = ledger.customer_balance(party)
-            raise ledger.LedgerError("OVERPAYMENT", f"Only {ledger.format_inr(max(balance, 0))} is owed.")
         entry = ledger.record_entry(
             shop,
             kind,

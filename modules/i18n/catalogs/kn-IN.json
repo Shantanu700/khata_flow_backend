@@ -410,5 +410,8 @@
   "palette.hintOpen": "ತೆರೆಯಿರಿ",
   "palette.hintCopy": "ಉತ್ತರ ಕಾಪಿ",
   "palette.hintClose": "ಮುಚ್ಚಿ",
-  "palette.hintAnywhere": "ಎಲ್ಲಿಂದಲಾದರೂ"
+  "palette.hintAnywhere": "ಎಲ್ಲಿಂದಲಾದರೂ",
+  "khata.inAdvance": "ಅಡ್ವಾನ್ಸ್ ಜಮಾ",
+  "khata.advanceNow": "ಈಗ {amount} ಅಡ್ವಾನ್ಸ್ ಜಮಾ ಇದೆ.",
+  "khata.advanceAmount": "{amount} ಅಡ್ವಾನ್ಸ್"
 }
