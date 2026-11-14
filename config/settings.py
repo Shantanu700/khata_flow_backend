@@ -106,11 +106,6 @@ DATABASES = {
     }
 }
 
-REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
-CELERY_TASK_SERIALIZER = "json"
-
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
